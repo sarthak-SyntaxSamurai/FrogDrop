@@ -49,6 +49,7 @@ class ClipboardPreviewWindow: NSWindow {
         self.backgroundColor = .clear
         self.level = .statusBar
         self.hasShadow = true
+        self.appearance = NSAppearance(named: .vibrantDark)
         
         let hostingView = NSHostingView(rootView: ClipboardPreviewView(model: model))
         hostingView.translatesAutoresizingMaskIntoConstraints = false
@@ -59,7 +60,7 @@ class ClipboardPreviewWindow: NSWindow {
         nsView.layer?.masksToBounds = true
         
         let effectView = NSVisualEffectView()
-        effectView.material = .hudWindow
+        effectView.material = .menu
         effectView.blendingMode = .behindWindow
         effectView.state = .active
         effectView.wantsLayer = true
@@ -115,6 +116,7 @@ class PopupWindow: NSWindow, NSWindowDelegate {
         self.level = .statusBar
         self.hasShadow = true
         self.delegate = self
+        self.appearance = NSAppearance(named: .vibrantDark)
 
         let hostingView = NSHostingView(rootView: PopupView())
         hostingView.translatesAutoresizingMaskIntoConstraints = false
@@ -125,7 +127,7 @@ class PopupWindow: NSWindow, NSWindowDelegate {
         nsView.layer?.masksToBounds = true
         
         let effectView = NSVisualEffectView()
-        effectView.material = .hudWindow
+        effectView.material = .menu
         effectView.blendingMode = .behindWindow
         effectView.state = .active
         effectView.wantsLayer = true
