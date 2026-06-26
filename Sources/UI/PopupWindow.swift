@@ -222,7 +222,7 @@ struct PopupView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Header Tab Bar
-            HStack(spacing: 0) {
+            HStack(spacing: 2) {
                 TabButton(title: "Timer", icon: "timer", isActive: activeTab == .timer) {
                     activeTab = .timer
                 }
@@ -233,6 +233,13 @@ struct PopupView: View {
                     activeTab = .dropzone
                 }
             }
+            .padding(3)
+            .background(Color.white.opacity(0.03))
+            .cornerRadius(8)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color.white.opacity(0.06), lineWidth: 0.5)
+            )
             .padding(.top, 14)
             .padding(.horizontal, 14)
             
@@ -265,7 +272,21 @@ struct PopupView: View {
             .background(Color.black.opacity(0.12))
         }
         .frame(width: 340, height: 460)
-        .background(Color.clear)
+        .background(
+            ZStack {
+                RadialGradient(
+                    gradient: Gradient(colors: [Color(red: 0.15, green: 0.85, blue: 0.45).opacity(0.12), Color.clear]),
+                    center: .topLeading,
+                    startRadius: 0,
+                    endRadius: 280
+                )
+                LinearGradient(
+                    colors: [Color.white.opacity(0.04), Color.clear],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            }
+        )
         .overlay(
             RoundedRectangle(cornerRadius: 18)
                 .stroke(Color.white.opacity(0.12), lineWidth: 1)
@@ -309,30 +330,33 @@ struct TabButton: View {
     @State private var isHovered = false
     
     var body: some View {
-        VStack(spacing: 4) {
+        VStack(spacing: 2) {
             Image(systemName: icon)
-                .font(.system(size: 15, weight: .semibold))
+                .font(.system(size: 13, weight: .semibold))
             Text(title)
-                .font(.system(size: 10, weight: .bold, design: .rounded))
+                .font(.system(size: 9, weight: .bold, design: .rounded))
         }
         .foregroundColor(isActive ? Color(red: 0.15, green: 0.85, blue: 0.45) : (isHovered ? .primary : .secondary))
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 8)
+        .padding(.vertical, 6)
         .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(isActive ? Color.white.opacity(0.06) : (isHovered ? Color.white.opacity(0.03) : Color.clear))
+            RoundedRectangle(cornerRadius: 6)
+                .fill(isActive ? Color.white.opacity(0.08) : Color.clear)
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(isActive ? Color(red: 0.15, green: 0.85, blue: 0.45).opacity(0.3) : Color.clear, lineWidth: 1)
+            RoundedRectangle(cornerRadius: 6)
+                .stroke(isActive ? Color.white.opacity(0.12) : Color.clear, lineWidth: 0.5)
         )
+        .shadow(color: isActive ? Color.black.opacity(0.15) : Color.clear, radius: 2, x: 0, y: 1)
         .contentShape(Rectangle())
         .onTapGesture {
             HapticManager.shared.click()
             action()
         }
         .onHover { hovering in
-            isHovered = hovering
+            withAnimation(.easeInOut(duration: 0.15)) {
+                isHovered = hovering
+            }
         }
     }
 }
@@ -351,16 +375,33 @@ struct PresetButton: View {
                 .foregroundColor(.primary)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
-                .background(Color.white.opacity(isHovered ? 0.08 : 0.04))
+                .background(
+                    LinearGradient(
+                        colors: isHovered ?
+                            [Color.white.opacity(0.12), Color.white.opacity(0.04)] :
+                            [Color.white.opacity(0.05), Color.white.opacity(0.01)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
                 .cornerRadius(8)
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
-                        .stroke(isHovered ? Color.white.opacity(0.16) : Color.white.opacity(0.08), lineWidth: 0.5)
+                        .stroke(
+                            isHovered ?
+                                LinearGradient(colors: [Color.white.opacity(0.25), Color.white.opacity(0.1)], startPoint: .top, endPoint: .bottom) :
+                                LinearGradient(colors: [Color.white.opacity(0.1), Color.white.opacity(0.02)], startPoint: .top, endPoint: .bottom),
+                            lineWidth: 0.5
+                        )
                 )
+                .shadow(color: isHovered ? Color.black.opacity(0.15) : Color.clear, radius: 4, x: 0, y: 2)
+                .scaleEffect(isHovered ? 1.04 : 1.0)
         }
         .buttonStyle(.plain)
         .onHover { hovering in
-            isHovered = hovering
+            withAnimation(.spring(response: 0.2, dampingFraction: 0.6)) {
+                isHovered = hovering
+            }
         }
     }
 }
@@ -416,8 +457,16 @@ struct TimerTabView: View {
                 // Frog Head with Tracking Eyes
                 ZStack {
                     Circle()
-                        .fill(Color.green)
+                        .fill(
+                            RadialGradient(
+                                colors: [Color(red: 0.25, green: 0.9, blue: 0.55), Color(red: 0.05, green: 0.6, blue: 0.3)],
+                                center: .topLeading,
+                                startRadius: 0,
+                                endRadius: 35
+                            )
+                        )
                         .frame(width: 60, height: 60)
+                        .shadow(color: Color.black.opacity(0.25), radius: 6, x: 0, y: 4)
                     
                     // Large Eyes (Moved to top of face)
                     HStack(spacing: 6) {
@@ -428,12 +477,14 @@ struct TimerTabView: View {
                     
                     // Cute blushing cheeks (Moved below eyes)
                     Circle()
-                        .fill(Color.pink.opacity(0.4))
+                        .fill(Color.pink.opacity(0.5))
                         .frame(width: 6, height: 4)
+                        .blur(radius: 0.5)
                         .position(x: 14, y: 34)
                     Circle()
-                        .fill(Color.pink.opacity(0.4))
+                        .fill(Color.pink.opacity(0.5))
                         .frame(width: 6, height: 4)
+                        .blur(radius: 0.5)
                         .position(x: 46, y: 34)
                     
                     // Smiling mouth (Curving down, moved to bottom of face)
@@ -444,7 +495,7 @@ struct TimerTabView: View {
                             control: CGPoint(x: 30, y: 46)
                         )
                     }
-                    .stroke(Color.black, lineWidth: 1.5)
+                    .stroke(Color.black.opacity(0.75), lineWidth: 1.8)
                 }
                 .frame(width: 60, height: 60)
             }
@@ -528,13 +579,26 @@ struct LargeEyeView: View {
     var body: some View {
         ZStack {
             Circle()
-                .fill(Color.white)
+                .fill(
+                    RadialGradient(
+                        colors: [.white, Color(white: 0.85)],
+                        center: .topLeading,
+                        startRadius: 0,
+                        endRadius: 8
+                    )
+                )
                 .frame(width: 14, height: 14)
-                .shadow(color: Color.black.opacity(0.1), radius: 1, x: 0, y: 1)
+                .shadow(color: Color.black.opacity(0.15), radius: 2, x: 0, y: 1)
             
             Circle()
                 .fill(Color.black)
                 .frame(width: 7, height: 7)
+                .overlay(
+                    Circle()
+                        .fill(Color.white.opacity(0.8))
+                        .frame(width: 1.5, height: 1.5)
+                        .offset(x: -1, y: -1)
+                )
                 .offset(pupilOffset())
         }
     }
@@ -691,16 +755,17 @@ struct ClipboardRow: View {
     var body: some View {
         GeometryReader { geometry in
             HStack(spacing: 8) {
-                VStack(alignment: .leading, spacing: 3) {
+                VStack(alignment: .leading, spacing: 4) {
                     Text(displayPreviewText)
                         .font(.system(.subheadline, design: .rounded))
+                        .fontWeight(.medium)
                         .foregroundColor(.primary)
                         .lineLimit(1)
                         .multilineTextAlignment(.leading)
                     
                     Text(formatTimestamp(item.timestamp))
-                        .font(.system(size: 9))
-                        .foregroundColor(.secondary)
+                        .font(.system(size: 10, weight: .medium, design: .rounded))
+                        .foregroundColor(.secondary.opacity(0.7))
                 }
                 
                 Spacer()
@@ -722,11 +787,31 @@ struct ClipboardRow: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(isHovering ? Color.white.opacity(0.08) : Color.clear)
+                    .fill(
+                        LinearGradient(
+                            colors: isHovering ?
+                                [Color.white.opacity(0.08), Color.white.opacity(0.02)] :
+                                [Color.white.opacity(0.02), Color.clear],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
             )
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(
+                        isHovering ?
+                            LinearGradient(colors: [Color.white.opacity(0.18), Color.white.opacity(0.05)], startPoint: .topLeading, endPoint: .bottomTrailing) :
+                            LinearGradient(colors: [Color.white.opacity(0.05), Color.clear], startPoint: .top, endPoint: .bottom),
+                        lineWidth: 0.5
+                    )
+            )
+            .shadow(color: isHovering ? Color.black.opacity(0.15) : Color.clear, radius: 4, x: 0, y: 2)
+            .scaleEffect(isHovering ? 1.015 : 1.0)
+            .offset(y: isHovering ? -1 : 0)
             .contentShape(Rectangle())
             .onHover { hovering in
-                withAnimation(.easeInOut(duration: 0.15)) {
+                withAnimation(.spring(response: 0.25, dampingFraction: 0.7)) {
                     isHovering = hovering
                 }
                 if hovering {

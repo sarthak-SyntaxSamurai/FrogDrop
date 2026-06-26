@@ -62,7 +62,7 @@ struct TongueOverlayView: View {
                     }
                     .stroke(
                         LinearGradient(
-                            colors: [Color.pink.opacity(0.8), Color.pink],
+                            colors: [Color(red: 1.0, green: 0.45, blue: 0.55), Color(red: 0.9, green: 0.25, blue: 0.35)],
                             startPoint: .top,
                             endPoint: .bottom
                         ),
@@ -70,13 +70,36 @@ struct TongueOverlayView: View {
                     )
                 }
                 
-                // Tongue Tip (pull handle)
+                // Tongue Tip (cleft pull handle)
                 if tongueLength > 0 {
-                    Circle()
-                        .fill(Color.pink)
-                        .frame(width: 14, height: 14)
-                        .shadow(color: Color.pink.opacity(0.4), radius: 2, x: 0, y: 1)
-                        .position(x: 50, y: tongueLength - 2)
+                    ZStack {
+                        Circle()
+                            .fill(
+                                RadialGradient(
+                                    colors: [Color(red: 1.0, green: 0.55, blue: 0.65), Color(red: 0.9, green: 0.3, blue: 0.42)],
+                                    center: .topLeading,
+                                    startRadius: 0,
+                                    endRadius: 8
+                                )
+                            )
+                            .frame(width: 10, height: 10)
+                            .offset(x: -2.5)
+                        
+                        Circle()
+                            .fill(
+                                RadialGradient(
+                                    colors: [Color(red: 1.0, green: 0.55, blue: 0.65), Color(red: 0.9, green: 0.3, blue: 0.42)],
+                                    center: .topLeading,
+                                    startRadius: 0,
+                                    endRadius: 8
+                                )
+                            )
+                            .frame(width: 10, height: 10)
+                            .offset(x: 2.5)
+                    }
+                    .frame(width: 16, height: 10)
+                    .shadow(color: Color.black.opacity(0.18), radius: 2, x: 0, y: 1.5)
+                    .position(x: 50, y: tongueLength - 2)
                 }
             }
             .frame(height: 400)
