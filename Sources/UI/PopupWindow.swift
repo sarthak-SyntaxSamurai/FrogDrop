@@ -2,8 +2,84 @@ import AppKit
 import SwiftUI
 import UniformTypeIdentifiers
 
+class PreviewModel: ObservableObject {
+    @Published var text: String = ""
+}
+
+struct ClipboardPreviewView: View {
+    @ObservedObject var model: PreviewModel
+    
+    var body: some View {
+        ScrollView {
+            Text(model.text)
+                .font(.system(.body, design: .monospaced))
+                .foregroundColor(.primary)
+                .multilineTextAlignment(.leading)
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+        }
+        .padding(14)
+        .frame(width: 280, height: 200)
+    }
+}
+
+class ClipboardPreviewWindow: NSWindow {
+    let model = PreviewModel()
+    
+    init(contentRect: NSRect, text: String) {
+        model.text = text
+        super.init(
+            contentRect: contentRect,
+            styleMask: [.borderless, .nonactivatingPanel],
+            backing: .buffered,
+            defer: false
+        )
+        
+        self.isOpaque = false
+        self.backgroundColor = .clear
+        self.level = .statusBar
+        self.hasShadow = true
+        
+        let hostingView = NSHostingView(rootView: ClipboardPreviewView(model: model))
+        hostingView.translatesAutoresizingMaskIntoConstraints = false
+        
+        let nsView = NSView()
+        nsView.wantsLayer = true
+        nsView.layer?.cornerRadius = 14
+        nsView.layer?.masksToBounds = true
+        
+        let effectView = NSVisualEffectView()
+        effectView.material = .hudWindow
+        effectView.blendingMode = .behindWindow
+        effectView.state = .active
+        effectView.wantsLayer = true
+        effectView.layer?.cornerRadius = 14
+        
+        self.contentView = nsView
+        nsView.addSubview(effectView)
+        nsView.addSubview(hostingView)
+        
+        effectView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            effectView.leadingAnchor.constraint(equalTo: nsView.leadingAnchor),
+            effectView.trailingAnchor.constraint(equalTo: nsView.trailingAnchor),
+            effectView.topAnchor.constraint(equalTo: nsView.topAnchor),
+            effectView.bottomAnchor.constraint(equalTo: nsView.bottomAnchor),
+            
+            hostingView.leadingAnchor.constraint(equalTo: nsView.leadingAnchor),
+            hostingView.trailingAnchor.constraint(equalTo: nsView.trailingAnchor),
+            hostingView.topAnchor.constraint(equalTo: nsView.topAnchor),
+            hostingView.bottomAnchor.constraint(equalTo: nsView.bottomAnchor)
+        ])
+    }
+    
+    func updateContent(text: String) {
+        model.text = text
+    }
+}
+
 class PopupWindow: NSWindow, NSWindowDelegate {
     static var activeInstance: PopupWindow?
+    private var previewWindow: ClipboardPreviewWindow?
     
     init(statusItemFrame: NSRect) {
         let width: CGFloat = 340
@@ -38,9 +114,11 @@ class PopupWindow: NSWindow, NSWindowDelegate {
         nsView.layer?.masksToBounds = true
         
         let effectView = NSVisualEffectView()
-        effectView.material = .popover
+        effectView.material = .hudWindow
         effectView.blendingMode = .behindWindow
         effectView.state = .active
+        effectView.wantsLayer = true
+        effectView.layer?.cornerRadius = 18
         
         self.contentView = nsView
         nsView.addSubview(effectView)
@@ -65,9 +143,40 @@ class PopupWindow: NSWindow, NSWindowDelegate {
     }
     
     func windowDidResignKey(_ notification: Notification) {
+        hidePreview()
         self.orderOut(nil)
         if PopupWindow.activeInstance == self {
             PopupWindow.activeInstance = nil
+        }
+    }
+    
+    func showPreview(for item: ClipboardItem, atRowMidY rowMidY: CGFloat) {
+        let windowFrame = self.frame
+        let screenY = windowFrame.maxY - rowMidY
+        
+        let previewWidth: CGFloat = 280
+        let previewHeight: CGFloat = 200
+        
+        let previewX = windowFrame.minX - previewWidth - 8
+        let previewY = screenY - (previewHeight / 2)
+        
+        let rect = NSRect(x: previewX, y: previewY, width: previewWidth, height: previewHeight)
+        
+        if let preview = previewWindow {
+            preview.updateContent(text: item.text)
+            preview.setFrame(rect, display: true, animate: false)
+        } else {
+            let preview = ClipboardPreviewWindow(contentRect: rect, text: item.text)
+            previewWindow = preview
+            self.addChildWindow(preview, ordered: .above)
+        }
+    }
+    
+    func hidePreview() {
+        if let preview = previewWindow {
+            self.removeChildWindow(preview)
+            preview.orderOut(nil)
+            previewWindow = nil
         }
     }
 }
@@ -84,7 +193,7 @@ struct PopupView: View {
         case dropzone
     }
     
-    @State private var activeTab: Tab = .timer
+    @State private var activeTab: Tab = TimerManager.shared.state != .idle ? .timer : .clipboard
     @ObservedObject var timerManager = TimerManager.shared
     @ObservedObject var clipboardManager = ClipboardManager.shared
     @ObservedObject var dropzoneManager = DropzoneManager.shared
@@ -145,6 +254,9 @@ struct PopupView: View {
             .background(Color.black.opacity(0.12))
         }
         .frame(width: 340, height: 460)
+        .onChange(of: activeTab) {
+            PopupWindow.activeInstance?.hidePreview()
+        }
     }
 }
 
@@ -480,35 +592,25 @@ struct ClipboardRow: View {
     @State private var isHovering = false
     
     var body: some View {
-        HStack(spacing: 8) {
-            VStack(alignment: .leading, spacing: 3) {
-                Text(item.text.trimmingCharacters(in: .whitespacesAndNewlines))
-                    .font(.system(.subheadline, design: .rounded))
-                    .foregroundColor(.primary)
-                    .lineLimit(2)
-                    .multilineTextAlignment(.leading)
-                
-                Text(formatTimestamp(item.timestamp))
-                    .font(.system(size: 9))
-                    .foregroundColor(.secondary)
-            }
-            
-            Spacer()
-            
-            if isHovering {
-                HStack(spacing: 4) {
-                    Button(action: onCopy) {
-                        Image(systemName: "doc.on.doc")
-                            .font(.system(size: 11))
-                            .foregroundColor(.green)
-                            .padding(6)
-                            .background(Color.green.opacity(0.12))
-                            .cornerRadius(6)
-                    }
-                    .buttonStyle(.plain)
+        GeometryReader { geometry in
+            HStack(spacing: 8) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(item.text.trimmingCharacters(in: .whitespacesAndNewlines))
+                        .font(.system(.subheadline, design: .rounded))
+                        .foregroundColor(.primary)
+                        .lineLimit(1)
+                        .multilineTextAlignment(.leading)
                     
+                    Text(formatTimestamp(item.timestamp))
+                        .font(.system(size: 9))
+                        .foregroundColor(.secondary)
+                }
+                
+                Spacer()
+                
+                if isHovering {
                     Button(action: onDelete) {
-                        Image(systemName: "xmark")
+                        Image(systemName: "trash")
                             .font(.system(size: 11))
                             .foregroundColor(.red)
                             .padding(6)
@@ -517,23 +619,35 @@ struct ClipboardRow: View {
                     }
                     .buttonStyle(.plain)
                 }
-                .transition(.opacity)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 8)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(isHovering ? Color.white.opacity(0.06) : Color.black.opacity(0.06))
+            )
+            .contentShape(Rectangle())
+            .onHover { hovering in
+                withAnimation(.easeInOut(duration: 0.15)) {
+                    isHovering = hovering
+                }
+                if hovering {
+                    let frame = geometry.frame(in: .global)
+                    let midY = frame.midY
+                    PopupWindow.activeInstance?.showPreview(for: item, atRowMidY: midY)
+                } else {
+                    PopupWindow.activeInstance?.hidePreview()
+                }
+            }
+            .onTapGesture {
+                onCopy()
+                PopupWindow.activeInstance?.hidePreview()
+                PopupWindow.activeInstance?.orderOut(nil)
+                PopupWindow.activeInstance = nil
             }
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 8)
-        .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(isHovering ? Color.white.opacity(0.06) : Color.black.opacity(0.06))
-        )
-        .onHover { hovering in
-            withAnimation(.easeInOut(duration: 0.15)) {
-                isHovering = hovering
-            }
-        }
-        .onTapGesture(count: 1) {
-            onCopy()
-        }
+        .frame(height: 50)
     }
     
     private func formatTimestamp(_ date: Date) -> String {
