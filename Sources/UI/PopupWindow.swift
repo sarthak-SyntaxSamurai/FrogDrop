@@ -10,12 +10,23 @@ struct ClipboardPreviewView: View {
     @ObservedObject var model: PreviewModel
     
     var body: some View {
-        ScrollView {
-            Text(model.text)
-                .font(.system(.body, design: .monospaced))
-                .foregroundColor(.primary)
-                .multilineTextAlignment(.leading)
-                .frame(maxWidth: .infinity, alignment: .topLeading)
+        VStack(alignment: .leading, spacing: 6) {
+            Text("PREVIEW")
+                .font(.system(size: 9, weight: .bold, design: .rounded))
+                .foregroundColor(.secondary)
+                .opacity(0.8)
+                
+            Divider()
+                .background(Color.white.opacity(0.1))
+                
+            ScrollView {
+                Text(model.text)
+                    .font(.system(.subheadline, design: .monospaced))
+                    .lineSpacing(4)
+                    .foregroundColor(.primary)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .topLeading)
+            }
         }
         .padding(14)
         .frame(width: 280, height: 200)
@@ -591,11 +602,19 @@ struct ClipboardRow: View {
     let onDelete: () -> Void
     @State private var isHovering = false
     
+    private var displayPreviewText: String {
+        item.text
+            .replacingOccurrences(of: "\n", with: " ")
+            .replacingOccurrences(of: "\r", with: " ")
+            .replacingOccurrences(of: "\t", with: " ")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+    
     var body: some View {
         GeometryReader { geometry in
             HStack(spacing: 8) {
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(item.text.trimmingCharacters(in: .whitespacesAndNewlines))
+                    Text(displayPreviewText)
                         .font(.system(.subheadline, design: .rounded))
                         .foregroundColor(.primary)
                         .lineLimit(1)
@@ -625,7 +644,7 @@ struct ClipboardRow: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(isHovering ? Color.white.opacity(0.06) : Color.black.opacity(0.06))
+                    .fill(isHovering ? Color.white.opacity(0.08) : Color.clear)
             )
             .contentShape(Rectangle())
             .onHover { hovering in
