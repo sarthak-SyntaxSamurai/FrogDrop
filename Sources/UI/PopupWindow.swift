@@ -13,8 +13,8 @@ struct ClipboardPreviewView: View {
         VStack(alignment: .leading, spacing: 6) {
             Text("PREVIEW")
                 .font(.system(size: 9, weight: .bold, design: .rounded))
-                .foregroundColor(.secondary)
-                .opacity(0.8)
+                .tracking(1.2)
+                .foregroundColor(Color(red: 0.15, green: 0.85, blue: 0.45))
                 
             Divider()
                 .background(Color.white.opacity(0.1))
@@ -30,6 +30,11 @@ struct ClipboardPreviewView: View {
         }
         .padding(14)
         .frame(width: 280, height: 200)
+        .background(Color.clear)
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(Color.white.opacity(0.12), lineWidth: 1)
+        )
     }
 }
 
@@ -254,21 +259,42 @@ struct PopupView: View {
                     .font(.system(.caption2, design: .rounded))
                     .foregroundColor(.secondary)
                 Spacer()
-                Button(action: {
-                    NSApplication.shared.terminate(nil)
-                }) {
-                    Text("Quit")
-                        .font(.system(.caption2, design: .rounded))
-                        .foregroundColor(.red.opacity(0.8))
-                }
-                .buttonStyle(.plain)
+                QuitButton()
             }
             .padding(12)
             .background(Color.black.opacity(0.12))
         }
         .frame(width: 340, height: 460)
+        .background(Color.clear)
+        .overlay(
+            RoundedRectangle(cornerRadius: 18)
+                .stroke(Color.white.opacity(0.12), lineWidth: 1)
+        )
         .onChange(of: activeTab) {
             PopupWindow.activeInstance?.hidePreview()
+        }
+    }
+}
+
+// Quit Button with Hover State
+struct QuitButton: View {
+    @State private var isHovered = false
+    
+    var body: some View {
+        Button(action: {
+            NSApplication.shared.terminate(nil)
+        }) {
+            Text("Quit")
+                .font(.system(size: 10, weight: .semibold, design: .rounded))
+                .foregroundColor(isHovered ? .red : .red.opacity(0.6))
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Color.red.opacity(isHovered ? 0.12 : 0.0))
+                .cornerRadius(4)
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering in
+            isHovered = hovering
         }
     }
 }
@@ -289,18 +315,50 @@ struct TabButton: View {
             Text(title)
                 .font(.system(size: 10, weight: .bold, design: .rounded))
         }
-        .foregroundColor(isActive ? .green : (isHovered ? .primary : .secondary))
+        .foregroundColor(isActive ? Color(red: 0.15, green: 0.85, blue: 0.45) : (isHovered ? .primary : .secondary))
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8)
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(isActive ? Color.green.opacity(0.08) : (isHovered ? Color.white.opacity(0.04) : Color.clear))
+                .fill(isActive ? Color.white.opacity(0.06) : (isHovered ? Color.white.opacity(0.03) : Color.clear))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(isActive ? Color(red: 0.15, green: 0.85, blue: 0.45).opacity(0.3) : Color.clear, lineWidth: 1)
         )
         .contentShape(Rectangle())
         .onTapGesture {
             HapticManager.shared.click()
             action()
         }
+        .onHover { hovering in
+            isHovered = hovering
+        }
+    }
+}
+
+// Preset Button with Hover State
+struct PresetButton: View {
+    let seconds: TimeInterval
+    let action: () -> Void
+    @State private var isHovered = false
+    
+    var body: some View {
+        Button(action: action) {
+            Text("\(Int(seconds / 60))m")
+                .font(.system(.subheadline, design: .rounded))
+                .fontWeight(.bold)
+                .foregroundColor(.primary)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(Color.white.opacity(isHovered ? 0.08 : 0.04))
+                .cornerRadius(8)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(isHovered ? Color.white.opacity(0.16) : Color.white.opacity(0.08), lineWidth: 0.5)
+                )
+        }
+        .buttonStyle(.plain)
         .onHover { hovering in
             isHovered = hovering
         }
@@ -325,7 +383,13 @@ struct TimerTabView: View {
             // Interactive Frog Face Centerpiece
             ZStack {
                 Circle()
-                    .fill(Color.green.opacity(0.1))
+                    .fill(
+                        LinearGradient(
+                            colors: [Color.green.opacity(0.15), Color.green.opacity(0.03)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
                     .frame(width: 110, height: 110)
                 
                 // Outer Timer Ring
@@ -337,9 +401,10 @@ struct TimerTabView: View {
                     Circle()
                         .trim(from: 0, to: CGFloat(timerManager.secondsRemaining / max(timerManager.totalSeconds, 1)))
                         .stroke(
-                            AngularGradient(
-                                colors: [.green, .emeraldGreen, .green],
-                                center: .center
+                            LinearGradient(
+                                colors: [Color(red: 0.15, green: 0.85, blue: 0.45), Color(red: 0.05, green: 0.65, blue: 0.35)],
+                                startPoint: .top,
+                                endPoint: .bottom
                             ),
                             style: StrokeStyle(lineWidth: 6, lineCap: .round)
                         )
@@ -397,7 +462,7 @@ struct TimerTabView: View {
                             timerManager.togglePause()
                         }) {
                             Text(timerManager.state == .running ? "Pause" : "Resume")
-                                .font(.system(.subheadline, design: .rounded))
+                               .font(.system(.subheadline, design: .rounded))
                                 .fontWeight(.semibold)
                                 .foregroundColor(.primary)
                                 .padding(.horizontal, 16)
@@ -431,23 +496,9 @@ struct TimerTabView: View {
                     // Preset buttons
                     HStack(spacing: 8) {
                         ForEach(presets, id: \.self) { seconds in
-                            Button(action: {
+                            PresetButton(seconds: seconds) {
                                 timerManager.startTimer(duration: seconds)
-                            }) {
-                                Text("\(Int(seconds / 60))m")
-                                    .font(.system(.subheadline, design: .rounded))
-                                    .fontWeight(.bold)
-                                    .foregroundColor(.primary)
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 8)
-                                    .background(Color.white.opacity(0.06))
-                                    .cornerRadius(8)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
-                                    )
                             }
-                            .buttonStyle(.plain)
                         }
                     }
                 }
@@ -519,10 +570,35 @@ fileprivate extension Color {
     static let emeraldGreen = Color(red: 0.05, green: 0.62, blue: 0.4)
 }
 
+// Clear Button with Hover State
+struct ClearButton: View {
+    let action: () -> Void
+    @State private var isHovered = false
+    
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "trash")
+                .foregroundColor(.red.opacity(isHovered ? 1.0 : 0.7))
+                .padding(7)
+                .background(Color.red.opacity(isHovered ? 0.15 : 0.08))
+                .cornerRadius(8)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.red.opacity(isHovered ? 0.25 : 0.1), lineWidth: 0.5)
+                )
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering in
+            isHovered = hovering
+        }
+    }
+}
+
 // ==================== CLIPBOARD TAB ====================
 struct ClipboardTabView: View {
     @ObservedObject var clipboardManager: ClipboardManager
     @Binding var searchQuery: String
+    @State private var isSearchHovered = false
     
     var filteredItems: [ClipboardItem] {
         if searchQuery.isEmpty {
@@ -547,21 +623,21 @@ struct ClipboardTabView: View {
                 }
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
-                .background(Color.black.opacity(0.12))
+                .background(Color.white.opacity(isSearchHovered ? 0.08 : 0.04))
                 .cornerRadius(8)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(isSearchHovered ? Color.white.opacity(0.16) : Color.white.opacity(0.08), lineWidth: 0.5)
+                )
+                .onHover { hovering in
+                    isSearchHovered = hovering
+                }
                 
                 // Clear all
-                Button(action: {
+                ClearButton {
                     clipboardManager.clearAll()
                     HapticManager.shared.success()
-                }) {
-                    Image(systemName: "trash")
-                        .foregroundColor(.red.opacity(0.8))
-                        .padding(7)
-                        .background(Color.red.opacity(0.08))
-                        .cornerRadius(8)
                 }
-                .buttonStyle(.plain)
                 .help("Clear History")
             }
             .padding(.horizontal, 14)
