@@ -39,7 +39,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     private func setupStatusItem() {
-        statusItem = NSStatusBar.system.statusItem(withLength: 26)
+        statusItem = NSStatusBar.system.statusItem(withLength: 26) // Placeholder initial size
         
         if let button = statusItem?.button {
             button.registerForDraggedTypes([.fileURL, .URL])
@@ -61,16 +61,34 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 self?.togglePopupWindow()
             }
             
-            hostingView.onDragStart = { [weak self] _ in
-                self?.startTongueDrag()
+            hostingView.onDragStart = { [weak self] pt in
+                self?.startTongueDrag(at: pt)
             }
             
-            hostingView.onDragUpdate = { [weak self] dy in
-                self?.updateTongueDrag(dy: dy)
+            hostingView.onDragUpdate = { [weak self] pt in
+                self?.updateTongueDrag(to: pt)
             }
             
-            hostingView.onDragEnd = { [weak self] dy in
-                self?.endTongueDrag(dy: dy)
+            hostingView.onDragEnd = { [weak self] pt in
+                self?.endTongueDrag(at: pt)
+            }
+            
+            // Initial layout calculation
+            updateMenuBarTitle()
+        }
+    }
+
+    func updateMenuBarTitle() {
+        guard let statusItem = statusItem, let button = statusItem.button else { return }
+        for subview in button.subviews {
+            if let hostingView = subview as? InteractiveFrogView {
+                hostingView.invalidateIntrinsicContentSize()
+                let width = hostingView.fittingSize.width
+                statusItem.length = width
+                
+                // Reposition the dropzone panel when the status item width changes
+                let frame = button.window?.frame ?? .zero
+                self.dropzonePanel?.updatePosition(statusItemFrame: frame)
             }
         }
     }
@@ -78,7 +96,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     // MARK: - Popup Window Management
     
-    private func togglePopupWindow() {
+    func togglePopupWindow() {
         guard let button = statusItem?.button, let window = button.window else { return }
         let statusItemFrame = window.frame
         
@@ -97,9 +115,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     // MARK: - Tongue Drag-Down Timer Setup
     
-    private func startTongueDrag() {
+    private var tongueAnchorPoint: NSPoint = .zero
+    
+    private func startTongueDrag(at mouseLocation: NSPoint) {
         guard let button = statusItem?.button, let window = button.window else { return }
         let statusItemFrame = window.frame
+        
+        // Center-bottom of status bar item in screen space
+        tongueAnchorPoint = NSPoint(x: statusItemFrame.midX, y: statusItemFrame.minY + 2)
         
         // Hide popup window if active
         if let active = PopupWindow.activeInstance {
@@ -108,34 +131,65 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         
         lastSelectedDuration = .cancel
-        tongueWindow = TongueOverlayWindow(statusItemFrame: statusItemFrame, initialLength: 0.0)
+        let screen = window.screen ?? NSScreen.main ?? NSScreen.screens[0]
+        tongueWindow = TongueOverlayWindow(screenFrame: screen.frame, startPoint: tongueAnchorPoint, initialCurrentPoint: mouseLocation)
         tongueWindow?.orderFrontRegardless()
         
         HapticManager.shared.tick()
     }
     
-    private func updateTongueDrag(dy: CGFloat) {
-        // Clamp and update length
-        let clampedLength = max(0, min(dy, 380))
-        tongueWindow?.updateLength(clampedLength)
+    private func updateTongueDrag(to mouseLocation: NSPoint) {
+        let dx = mouseLocation.x - tongueAnchorPoint.x
+        let dy = mouseLocation.y - tongueAnchorPoint.y
+        let distance = sqrt(dx*dx + dy*dy)
+        let clampedDistance = max(0, min(distance, 380))
         
-        let currentDuration = TimerDuration.fromDragDistance(clampedLength)
+        let clampedEndPoint: NSPoint
+        if distance > 0 {
+            clampedEndPoint = NSPoint(
+                x: tongueAnchorPoint.x + (dx / distance) * clampedDistance,
+                y: tongueAnchorPoint.y + (dy / distance) * clampedDistance
+            )
+        } else {
+            clampedEndPoint = tongueAnchorPoint
+        }
+        
+        tongueWindow?.updatePoints(start: tongueAnchorPoint, current: clampedEndPoint)
+        
+        let currentDuration = TimerDuration.fromDragDistance(clampedDistance)
         if currentDuration != lastSelectedDuration {
             HapticManager.shared.tick()
             lastSelectedDuration = currentDuration
         }
     }
     
-    private func endTongueDrag(dy: CGFloat) {
+    private func endTongueDrag(at mouseLocation: NSPoint) {
         tongueWindow?.orderOut(nil)
         tongueWindow = nil
         
-        let clampedLength = max(0, min(dy, 380))
-        let finalDuration = TimerDuration.fromDragDistance(clampedLength)
+        let dx = mouseLocation.x - tongueAnchorPoint.x
+        let dy = mouseLocation.y - tongueAnchorPoint.y
+        let distance = sqrt(dx*dx + dy*dy)
+        let clampedDistance = max(0, min(distance, 380))
+        let finalDuration = TimerDuration.fromDragDistance(clampedDistance)
         
         if finalDuration != .cancel {
-            TimerManager.shared.startTimer(duration: finalDuration.seconds)
-            HapticManager.shared.success()
+            // Check direction: if released to the right of status bar item center
+            if mouseLocation.x > tongueAnchorPoint.x {
+                // Drag Right: Setup Mode
+                TimerManager.shared.setupSeconds = finalDuration.seconds
+                TimerManager.shared.isShowingSetup = true
+                TimerManager.shared.setupTaskName = ""
+                TimerManager.shared.setupIsPomodoro = false
+                
+                // Show popover window
+                togglePopupWindow()
+                HapticManager.shared.success()
+            } else {
+                // Drag Left: Direct Start
+                TimerManager.shared.startTimer(duration: finalDuration.seconds)
+                HapticManager.shared.success()
+            }
         } else {
             HapticManager.shared.click()
         }
@@ -149,8 +203,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 class InteractiveFrogView: NSHostingView<MenuBarFrogView> {
     var onClick: (() -> Void)?
     var onDragStart: ((NSPoint) -> Void)?
-    var onDragUpdate: ((CGFloat) -> Void)?
-    var onDragEnd: ((CGFloat) -> Void)?
+    var onDragUpdate: ((NSPoint) -> Void)?
+    var onDragEnd: ((NSPoint) -> Void)?
     
     private var startPoint: NSPoint?
     private var isDragging = false
@@ -215,23 +269,23 @@ class InteractiveFrogView: NSHostingView<MenuBarFrogView> {
     override func mouseDragged(with event: NSEvent) {
         guard let startPoint = startPoint else { return }
         let currentPoint = event.locationInWindow
-        let dy = startPoint.y - currentPoint.y // positive value means dragging downwards
+        let dx = currentPoint.x - startPoint.x
+        let dy = startPoint.y - currentPoint.y
+        let dist = sqrt(dx*dx + dy*dy)
         
-        if !isDragging && dy > 12 {
+        if !isDragging && dist > 12 {
             isDragging = true
             onDragStart?(NSEvent.mouseLocation)
         }
         
         if isDragging {
-            onDragUpdate?(dy)
+            onDragUpdate?(NSEvent.mouseLocation)
         }
     }
     
     override func mouseUp(with event: NSEvent) {
         if isDragging {
-            let currentPoint = event.locationInWindow
-            let dy = startPoint!.y - currentPoint.y
-            onDragEnd?(dy)
+            onDragEnd?(NSEvent.mouseLocation)
         } else {
             onClick?()
         }

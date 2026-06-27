@@ -294,6 +294,11 @@ struct PopupView: View {
         .onChange(of: activeTab) {
             PopupWindow.activeInstance?.hidePreview()
         }
+        .onReceive(TimerManager.shared.$isShowingSetup) { showing in
+            if showing {
+                activeTab = .timer
+            }
+        }
     }
 }
 
@@ -407,158 +412,418 @@ struct PresetButton: View {
 }
 
 // ==================== TIMER TAB ====================
-struct TimerTabView: View {
-    @ObservedObject var timerManager: TimerManager
-    @ObservedObject var tracker = CursorTracker.shared
+struct TodoItem: Identifiable, Codable {
+    let id: UUID
+    var title: String
+    var isCompleted: Bool
+    var focusedDuration: TimeInterval
     
-    let presets: [TimeInterval] = [
-        5 * 60,
-        15 * 60,
-        30 * 60,
-        60 * 60,
-        120 * 60
-    ]
+    enum CodingKeys: String, CodingKey {
+        case id, title, isCompleted, focusedDuration
+    }
+    
+    init(id: UUID, title: String, isCompleted: Bool, focusedDuration: TimeInterval = 0) {
+        self.id = id
+        self.title = title
+        self.isCompleted = isCompleted
+        self.focusedDuration = focusedDuration
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        title = try container.decode(String.self, forKey: .title)
+        isCompleted = try container.decode(Bool.self, forKey: .isCompleted)
+        focusedDuration = (try? container.decode(TimeInterval.self, forKey: .focusedDuration)) ?? 0
+    }
+}
+
+class TodoManager: ObservableObject {
+    static let shared = TodoManager()
+    
+    @Published var items: [TodoItem] = [] {
+        didSet {
+            save()
+        }
+    }
+    
+    private init() {
+        load()
+    }
+    
+    func add(title: String) {
+        let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        let newItem = TodoItem(id: UUID(), title: trimmed, isCompleted: false)
+        items.append(newItem)
+        HapticManager.shared.click()
+    }
+    
+    func toggle(id: UUID) {
+        if let index = items.firstIndex(where: { $0.id == id }) {
+            items[index].isCompleted.toggle()
+            HapticManager.shared.click()
+        }
+    }
+    
+    func delete(id: UUID) {
+        items.removeAll { $0.id == id }
+        HapticManager.shared.click()
+    }
+    
+    func addDuration(id: UUID, seconds: TimeInterval) {
+        if let index = items.firstIndex(where: { $0.id == id }) {
+            items[index].focusedDuration += seconds
+            save()
+        }
+    }
+    
+    private func save() {
+        if let data = try? JSONEncoder().encode(items) {
+            UserDefaults.standard.set(data, forKey: "FrogDrop.TodoList")
+        }
+    }
+    
+    private func load() {
+        if let data = UserDefaults.standard.data(forKey: "FrogDrop.TodoList"),
+           let decoded = try? JSONDecoder().decode([TodoItem].self, from: data) {
+            self.items = decoded
+        }
+    }
+}
+
+struct TodoListView: View {
+    @ObservedObject var todoManager = TodoManager.shared
+    @State private var newTodoText = ""
+    @State private var isInputHovered = false
     
     var body: some View {
-        VStack(spacing: 16) {
-            // Interactive Frog Face Centerpiece
-            ZStack {
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: [Color.green.opacity(0.15), Color.green.opacity(0.03)],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
-                    .frame(width: 110, height: 110)
-                
-                // Outer Timer Ring
-                if timerManager.state != .idle {
-                    Circle()
-                        .stroke(Color.white.opacity(0.08), lineWidth: 6)
-                        .frame(width: 100, height: 100)
-                    
-                    Circle()
-                        .trim(from: 0, to: CGFloat(timerManager.secondsRemaining / max(timerManager.totalSeconds, 1)))
-                        .stroke(
-                            LinearGradient(
-                                colors: [Color(red: 0.15, green: 0.85, blue: 0.45), Color(red: 0.05, green: 0.65, blue: 0.35)],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            ),
-                            style: StrokeStyle(lineWidth: 6, lineCap: .round)
-                        )
-                        .frame(width: 100, height: 100)
-                        .rotationEffect(.degrees(-90))
-                        .animation(.linear(duration: 1.0), value: timerManager.secondsRemaining)
-                }
-                
-                // Frog Head with Tracking Eyes
-                ZStack {
-                    Circle()
-                        .fill(
-                            RadialGradient(
-                                colors: [Color(red: 0.25, green: 0.9, blue: 0.55), Color(red: 0.05, green: 0.6, blue: 0.3)],
-                                center: .topLeading,
-                                startRadius: 0,
-                                endRadius: 35
-                            )
-                        )
-                        .frame(width: 60, height: 60)
-                        .shadow(color: Color.black.opacity(0.25), radius: 6, x: 0, y: 4)
-                    
-                    // Large Eyes (Moved to top of face)
-                    HStack(spacing: 6) {
-                        LargeEyeView(mouseLocation: tracker.mouseLocation)
-                        LargeEyeView(mouseLocation: tracker.mouseLocation)
-                    }
-                    .position(x: 30, y: 22)
-                    
-                    // Cute blushing cheeks (Moved below eyes)
-                    Circle()
-                        .fill(Color.pink.opacity(0.5))
-                        .frame(width: 6, height: 4)
-                        .blur(radius: 0.5)
-                        .position(x: 14, y: 34)
-                    Circle()
-                        .fill(Color.pink.opacity(0.5))
-                        .frame(width: 6, height: 4)
-                        .blur(radius: 0.5)
-                        .position(x: 46, y: 34)
-                    
-                    // Smiling mouth (Curving down, moved to bottom of face)
-                    Path { path in
-                        path.move(to: CGPoint(x: 21, y: 38))
-                        path.addQuadCurve(
-                            to: CGPoint(x: 39, y: 38),
-                            control: CGPoint(x: 30, y: 46)
-                        )
-                    }
-                    .stroke(Color.black.opacity(0.75), lineWidth: 1.8)
-                }
-                .frame(width: 60, height: 60)
+        VStack(spacing: 8) {
+            HStack {
+                Text("To-Do List")
+                    .font(.system(.headline, design: .rounded))
+                    .fontWeight(.bold)
+                    .foregroundColor(.secondary)
+                Spacer()
             }
-            .frame(height: 120)
+            .padding(.horizontal, 4)
             
-            // Timer Display or Presets
-            if timerManager.state != .idle {
-                VStack(spacing: 8) {
-                    Text(formatTime(timerManager.secondsRemaining))
-                        .font(.system(size: 32, weight: .bold, design: .monospaced))
-                        .foregroundColor(.primary)
-                    
-                    HStack(spacing: 12) {
-                        Button(action: {
-                            timerManager.togglePause()
-                        }) {
-                            Text(timerManager.state == .running ? "Pause" : "Resume")
-                               .font(.system(.subheadline, design: .rounded))
-                                .fontWeight(.semibold)
-                                .foregroundColor(.primary)
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 6)
-                                .background(Color.white.opacity(0.1))
-                                .clipShape(Capsule())
-                        }
-                        .buttonStyle(.plain)
-                        
-                        Button(action: {
-                            timerManager.stopTimer()
-                        }) {
-                            Text("Cancel")
-                                .font(.system(.subheadline, design: .rounded))
-                                .fontWeight(.semibold)
-                                .foregroundColor(.red)
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 6)
-                                .background(Color.red.opacity(0.1))
-                                .clipShape(Capsule())
-                        }
-                        .buttonStyle(.plain)
+            // Task input field
+            HStack {
+                Image(systemName: "plus")
+                    .foregroundColor(.secondary)
+                    .font(.system(size: 11, weight: .bold))
+                TextField("Add task...", text: $newTodoText)
+                    .textFieldStyle(.plain)
+                    .font(.system(.subheadline, design: .rounded))
+                    .onSubmit {
+                        todoManager.add(title: newTodoText)
+                        newTodoText = ""
                     }
-                }
-            } else {
-                VStack(spacing: 10) {
-                    Text("Select Preset or Drag Tongue Down")
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(Color.white.opacity(isInputHovered ? 0.08 : 0.04))
+            .cornerRadius(8)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(isInputHovered ? Color.white.opacity(0.16) : Color.white.opacity(0.08), lineWidth: 0.5)
+            )
+            .onHover { hovering in
+                isInputHovered = hovering
+            }
+            
+            // To-do ScrollView
+            if todoManager.items.isEmpty {
+                VStack(spacing: 4) {
+                    Spacer()
+                    Image(systemName: "checklist")
+                        .font(.system(size: 24))
+                        .foregroundColor(.secondary.opacity(0.3))
+                    Text("No tasks yet")
                         .font(.system(.caption, design: .rounded))
-                        .foregroundColor(.secondary)
-                    
-                    // Preset buttons
-                    HStack(spacing: 8) {
-                        ForEach(presets, id: \.self) { seconds in
-                            PresetButton(seconds: seconds) {
-                                timerManager.startTimer(duration: seconds)
-                            }
+                        .foregroundColor(.secondary.opacity(0.7))
+                    Spacer()
+                }
+                .frame(height: 110)
+            } else {
+                ScrollView {
+                    VStack(spacing: 4) {
+                        ForEach(todoManager.items) { item in
+                            TodoRow(item: item)
                         }
                     }
                 }
+                .frame(height: 110)
+            }
+        }
+        .padding(.horizontal, 4)
+    }
+}
+
+struct TodoRow: View {
+    let item: TodoItem
+    @ObservedObject var todoManager = TodoManager.shared
+    @State private var isHovering = false
+    
+    var body: some View {
+        HStack(spacing: 8) {
+            Button(action: {
+                todoManager.toggle(id: item.id)
+            }) {
+                Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
+                    .foregroundColor(item.isCompleted ? Color(red: 0.15, green: 0.85, blue: 0.45) : .secondary)
+                    .font(.system(size: 14))
+            }
+            .buttonStyle(.plain)
+            
+            Text(item.title)
+                .font(.system(.subheadline, design: .rounded))
+                .strikethrough(item.isCompleted)
+                .foregroundColor(item.isCompleted ? .secondary.opacity(0.7) : .primary)
+                .lineLimit(1)
+            
+            let durStr = formatFocusedDuration(item.focusedDuration)
+            if !durStr.isEmpty {
+                Text(durStr)
+                    .font(.system(size: 9, weight: .bold, design: .rounded))
+                    .foregroundColor(.green)
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 1.5)
+                    .background(Color.green.opacity(0.08))
+                    .cornerRadius(4)
             }
             
             Spacer()
+            
+            if isHovering {
+                HStack(spacing: 8) {
+                    // Play Timer Option
+                    Button(action: {
+                        TimerManager.shared.setupSeconds = 25 * 60 // 25m default
+                        TimerManager.shared.setupTaskName = item.title
+                        TimerManager.shared.setupTodoId = item.id
+                        TimerManager.shared.isShowingSetup = true
+                    }) {
+                        Image(systemName: "play.fill")
+                            .font(.system(size: 9))
+                            .foregroundColor(.green)
+                            .padding(5)
+                            .background(Color.green.opacity(0.12))
+                            .cornerRadius(5)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Start Focus Timer")
+                    
+                    // Stopwatch Option
+                    Button(action: {
+                        TimerManager.shared.startStopwatch(name: item.title, todoId: item.id)
+                    }) {
+                        Image(systemName: "stopwatch.fill")
+                            .font(.system(size: 9))
+                            .foregroundColor(.blue)
+                            .padding(5)
+                            .background(Color.blue.opacity(0.12))
+                            .cornerRadius(5)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Start Stopwatch")
+                    
+                    // Delete Option
+                    Button(action: {
+                        todoManager.delete(id: item.id)
+                    }) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundColor(.red)
+                            .padding(5)
+                            .background(Color.red.opacity(0.12))
+                            .cornerRadius(5)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Delete Task")
+                }
+                .transition(.opacity)
+            }
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 10)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
+        .background(Color.white.opacity(isHovering ? 0.05 : 0.01))
+        .cornerRadius(6)
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: 0.1)) {
+                isHovering = hovering
+            }
+        }
+    }
+    
+    private func formatFocusedDuration(_ duration: TimeInterval) -> String {
+        guard duration > 0 else { return "" }
+        let hrs = Int(duration) / 3600
+        let mins = (Int(duration) % 3600) / 60
+        if hrs > 0 {
+            if mins > 0 {
+                return "\(hrs)h \(mins)m"
+            }
+            return "\(hrs)h"
+        } else {
+            return "\(mins)m"
+        }
+    }
+}
+
+struct StopwatchControlView: View {
+    @ObservedObject var timerManager: TimerManager
+    @State private var taskName: String = ""
+    @State private var isHovered = false
+    
+    var body: some View {
+        VStack(spacing: 10) {
+            Text("Stopwatch Controls")
+                .font(.system(.caption, design: .rounded))
+                .fontWeight(.bold)
+                .foregroundColor(.secondary)
+            
+            HStack(spacing: 8) {
+                TextField("Stopwatch description...", text: $taskName)
+                    .textFieldStyle(.plain)
+                    .font(.system(.subheadline, design: .rounded))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Color.white.opacity(isHovered ? 0.08 : 0.04))
+                    .cornerRadius(8)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(isHovered ? Color.white.opacity(0.16) : Color.white.opacity(0.08), lineWidth: 0.5)
+                    )
+                    .onHover { hovering in
+                        isHovered = hovering
+                    }
+                
+                Button(action: {
+                    timerManager.startStopwatch(name: taskName)
+                    taskName = ""
+                }) {
+                    Image(systemName: "stopwatch.fill")
+                        .foregroundColor(.black)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(
+                            LinearGradient(
+                                colors: [Color(red: 0.2, green: 0.9, blue: 0.5), Color(red: 0.05, green: 0.7, blue: 0.35)],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                        .cornerRadius(8)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(12)
+        .background(Color.white.opacity(0.03))
+        .cornerRadius(10)
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(Color.white.opacity(0.06), lineWidth: 0.5)
+        )
+    }
+}
+
+struct TugTimerCard: View {
+    let timer: TimerManager.ActiveTimer
+    @ObservedObject var timerManager: TimerManager
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(timer.name)
+                        .font(.system(.subheadline, design: .rounded))
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                        .lineLimit(1)
+                    
+                    if !timer.isStopwatch {
+                        let endTime = Date().addingTimeInterval(timer.secondsRemaining)
+                        Text("Ends at \(formatEndTime(endTime))")
+                            .font(.system(size: 9, design: .rounded))
+                            .foregroundColor(.secondary)
+                    } else {
+                        Text("Stopwatch Mode")
+                            .font(.system(size: 9, design: .rounded))
+                            .foregroundColor(.blue.opacity(0.8))
+                    }
+                }
+                
+                Spacer()
+                
+                Text(formatTime(timer.isStopwatch ? timer.secondsElapsed : timer.secondsRemaining))
+                    .font(.system(size: 20, weight: .bold, design: .monospaced))
+                    .foregroundColor(timer.isBreakActive ? .orange : .green)
+            }
+            
+            HStack(spacing: 8) {
+                if !timer.isStopwatch {
+                    Button(action: {
+                        timerManager.addTime(timerId: timer.id, minutes: 1)
+                    }) {
+                        Text("+ 1m")
+                            .font(.system(size: 10, weight: .semibold, design: .rounded))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.white.opacity(0.08))
+                            .cornerRadius(6)
+                    }
+                    .buttonStyle(.plain)
+                    
+                    Button(action: {
+                        timerManager.addTime(timerId: timer.id, minutes: 5)
+                    }) {
+                        Text("+ 5m")
+                            .font(.system(size: 10, weight: .semibold, design: .rounded))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.white.opacity(0.08))
+                            .cornerRadius(6)
+                    }
+                    .buttonStyle(.plain)
+                }
+                
+                Spacer()
+                
+                Button(action: {
+                    timerManager.togglePause(timerId: timer.id)
+                }) {
+                    Image(systemName: timer.state == .running ? "pause.fill" : "play.fill")
+                        .font(.system(size: 10))
+                        .foregroundColor(.primary)
+                        .padding(6)
+                        .background(Color.white.opacity(0.12))
+                        .clipShape(Circle())
+                }
+                .buttonStyle(.plain)
+                
+                Button(action: {
+                    timerManager.stopTimer(timerId: timer.id)
+                }) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(.red)
+                        .padding(6)
+                        .background(Color.red.opacity(0.15))
+                        .clipShape(Circle())
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(12)
+        .background(Color.white.opacity(0.05))
+        .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
+        )
     }
     
     private func formatTime(_ seconds: TimeInterval) -> String {
@@ -570,6 +835,250 @@ struct TimerTabView: View {
         } else {
             return String(format: "%02d:%02d", mins, secs)
         }
+    }
+    
+    private func formatEndTime(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
+    }
+}
+
+struct TimerSetupView: View {
+    @ObservedObject var timerManager: TimerManager
+    @State private var taskName: String = ""
+    @State private var isPomodoro: Bool = false
+    @State private var breakMinutes: Int = 5
+    @State private var cycles: Int = 4
+    @State private var isTaskHovered = false
+    
+    private var totalDuration: TimeInterval {
+        if isPomodoro {
+            let focusTotal = timerManager.setupSeconds * Double(cycles)
+            let breakTotal = Double(breakMinutes * 60) * Double(cycles - 1)
+            return focusTotal + breakTotal
+        } else {
+            return timerManager.setupSeconds
+        }
+    }
+    
+    private var endTime: Date {
+        Date().addingTimeInterval(totalDuration)
+    }
+    
+    var body: some View {
+        let displaySeconds = timerManager.setupSeconds
+        
+        VStack(spacing: 12) {
+            VStack(spacing: 2) {
+                Text(formatTime(displaySeconds))
+                    .font(.system(size: 36, weight: .bold, design: .rounded))
+                    .foregroundColor(Color(red: 0.15, green: 0.85, blue: 0.45))
+                
+                Text("Ends at \(formatEndTime(endTime))")
+                    .font(.system(.caption, design: .rounded))
+                    .foregroundColor(.secondary)
+            }
+            .padding(.top, 4)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text("TASK NAME")
+                    .font(.system(size: 8, weight: .bold))
+                    .foregroundColor(.secondary)
+                    .tracking(1.0)
+                
+                TextField("What are you working on?", text: $taskName)
+                    .textFieldStyle(.plain)
+                    .font(.system(.subheadline, design: .rounded))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Color.white.opacity(isTaskHovered ? 0.08 : 0.04))
+                    .cornerRadius(8)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(isTaskHovered ? Color.white.opacity(0.16) : Color.white.opacity(0.08), lineWidth: 0.5)
+                    )
+                    .onHover { hovering in
+                        isTaskHovered = hovering
+                    }
+            }
+            .padding(.horizontal, 4)
+            
+            Toggle(isOn: $isPomodoro.animation(.spring(response: 0.3, dampingFraction: 0.7))) {
+                Text("Pomodoro Mode")
+                    .font(.system(.subheadline, design: .rounded))
+                    .fontWeight(.medium)
+            }
+            .toggleStyle(SwitchToggleStyle(tint: Color(red: 0.15, green: 0.85, blue: 0.45)))
+            .padding(.horizontal, 4)
+            
+            if isPomodoro {
+                VStack(spacing: 8) {
+                    HStack {
+                        Text("Break Duration")
+                            .font(.system(.subheadline, design: .rounded))
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Stepper(value: $breakMinutes, in: 1...60) {
+                            Text("\(breakMinutes) min")
+                                .font(.system(.subheadline, design: .rounded))
+                                .fontWeight(.bold)
+                        }
+                    }
+                    
+                    HStack {
+                        Text("Cycles")
+                            .font(.system(.subheadline, design: .rounded))
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Stepper(value: $cycles, in: 2...12) {
+                            Text("\(cycles)")
+                                .font(.system(.subheadline, design: .rounded))
+                                .fontWeight(.bold)
+                        }
+                    }
+                    
+                    HStack(spacing: 4) {
+                        ForEach(0..<(cycles * 2 - 1), id: \.self) { idx in
+                            Capsule()
+                                .fill(idx % 2 == 0 ? Color(red: 0.15, green: 0.85, blue: 0.45) : Color.red.opacity(0.6))
+                                .frame(width: idx % 2 == 0 ? 16 : 8, height: 6)
+                        }
+                    }
+                    .padding(.top, 4)
+                }
+                .padding(10)
+                .background(Color.white.opacity(0.03))
+                .cornerRadius(10)
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+            
+            Spacer()
+            
+            HStack(spacing: 12) {
+                Button(action: {
+                    cancelSetup()
+                }) {
+                    Text("Cancel")
+                        .font(.system(.subheadline, design: .rounded))
+                        .fontWeight(.semibold)
+                        .foregroundColor(.primary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(Color.white.opacity(0.08))
+                        .cornerRadius(8)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.white.opacity(0.12), lineWidth: 0.5)
+                        )
+                }
+                .buttonStyle(.plain)
+                .keyboardShortcut(.cancelAction)
+                
+                Button(action: {
+                    startTimer()
+                }) {
+                    Text("Start")
+                        .font(.system(.subheadline, design: .rounded))
+                        .fontWeight(.bold)
+                        .foregroundColor(.black)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(
+                            LinearGradient(
+                                colors: [Color(red: 0.2, green: 0.9, blue: 0.5), Color(red: 0.05, green: 0.7, blue: 0.35)],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                        .cornerRadius(8)
+                }
+                .buttonStyle(.plain)
+                .keyboardShortcut(.defaultAction)
+            }
+            .padding(.bottom, 4)
+            
+            Text("Enter to start • Esc to cancel")
+                .font(.system(size: 9))
+                .foregroundColor(.secondary.opacity(0.7))
+        }
+        .onAppear {
+            self.taskName = timerManager.setupTaskName
+        }
+    }
+    
+    private func cancelSetup() {
+        timerManager.isShowingSetup = false
+        timerManager.setupTodoId = nil
+    }
+    
+    private func startTimer() {
+        if isPomodoro {
+            timerManager.startPomodoro(
+                taskName: taskName,
+                focusDuration: timerManager.setupSeconds,
+                breakDuration: TimeInterval(breakMinutes * 60),
+                cycles: cycles,
+                todoId: timerManager.setupTodoId
+            )
+        } else {
+            timerManager.startTimer(
+                duration: timerManager.setupSeconds,
+                name: taskName,
+                todoId: timerManager.setupTodoId
+            )
+        }
+        timerManager.isShowingSetup = false
+        timerManager.setupTodoId = nil
+        PopupWindow.activeInstance?.orderOut(nil)
+        PopupWindow.activeInstance = nil
+    }
+    
+    private func formatTime(_ seconds: TimeInterval) -> String {
+        let mins = Int(seconds) / 60
+        let secs = Int(seconds) % 60
+        return String(format: "%02d:%02d", mins, secs)
+    }
+    
+    private func formatEndTime(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
+    }
+}
+
+struct TimerTabView: View {
+    @ObservedObject var timerManager = TimerManager.shared
+    
+    var body: some View {
+        VStack(spacing: 8) {
+            if timerManager.isShowingSetup {
+                TimerSetupView(timerManager: timerManager)
+            } else {
+                TodoListView()
+                    .frame(maxHeight: 180)
+                
+                Divider()
+                    .background(Color.white.opacity(0.08))
+                    .padding(.vertical, 2)
+                
+                ScrollView {
+                    VStack(spacing: 8) {
+                        if timerManager.activeTimers.isEmpty {
+                            StopwatchControlView(timerManager: timerManager)
+                        } else {
+                            ForEach(timerManager.activeTimers) { timer in
+                                TugTimerCard(timer: timer, timerManager: timerManager)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 4)
+                }
+            }
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
     }
 }
 

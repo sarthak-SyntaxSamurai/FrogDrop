@@ -4,23 +4,22 @@ import AppKit
 @MainActor
 class TongueOverlayWindow: NSWindow {
     private let hostingView: NSHostingView<TongueOverlayView>
+    private let screenFrame: NSRect
+    private let startPoint: NSPoint
     
-    init(statusItemFrame: NSRect, initialLength: CGFloat = 0.0) {
-        let width: CGFloat = 100
-        let height: CGFloat = 450
-        // Position window directly under the menu bar item, centered
-        let rect = NSRect(
-            x: statusItemFrame.midX - (width / 2),
-            y: statusItemFrame.minY - height + 2, // Slight overlap for continuous visual flow
-            width: width,
-            height: height
-        )
+    init(screenFrame: NSRect, startPoint: NSPoint, initialCurrentPoint: NSPoint) {
+        self.screenFrame = screenFrame
+        self.startPoint = startPoint
         
-        let overlayView = TongueOverlayView(tongueLength: initialLength)
+        let overlayView = TongueOverlayView(
+            screenFrame: screenFrame,
+            startPoint: startPoint,
+            currentPoint: initialCurrentPoint
+        )
         self.hostingView = NSHostingView(rootView: overlayView)
         
         super.init(
-            contentRect: rect,
+            contentRect: screenFrame,
             styleMask: [.borderless],
             backing: .buffered,
             defer: false
@@ -34,78 +33,106 @@ class TongueOverlayWindow: NSWindow {
         self.contentView = hostingView
     }
     
-    func updateLength(_ length: CGFloat) {
-        hostingView.rootView = TongueOverlayView(tongueLength: length)
+    func updatePoints(start: NSPoint, current: NSPoint) {
+        hostingView.rootView = TongueOverlayView(
+            screenFrame: screenFrame,
+            startPoint: start,
+            currentPoint: current
+        )
     }
 }
 
 struct TongueOverlayView: View {
-    let tongueLength: CGFloat
+    let screenFrame: NSRect
+    let startPoint: NSPoint
+    let currentPoint: NSPoint
+    
+    // Screen coordinates to SwiftUI coordinates in a fullscreen window of size `screenFrame.size`
+    private func toSwiftUI(_ point: NSPoint) -> CGPoint {
+        CGPoint(
+            x: point.x - screenFrame.minX,
+            y: screenFrame.maxY - point.y
+        )
+    }
     
     var body: some View {
-        let config = TimerDuration.fromDragDistance(tongueLength)
+        let start = toSwiftUI(startPoint)
+        let end = toSwiftUI(currentPoint)
         
-        VStack(spacing: 0) {
-            ZStack(alignment: .top) {
-                // Background reference line (optional, but a guide is nice)
-                Path { path in
-                    path.move(to: CGPoint(x: 50, y: 0))
-                    path.addLine(to: CGPoint(x: 50, y: min(tongueLength, 400)))
-                }
-                .stroke(Color.black.opacity(0.08), style: StrokeStyle(lineWidth: 1, lineCap: .round, dash: [2, 4]))
-                
-                // Tongue Stem
-                if tongueLength > 10 {
-                    Path { path in
-                        path.move(to: CGPoint(x: 50, y: 0))
-                        path.addLine(to: CGPoint(x: 50, y: tongueLength - 8))
-                    }
-                    .stroke(
-                        LinearGradient(
-                            colors: [Color(red: 1.0, green: 0.45, blue: 0.55), Color(red: 0.9, green: 0.25, blue: 0.35)],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        ),
-                        style: StrokeStyle(lineWidth: 5.5, lineCap: .round)
+        let dx = end.x - start.x
+        let dy = end.y - start.y
+        let distance = sqrt(dx*dx + dy*dy)
+        let angle = atan2(dy, dx)
+        
+        let config = TimerDuration.fromDragDistance(distance)
+        
+        ZStack {
+            // Full screen container to avoid cropping
+            Canvas { context, size in
+                // Draw tongue stem
+                if distance > 10 {
+                    var path = Path()
+                    path.move(to: start)
+                    // End point slightly short of the tip
+                    let tipOffset = 8.0
+                    let endX = start.x + (dx / distance) * (distance - tipOffset)
+                    let endY = start.y + (dy / distance) * (distance - tipOffset)
+                    path.addLine(to: CGPoint(x: endX, y: endY))
+                    
+                    let gradient = Gradient(colors: [Color(red: 1.0, green: 0.45, blue: 0.55), Color(red: 0.9, green: 0.25, blue: 0.35)])
+                    let shader = GraphicsContext.Shading.linearGradient(
+                        gradient,
+                        startPoint: start,
+                        endPoint: CGPoint(x: endX, y: endY)
+                    )
+                    
+                    let progress = min(distance / 380.0, 1.0)
+                    let dynamicWidth = 8.0 - (progress * 2.5)
+                    
+                    context.stroke(
+                        path,
+                        with: shader,
+                        style: StrokeStyle(lineWidth: dynamicWidth, lineCap: .round)
                     )
                 }
-                
-                // Tongue Tip (cleft pull handle)
-                if tongueLength > 0 {
-                    ZStack {
-                        Circle()
-                            .fill(
-                                RadialGradient(
-                                    colors: [Color(red: 1.0, green: 0.55, blue: 0.65), Color(red: 0.9, green: 0.3, blue: 0.42)],
-                                    center: .topLeading,
-                                    startRadius: 0,
-                                    endRadius: 8
-                                )
-                            )
-                            .frame(width: 10, height: 10)
-                            .offset(x: -2.5)
-                        
-                        Circle()
-                            .fill(
-                                RadialGradient(
-                                    colors: [Color(red: 1.0, green: 0.55, blue: 0.65), Color(red: 0.9, green: 0.3, blue: 0.42)],
-                                    center: .topLeading,
-                                    startRadius: 0,
-                                    endRadius: 8
-                                )
-                            )
-                            .frame(width: 10, height: 10)
-                            .offset(x: 2.5)
-                    }
-                    .frame(width: 16, height: 10)
-                    .shadow(color: Color.black.opacity(0.18), radius: 2, x: 0, y: 1.5)
-                    .position(x: 50, y: tongueLength - 2)
-                }
             }
-            .frame(height: 400)
+            .ignoresSafeArea()
+            
+            // Cleft tongue tip (rotated and placed at the end point)
+            if distance > 0 {
+                ZStack {
+                    Circle()
+                        .fill(
+                            RadialGradient(
+                                colors: [Color(red: 1.0, green: 0.55, blue: 0.65), Color(red: 0.9, green: 0.3, blue: 0.42)],
+                                center: .topLeading,
+                                startRadius: 0,
+                                endRadius: 10
+                            )
+                        )
+                        .frame(width: 12, height: 12)
+                        .offset(x: -3.0)
+                    
+                    Circle()
+                        .fill(
+                            RadialGradient(
+                                colors: [Color(red: 1.0, green: 0.55, blue: 0.65), Color(red: 0.9, green: 0.3, blue: 0.42)],
+                                center: .topLeading,
+                                startRadius: 0,
+                                endRadius: 10
+                            )
+                        )
+                        .frame(width: 12, height: 12)
+                        .offset(x: 3.0)
+                }
+                .frame(width: 19, height: 12)
+                .shadow(color: Color.black.opacity(0.18), radius: 2.5, x: 0, y: 1.5)
+                .rotationEffect(.radians(angle - .pi/2))
+                .position(end)
+            }
             
             // Timer Badge
-            if tongueLength > 15 {
+            if distance > 15 {
                 VStack(spacing: 2) {
                     Text(config.label)
                         .font(.system(.caption2, design: .rounded))
@@ -123,11 +150,10 @@ struct TongueOverlayView: View {
                         )
                 }
                 .transition(.scale.combined(with: .opacity))
+                .position(x: end.x, y: end.y + 24)
             }
-            
-            Spacer()
         }
-        .frame(width: 100, height: 450)
+        .frame(width: screenFrame.width, height: screenFrame.height)
     }
 }
 
@@ -202,3 +228,4 @@ struct VisualEffectView: NSViewRepresentable {
         nsView.blendingMode = blendingMode
     }
 }
+
