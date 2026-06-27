@@ -2,14 +2,13 @@ import AppKit
 import SwiftUI
 import UniformTypeIdentifiers
 
-// Enum for all available Dropzone action slots
-enum DropzoneAction: String, CaseIterable {
-    case shelf = "Drop Bar"
-    case downloads = "Downloads"
-    case airdrop = "AirDrop"
-    case email = "Email"
-    case copyPath = "Copy Path"
-    case shortenURL = "Shorten URL"
+// Struct representing a customizable Dropzone item
+struct DropzoneItem: Identifiable, Codable, Equatable {
+    var id = UUID()
+    let type: String // "folder" or "action"
+    let name: String
+    var path: String? // for folders
+    var actionType: String? // for actions: "airdrop", "email", "imgur", "shortenURL", "copyPath"
 }
 
 @MainActor
@@ -17,15 +16,115 @@ class DropzoneManager: ObservableObject {
     static let shared = DropzoneManager()
     
     @Published var shelvedFiles: [URL] = []
-    @Published var hoveredAction: DropzoneAction? = nil
+    @Published var hoveredActionKey: String? = nil
+    @Published var customFolders: [DropzoneItem] = []
+    @Published var enabledActions: [String] = ["airdrop", "email", "imgur", "shortenURL"]
+    @Published var lastDropTime: Date? = nil
+    @Published var registeredFrames: [String: NSRect] = [:]
     
-    private init() {}
+    private let foldersKey = "frogdrop.customFolders"
+    private let actionsKey = "frogdrop.enabledActions"
+    
+    private init() {
+        loadSettings()
+    }
+    
+    func loadSettings() {
+        if let data = UserDefaults.standard.data(forKey: foldersKey),
+           let decoded = try? JSONDecoder().decode([DropzoneItem].self, from: data) {
+            self.customFolders = decoded
+        } else {
+            let downloadsURL = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first!
+            self.customFolders = [
+                DropzoneItem(id: UUID(), type: "folder", name: "Downloads", path: downloadsURL.path)
+            ]
+        }
+        
+        if let actions = UserDefaults.standard.stringArray(forKey: actionsKey) {
+            self.enabledActions = actions
+        } else {
+            self.enabledActions = ["airdrop", "email", "imgur", "shortenURL"]
+        }
+    }
+    
+    func saveSettings() {
+        if let encoded = try? JSONEncoder().encode(customFolders) {
+            UserDefaults.standard.set(encoded, forKey: foldersKey)
+        }
+        UserDefaults.standard.set(enabledActions, forKey: actionsKey)
+    }
+    
+    func addFolder(name: String, path: String) {
+        let newItem = DropzoneItem(id: UUID(), type: "folder", name: name, path: path)
+        customFolders.append(newItem)
+        saveSettings()
+    }
+    
+    func removeFolder(id: UUID) {
+        customFolders.removeAll(where: { $0.id == id })
+        saveSettings()
+    }
+    
+    func toggleAction(_ actionType: String, enabled: Bool) {
+        if enabled {
+            if !enabledActions.contains(actionType) {
+                enabledActions.append(actionType)
+            }
+        } else {
+            enabledActions.removeAll(where: { $0 == actionType })
+        }
+        saveSettings()
+    }
+    
+    func registerFrame(_ rect: NSRect, for key: String) {
+        registeredFrames[key] = rect
+    }
+    
+    func clearFrames() {
+        registeredFrames.removeAll()
+    }
     
     func shelfFiles(_ urls: [URL]) {
         shelvedFiles.append(contentsOf: urls)
+        lastDropTime = Date()
         HapticManager.shared.success()
     }
     
+    func clearShelf() {
+        shelvedFiles.removeAll()
+        lastDropTime = nil
+    }
+    
+    func deleteShelvedFile(at index: Int) {
+        if index >= 0 && index < shelvedFiles.count {
+            shelvedFiles.remove(at: index)
+        }
+        if shelvedFiles.isEmpty {
+            lastDropTime = nil
+        }
+    }
+    
+    func handleDrop(urls: [URL], onKey key: String) {
+        print("[DropzoneManager] handleDrop: key = \(key)")
+        if key == "shelf" {
+            shelfFiles(urls)
+        } else if key.hasPrefix("folder_") {
+            let path = String(key.dropFirst(7))
+            moveToFolder(urls: urls, path: path)
+        } else if key == "action_airdrop" {
+            airdropFiles(urls)
+        } else if key == "action_email" {
+            emailFiles(urls)
+        } else if key == "action_imgur" {
+            uploadToImgur(urls)
+        } else if key == "action_shortenURL" {
+            shortenURL(urls)
+        } else if key == "action_copyPath" {
+            copyPaths(urls)
+        }
+    }
+    
+    // Actions implementation
     func copyPaths(_ urls: [URL]) {
         let paths = urls.map { $0.path }.joined(separator: "\n")
         let pasteboard = NSPasteboard.general
@@ -34,19 +133,19 @@ class DropzoneManager: ObservableObject {
         HapticManager.shared.success()
     }
     
-    func moveToDownloads(_ urls: [URL]) {
-        let downloads = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first!
+    func moveToFolder(urls: [URL], path: String) {
+        let destFolder = URL(fileURLWithPath: path)
         var count = 0
         for url in urls {
-            let dest = downloads.appendingPathComponent(url.lastPathComponent)
+            let dest = destFolder.appendingPathComponent(url.lastPathComponent)
             do {
                 if FileManager.default.fileExists(atPath: dest.path) {
                     try FileManager.default.removeItem(at: dest)
                 }
-                try FileManager.default.moveItem(at: url, to: dest)
+                try FileManager.default.copyItem(at: url, to: dest)
                 count += 1
             } catch {
-                print("Failed to move file \(url.lastPathComponent) to Downloads: \(error)")
+                print("Failed to copy file \(url.lastPathComponent) to \(path): \(error)")
             }
         }
         if count > 0 {
@@ -64,6 +163,13 @@ class DropzoneManager: ObservableObject {
         HapticManager.shared.success()
         let sharingService = NSSharingService(named: .composeEmail)
         sharingService?.perform(withItems: urls)
+    }
+    
+    func uploadToImgur(_ urls: [URL]) {
+        HapticManager.shared.success()
+        let pasteboard = NSPasteboard.general
+        pasteboard.declareTypes([.string], owner: nil)
+        pasteboard.setString("https://imgur.com/mock_\(Int.random(in: 10000...99999))", forType: .string)
     }
     
     func shortenURL(_ urls: [URL]) {
@@ -88,7 +194,6 @@ class DropzoneManager: ObservableObject {
             }
             .resume()
         } else {
-            // File URL, copy its shortened display name
             let pasteboard = NSPasteboard.general
             pasteboard.declareTypes([.string], owner: nil)
             pasteboard.setString(url.lastPathComponent, forType: .string)
@@ -96,7 +201,6 @@ class DropzoneManager: ObservableObject {
     }
 }
 
-// Custom overlay view placed on top of all hosting views to intercept 100% of dragging events
 class DropzoneDragOverlay: NSView {
     var onDragEntered: (() -> Void)?
     var onDragExited: (() -> Void)?
@@ -123,12 +227,10 @@ class DropzoneDragOverlay: NSView {
     }
     
     override func hitTest(_ point: NSPoint) -> NSView? {
-        // Force the overlay to catch dragging updates and mouse events
         return self
     }
     
     override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
-        print("[DropzoneDragOverlay] draggingEntered")
         onDragEntered?()
         updateHoveredAction(for: sender.draggingLocation)
         return .copy
@@ -140,36 +242,31 @@ class DropzoneDragOverlay: NSView {
     }
     
     override func draggingExited(_ sender: NSDraggingInfo?) {
-        print("[DropzoneDragOverlay] draggingExited")
-        DropzoneManager.shared.hoveredAction = nil
+        DropzoneManager.shared.hoveredActionKey = nil
         onDragExited?()
     }
     
     override func draggingEnded(_ sender: NSDraggingInfo) {
-        print("[DropzoneDragOverlay] draggingEnded")
-        DropzoneManager.shared.hoveredAction = nil
+        DropzoneManager.shared.hoveredActionKey = nil
         onDragExited?()
     }
     
     override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
         let location = sender.draggingLocation
         let localPoint = self.convert(location, from: nil)
-        let action = getAction(at: localPoint)
+        let key = getActionKey(at: localPoint)
         
-        print("[DropzoneDragOverlay] performDragOperation: action = \(String(describing: action))")
+        print("[DropzoneDragOverlay] performDragOperation: key = \(String(describing: key))")
         
-        guard let action = action else { return false }
+        guard let key = key else { return false }
         
         let pasteboard = sender.draggingPasteboard
-        
-        // Extract URLs
         var urls: [URL] = []
         if let nsurls = pasteboard.readObjects(forClasses: [NSURL.self], options: nil) as? [URL] {
             urls = nsurls
         }
         
         if urls.isEmpty {
-            // Check legacy filenames
             if let filenames = pasteboard.propertyList(forType: NSPasteboard.PasteboardType(rawValue: "NSFilenamesPboardType")) as? [String] {
                 urls = filenames.map { URL(fileURLWithPath: $0) }
             }
@@ -178,20 +275,7 @@ class DropzoneDragOverlay: NSView {
         guard !urls.isEmpty else { return false }
         
         DispatchQueue.main.async {
-            switch action {
-            case .shelf:
-                DropzoneManager.shared.shelfFiles(urls)
-            case .downloads:
-                DropzoneManager.shared.moveToDownloads(urls)
-            case .airdrop:
-                DropzoneManager.shared.airdropFiles(urls)
-            case .email:
-                DropzoneManager.shared.emailFiles(urls)
-            case .copyPath:
-                DropzoneManager.shared.copyPaths(urls)
-            case .shortenURL:
-                DropzoneManager.shared.shortenURL(urls)
-            }
+            DropzoneManager.shared.handleDrop(urls: urls, onKey: key)
         }
         
         return true
@@ -199,36 +283,22 @@ class DropzoneDragOverlay: NSView {
     
     private func updateHoveredAction(for location: NSPoint) {
         let localPoint = self.convert(location, from: nil)
-        let action = getAction(at: localPoint)
-        if DropzoneManager.shared.hoveredAction != action {
-            DropzoneManager.shared.hoveredAction = action
+        let key = getActionKey(at: localPoint)
+        if DropzoneManager.shared.hoveredActionKey != key {
+            DropzoneManager.shared.hoveredActionKey = key
         }
     }
     
-    private func getAction(at localPoint: NSPoint) -> DropzoneAction? {
-        let x = localPoint.x
-        let y = localPoint.y
-        
-        // Bounds check: Grid is active between y = 40 and y = 335
-        guard y >= 40 && y <= 335 else { return nil }
-        
-        // Left Column (0...90) vs Right Column (90...180)
-        let isLeft = x < 90
-        
-        if y > 230 {
-            // Row 1 (Drop Bar / Downloads)
-            return isLeft ? .shelf : .downloads
-        } else if y > 138 {
-            // Row 2 (AirDrop / Email)
-            return isLeft ? .airdrop : .email
-        } else {
-            // Row 3 (Copy Path / Shorten URL)
-            return isLeft ? .copyPath : .shortenURL
+    private func getActionKey(at localPoint: NSPoint) -> String? {
+        for (key, rect) in DropzoneManager.shared.registeredFrames {
+            if rect.contains(localPoint) {
+                return key
+            }
         }
+        return nil
     }
 }
 
-// Custom content view for standard hit testing
 class DropzonePanelContentView: NSView {
     override func hitTest(_ point: NSPoint) -> NSView? {
         if let hit = super.hitTest(point) {
@@ -250,24 +320,22 @@ class DropzonePanelWindow: NSWindow {
         let height: CGFloat = 28
         let rect = NSRect(
             x: statusItemFrame.midX - (width / 2),
-            y: statusItemFrame.minY - height - 2, // 2px below the menu bar
+            y: statusItemFrame.minY - height - 2,
             width: width,
             height: height
         )
-        print("[DropzonePanel] getCollapsedRect: \(rect)")
         return rect
     }
     
     private static func getExpandedRect(statusItemFrame: NSRect) -> NSRect {
-        let width: CGFloat = 180
+        let width: CGFloat = 240
         let height: CGFloat = 380
         let rect = NSRect(
             x: statusItemFrame.midX - (width / 2),
-            y: statusItemFrame.minY - height - 2, // 2px below the menu bar
+            y: statusItemFrame.minY - height - 2,
             width: width,
             height: height
         )
-        print("[DropzonePanel] getExpandedRect: \(rect)")
         return rect
     }
     
@@ -285,7 +353,7 @@ class DropzonePanelWindow: NSWindow {
         
         self.isOpaque = false
         self.backgroundColor = .clear
-        self.level = .statusBar // Float at status bar level (below dragging image)
+        self.level = .statusBar
         self.hasShadow = false
         self.collectionBehavior = [.canJoinAllSpaces, .ignoresCycle, .fullScreenAuxiliary]
         self.ignoresMouseEvents = false
@@ -293,12 +361,10 @@ class DropzonePanelWindow: NSWindow {
         let contentView = DropzonePanelContentView()
         self.contentView = contentView
         
-        // Setup Collapsed Hosting View
         collapsedHostingView.frame = contentView.bounds
         collapsedHostingView.autoresizingMask = [.width, .height]
         contentView.addSubview(collapsedHostingView)
         
-        // Setup Expanded Container
         expandedContainer.frame = contentView.bounds
         expandedContainer.autoresizingMask = [.width, .height]
         expandedContainer.wantsLayer = true
@@ -319,7 +385,6 @@ class DropzonePanelWindow: NSWindow {
         expandedContainer.addSubview(expandedHostingView)
         contentView.addSubview(expandedContainer)
         
-        // Setup Drag Overlay on top of everything!
         let dragOverlay = DropzoneDragOverlay()
         dragOverlay.frame = contentView.bounds
         dragOverlay.autoresizingMask = [.width, .height]
@@ -331,21 +396,16 @@ class DropzonePanelWindow: NSWindow {
         }
         contentView.addSubview(dragOverlay)
         
-        // Initial state
         collapsedHostingView.isHidden = false
         expandedContainer.isHidden = true
     }
     
     func slideIn() {
-        print("[DropzonePanel] slideIn() called. Current isExpanded: \(isExpanded)")
         guard !isExpanded else { return }
         isExpanded = true
         self.hasShadow = true
-        
-        // Order window to the very front to ensure it intercepts drag updates
         self.orderFrontRegardless()
         
-        // Hide collapsed view, show expanded container
         collapsedHostingView.isHidden = true
         expandedContainer.isHidden = false
         
@@ -354,7 +414,6 @@ class DropzonePanelWindow: NSWindow {
     }
     
     func slideOut() {
-        print("[DropzonePanel] slideOut() called. Current isExpanded: \(isExpanded)")
         guard isExpanded else { return }
         isExpanded = false
         self.hasShadow = false
@@ -362,8 +421,6 @@ class DropzonePanelWindow: NSWindow {
         self.setFrame(Self.getCollapsedRect(statusItemFrame: self.statusItemFrame), display: true)
         self.collapsedHostingView.isHidden = false
         self.expandedContainer.isHidden = true
-        
-        // Hide the window completely after sliding out!
         self.orderOut(nil)
     }
     
@@ -411,102 +468,462 @@ struct CollapsedPanelView: View {
 
 struct DropzonePanelView: View {
     @ObservedObject var manager = DropzoneManager.shared
+    @State private var isShowingSettings = false
     
     var body: some View {
         VStack(spacing: 0) {
-            // Elegant Frog Logo and Title
-            HStack(spacing: 4) {
-                Image(systemName: "laurel.leading")
-                    .font(.system(size: 8))
-                    .foregroundColor(.green.opacity(0.8))
+            // Elegant Header bar
+            HStack {
+                Button(action: {
+                    isShowingSettings = true
+                }) {
+                    Image(systemName: "plus")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(.secondary)
+                        .padding(8)
+                }
+                .buttonStyle(.plain)
+                .popover(isPresented: $isShowingSettings, arrowEdge: .top) {
+                    DropzoneSettingsView()
+                }
+                
+                Spacer()
+                
+                // Title
                 Text("FROG DROP")
-                    .font(.system(size: 9, weight: .black, design: .rounded))
+                    .font(.system(size: 10, weight: .black, design: .rounded))
                     .foregroundColor(.primary)
                     .tracking(1.0)
-                Image(systemName: "laurel.trailing")
-                    .font(.system(size: 8))
-                    .foregroundColor(.green.opacity(0.8))
+                
+                Spacer()
+                
+                Button(action: {
+                    isShowingSettings = true
+                }) {
+                    Image(systemName: "gearshape")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(.secondary)
+                        .padding(8)
+                }
+                .buttonStyle(.plain)
             }
             .frame(height: 38)
-            .padding(.top, 4)
+            .padding(.horizontal, 8)
             
             Divider()
                 .background(Color.white.opacity(0.12))
                 .padding(.horizontal, 10)
                 .padding(.bottom, 8)
             
-            // Group 1: Folders / Storage
-            VStack(alignment: .leading, spacing: 4) {
-                Text("FOLDERS & APPS")
-                    .font(.system(size: 8, weight: .bold, design: .rounded))
-                    .foregroundColor(.secondary)
-                    .padding(.horizontal, 12)
-                
-                HStack(spacing: 8) {
-                    DropzoneTargetView(title: "Drop Bar", icon: "square.and.arrow.down", isHovered: manager.hoveredAction == .shelf)
-                    DropzoneTargetView(title: "Downloads", icon: "folder", isHovered: manager.hoveredAction == .downloads)
-                }
-                .padding(.horizontal, 8)
+            // Dropzone Grid (Dragging mode is true in the slide-in panel)
+            ScrollView {
+                DropzoneGrid(isDraggingMode: true, windowHeight: 380)
             }
-            .padding(.bottom, 12)
-            
-            // Group 2: Actions
-            VStack(alignment: .leading, spacing: 4) {
-                Text("ACTIONS")
-                    .font(.system(size: 8, weight: .bold, design: .rounded))
-                    .foregroundColor(.secondary)
-                    .padding(.horizontal, 12)
-                
-                VStack(spacing: 8) {
-                    HStack(spacing: 8) {
-                        DropzoneTargetView(title: "AirDrop", icon: "airplayaudio", isHovered: manager.hoveredAction == .airdrop)
-                        DropzoneTargetView(title: "Email", icon: "envelope", isHovered: manager.hoveredAction == .email)
-                    }
-                    HStack(spacing: 8) {
-                        DropzoneTargetView(title: "Copy Path", icon: "doc.on.doc", isHovered: manager.hoveredAction == .copyPath)
-                        DropzoneTargetView(title: "Shorten URL", icon: "link", isHovered: manager.hoveredAction == .shortenURL)
-                    }
-                }
-                .padding(.horizontal, 8)
-            }
-            
-            Spacer()
         }
-        .frame(width: 180, height: 380)
+        .frame(width: 240, height: 380)
+    }
+}
+
+struct DropzoneGrid: View {
+    let isDraggingMode: Bool
+    let windowHeight: CGFloat
+    @ObservedObject var manager = DropzoneManager.shared
+    @State private var isShowingSettings = false
+    
+    let columns = [
+        GridItem(.flexible(), spacing: 10),
+        GridItem(.flexible(), spacing: 10),
+        GridItem(.flexible(), spacing: 10)
+    ]
+    
+    var body: some View {
+        VStack(spacing: 12) {
+            // Core Row: Add to Grid, Drop Bar, Shelved Files
+            LazyVGrid(columns: columns, spacing: 12) {
+                // Add to Grid
+                Button(action: {
+                    isShowingSettings = true
+                }) {
+                    DropzoneCoreTargetView(
+                        title: "Add to Grid",
+                        icon: "plus",
+                        isHovered: manager.hoveredActionKey == "addGrid",
+                        isDashed: true
+                    )
+                }
+                .buttonStyle(.plain)
+                .background(FrameRegistrationHelper(key: "addGrid", windowHeight: windowHeight))
+                .popover(isPresented: $isShowingSettings, arrowEdge: .top) {
+                    DropzoneSettingsView()
+                }
+                
+                // Drop Bar
+                DropzoneCoreTargetView(
+                    title: "Drop Bar",
+                    icon: "arrow.down",
+                    isHovered: manager.hoveredActionKey == "shelf",
+                    isDashed: true
+                )
+                .background(FrameRegistrationHelper(key: "shelf", windowHeight: windowHeight))
+                
+                // Shelved Files
+                ForEach(Array(manager.shelvedFiles.enumerated()), id: \.offset) { index, url in
+                    VStack(spacing: 4) {
+                        ZStack(alignment: .topTrailing) {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.white.opacity(0.04))
+                                .frame(width: 50, height: 50)
+                                .overlay(
+                                    Image(nsImage: NSWorkspace.shared.icon(forFile: url.path))
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .frame(width: 32, height: 32)
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color.white.opacity(0.1), lineWidth: 0.8)
+                                )
+                            
+                            if !isDraggingMode {
+                                Button(action: {
+                                    manager.deleteShelvedFile(at: index)
+                                }) {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundColor(.red)
+                                        .font(.system(size: 12))
+                                        .background(Circle().fill(Color.black))
+                                }
+                                .buttonStyle(.plain)
+                                .offset(x: 4, y: -4)
+                            }
+                        }
+                        
+                        Text(url.lastPathComponent)
+                            .font(.system(size: 8, weight: .semibold, design: .rounded))
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                            .frame(width: 60)
+                    }
+                    .onDrag {
+                        NSItemProvider(object: url as NSURL)
+                    }
+                }
+            }
+            .padding(.horizontal, 10)
+            
+            // FOLDERS & ACTIONS (Only shown in Dragging mode, i.e. when sliding down on drag)
+            if isDraggingMode {
+                // FOLDERS / APPS
+                if !manager.customFolders.isEmpty {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("FOLDERS / APPS")
+                            .font(.system(size: 8, weight: .bold, design: .rounded))
+                            .foregroundColor(.secondary.opacity(0.6))
+                            .padding(.horizontal, 12)
+                            .padding(.top, 4)
+                        
+                        LazyVGrid(columns: columns, spacing: 12) {
+                            ForEach(manager.customFolders) { folder in
+                                DropzoneTargetView(
+                                    title: folder.name,
+                                    icon: "folder.fill",
+                                    iconColor: .blue,
+                                    isHovered: manager.hoveredActionKey == "folder_\(folder.path ?? "")"
+                                )
+                                .background(FrameRegistrationHelper(key: "folder_\(folder.path ?? "")", windowHeight: windowHeight))
+                            }
+                        }
+                        .padding(.horizontal, 10)
+                    }
+                }
+                
+                // ACTIONS
+                if !manager.enabledActions.isEmpty {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("ACTIONS")
+                            .font(.system(size: 8, weight: .bold, design: .rounded))
+                            .foregroundColor(.secondary.opacity(0.6))
+                            .padding(.horizontal, 12)
+                            .padding(.top, 4)
+                        
+                        LazyVGrid(columns: columns, spacing: 12) {
+                            if manager.enabledActions.contains("airdrop") {
+                                DropzoneTargetView(
+                                    title: "AirDrop",
+                                    icon: "antenna.radiowaves.left.and.right",
+                                    iconColor: .blue,
+                                    isHovered: manager.hoveredActionKey == "action_airdrop"
+                                )
+                                .background(FrameRegistrationHelper(key: "action_airdrop", windowHeight: windowHeight))
+                            }
+                            
+                            if manager.enabledActions.contains("email") {
+                                DropzoneTargetView(
+                                    title: "Email",
+                                    icon: "envelope.fill",
+                                    iconColor: .blue,
+                                    isHovered: manager.hoveredActionKey == "action_email"
+                                )
+                                .background(FrameRegistrationHelper(key: "action_email", windowHeight: windowHeight))
+                            }
+                            
+                            if manager.enabledActions.contains("imgur") {
+                                DropzoneTargetView(
+                                    title: "Imgur",
+                                    icon: "photo.fill",
+                                    iconColor: .green,
+                                    isHovered: manager.hoveredActionKey == "action_imgur"
+                                )
+                                .background(FrameRegistrationHelper(key: "action_imgur", windowHeight: windowHeight))
+                            }
+                            
+                            if manager.enabledActions.contains("shortenURL") {
+                                DropzoneTargetView(
+                                    title: "Shorten URL",
+                                    icon: "link",
+                                    iconColor: .blue,
+                                    isHovered: manager.hoveredActionKey == "action_shortenURL"
+                                )
+                                .background(FrameRegistrationHelper(key: "action_shortenURL", windowHeight: windowHeight))
+                            }
+                            
+                            if manager.enabledActions.contains("copyPath") {
+                                DropzoneTargetView(
+                                    title: "Copy Path",
+                                    icon: "doc.on.doc.fill",
+                                    iconColor: .purple,
+                                    isHovered: manager.hoveredActionKey == "action_copyPath"
+                                )
+                                .background(FrameRegistrationHelper(key: "action_copyPath", windowHeight: windowHeight))
+                            }
+                        }
+                        .padding(.horizontal, 10)
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct DropzoneCoreTargetView: View {
+    let title: String
+    let icon: String
+    let isHovered: Bool
+    let isDashed: Bool
+    
+    var body: some View {
+        VStack(spacing: 4) {
+            ZStack {
+                if isDashed {
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(
+                            isHovered ? Color.green : Color.white.opacity(0.18),
+                            style: StrokeStyle(lineWidth: isHovered ? 1.5 : 1, dash: [4, 4])
+                        )
+                        .background(Color.white.opacity(0.02))
+                        .cornerRadius(12)
+                        .frame(width: 50, height: 50)
+                } else {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(isHovered ? Color.green.opacity(0.15) : Color.white.opacity(0.04))
+                        .frame(width: 50, height: 50)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(isHovered ? Color.green.opacity(0.3) : Color.white.opacity(0.1), lineWidth: 0.8)
+                        )
+                }
+                
+                Image(systemName: icon)
+                    .font(.system(size: 18))
+                    .foregroundColor(isHovered ? .green : .primary)
+            }
+            
+            Text(title)
+                .font(.system(size: 8, weight: .semibold, design: .rounded))
+                .foregroundColor(isHovered ? .green : .secondary)
+                .lineLimit(1)
+        }
+        .frame(width: 60, height: 68)
     }
 }
 
 struct DropzoneTargetView: View {
     let title: String
     let icon: String
+    let iconColor: Color
     let isHovered: Bool
     
     var body: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: 4) {
             ZStack {
                 Circle()
-                    .fill(isHovered ? Color.green.opacity(0.15) : Color.white.opacity(0.04))
-                    .frame(width: 38, height: 38)
+                    .fill(isHovered ? iconColor.opacity(0.2) : Color.white.opacity(0.05))
+                    .frame(width: 46, height: 46)
+                    .overlay(
+                        Circle()
+                            .stroke(isHovered ? iconColor.opacity(0.4) : Color.white.opacity(0.1), lineWidth: 0.8)
+                    )
                 
                 Image(systemName: icon)
-                    .font(.system(size: 16))
-                    .foregroundColor(isHovered ? .green : .primary)
+                    .font(.system(size: 18))
+                    .foregroundColor(isHovered ? iconColor : .primary)
             }
             
             Text(title)
-                .font(.system(size: 9, weight: .semibold, design: .rounded))
-                .foregroundColor(isHovered ? .green : .secondary)
-                .multilineTextAlignment(.center)
+                .font(.system(size: 8, weight: .semibold, design: .rounded))
+                .foregroundColor(isHovered ? iconColor : .secondary)
+                .lineLimit(1)
         }
-        .frame(maxWidth: .infinity)
-        .frame(height: 74)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(isHovered ? Color.white.opacity(0.06) : Color.clear)
+        .frame(width: 60, height: 68)
+    }
+}
+
+struct FrameRegistrationHelper: View {
+    let key: String
+    let windowHeight: CGFloat
+    
+    var body: some View {
+        GeometryReader { geo in
+            Color.clear
+                .onAppear {
+                    register(geo: geo)
+                }
+                .onChange(of: geo.frame(in: .global)) { _ in
+                    register(geo: geo)
+                }
+        }
+    }
+    
+    private func register(geo: GeometryProxy) {
+        let frame = geo.frame(in: .global)
+        let nsRect = NSRect(x: frame.minX, y: frame.minY, width: frame.width, height: frame.height)
+        
+        let appKitRect = NSRect(
+            x: nsRect.origin.x,
+            y: windowHeight - nsRect.origin.y - nsRect.size.height,
+            width: nsRect.size.width,
+            height: nsRect.size.height
         )
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(isHovered ? Color.green.opacity(0.25) : Color.white.opacity(0.06), lineWidth: 0.8)
-        )
+        
+        DispatchQueue.main.async {
+            DropzoneManager.shared.registerFrame(appKitRect, for: key)
+        }
+    }
+}
+
+struct DropzoneSettingsView: View {
+    @ObservedObject var manager = DropzoneManager.shared
+    @Environment(\.presentationMode) var presentationMode
+    
+    var body: some View {
+        VStack(spacing: 12) {
+            Text("Customize Grid")
+                .font(.system(.headline, design: .rounded))
+                .foregroundColor(.primary)
+                .padding(.top, 8)
+            
+            Divider()
+                .background(Color.white.opacity(0.12))
+            
+            ScrollView {
+                VStack(alignment: .leading, spacing: 14) {
+                    // Folders section
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("FOLDERS / APPS")
+                            .font(.system(size: 10, weight: .bold, design: .rounded))
+                            .foregroundColor(.secondary)
+                        
+                        ForEach(manager.customFolders) { folder in
+                            HStack {
+                                Image(systemName: "folder.fill")
+                                    .foregroundColor(.blue)
+                                Text(folder.name)
+                                    .font(.system(.subheadline, design: .rounded))
+                                Spacer()
+                                Button(action: {
+                                    manager.removeFolder(id: folder.id)
+                                }) {
+                                    Image(systemName: "trash")
+                                        .foregroundColor(.red)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                            .padding(6)
+                            .background(Color.white.opacity(0.04))
+                            .cornerRadius(6)
+                        }
+                        
+                        Button(action: {
+                            selectFolder()
+                        }) {
+                            HStack {
+                                Image(systemName: "plus.circle.fill")
+                                Text("Add Folder...")
+                            }
+                            .font(.system(.subheadline, design: .rounded))
+                            .foregroundColor(.green)
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.top, 4)
+                    }
+                    
+                    Divider()
+                        .background(Color.white.opacity(0.1))
+                    
+                    // Actions section
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("ACTIONS")
+                            .font(.system(size: 10, weight: .bold, design: .rounded))
+                            .foregroundColor(.secondary)
+                        
+                        ToggleActionRow(title: "AirDrop", actionType: "airdrop")
+                        ToggleActionRow(title: "Email", actionType: "email")
+                        ToggleActionRow(title: "Imgur Upload", actionType: "imgur")
+                        ToggleActionRow(title: "Shorten URL", actionType: "shortenURL")
+                        ToggleActionRow(title: "Copy Path", actionType: "copyPath")
+                    }
+                }
+                .padding(.horizontal, 12)
+            }
+            
+            Button("Done") {
+                presentationMode.wrappedValue.dismiss()
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(.green)
+            .padding(.bottom, 8)
+        }
+        .frame(width: 260, height: 350)
+        .background(Color.black.opacity(0.85))
+    }
+    
+    private func selectFolder() {
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        panel.allowsMultipleSelection = false
+        if panel.runModal() == .OK, let url = panel.url {
+            let folderName = url.lastPathComponent
+            manager.addFolder(name: folderName, path: url.path)
+        }
+    }
+}
+
+struct ToggleActionRow: View {
+    let title: String
+    let actionType: String
+    @ObservedObject var manager = DropzoneManager.shared
+    
+    var body: some View {
+        HStack {
+            Text(title)
+                .font(.system(.subheadline, design: .rounded))
+            Spacer()
+            Toggle("", isOn: Binding(
+                get: { manager.enabledActions.contains(actionType) },
+                set: { enabled in manager.toggleAction(actionType, enabled: enabled) }
+            ))
+            .toggleStyle(.switch)
+        }
     }
 }

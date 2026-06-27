@@ -213,7 +213,17 @@ struct PopupView: View {
         case dropzone
     }
     
-    @State private var activeTab: Tab = TimerManager.shared.state != .idle ? .timer : .clipboard
+    @State private var activeTab: Tab = {
+        if TimerManager.shared.state != .idle {
+            return .timer
+        } else if let lastDrop = DropzoneManager.shared.lastDropTime,
+                  Date().timeIntervalSince(lastDrop) < 5 * 60,
+                  !DropzoneManager.shared.shelvedFiles.isEmpty {
+            return .dropzone
+        } else {
+            return .clipboard
+        }
+    }()
     @ObservedObject var timerManager = TimerManager.shared
     @ObservedObject var clipboardManager = ClipboardManager.shared
     @ObservedObject var dropzoneManager = DropzoneManager.shared
@@ -221,21 +231,82 @@ struct PopupView: View {
     // Clipboard Search
     @State private var clipboardSearchQuery = ""
     
+    private func offsetForTab(_ tab: Tab, in totalWidth: CGFloat) -> CGFloat {
+        let buttonWidth = (totalWidth - 8) / 3
+        switch tab {
+        case .timer:
+            return 3
+        case .clipboard:
+            return 3 + buttonWidth + 2
+        case .dropzone:
+            return 3 + 2 * (buttonWidth + 2)
+        }
+    }
+    
+    private func switchToNextTab() {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+            switch activeTab {
+            case .timer:
+                activeTab = .clipboard
+            case .clipboard:
+                activeTab = .dropzone
+            case .dropzone:
+                break
+            }
+        }
+        HapticManager.shared.tick()
+    }
+    
+    private func switchToPrevTab() {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+            switch activeTab {
+            case .timer:
+                break
+            case .clipboard:
+                activeTab = .timer
+            case .dropzone:
+                activeTab = .clipboard
+            }
+        }
+        HapticManager.shared.tick()
+    }
+    
     var body: some View {
         VStack(spacing: 0) {
             // Header Tab Bar
             HStack(spacing: 2) {
                 TabButton(title: "Timer", icon: "timer", isActive: activeTab == .timer) {
-                    activeTab = .timer
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                        activeTab = .timer
+                    }
                 }
                 TabButton(title: "Clipboard", icon: "paperclip", isActive: activeTab == .clipboard) {
-                    activeTab = .clipboard
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                        activeTab = .clipboard
+                    }
                 }
                 TabButton(title: "Dropzone", icon: "square.and.arrow.down", isActive: activeTab == .dropzone) {
-                    activeTab = .dropzone
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                        activeTab = .dropzone
+                    }
                 }
             }
             .padding(3)
+            .background(
+                GeometryReader { tabGeo in
+                    ZStack(alignment: .leading) {
+                        RoundedRectangle(cornerRadius: 6)
+                            .fill(Color.white.opacity(0.08))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.white.opacity(0.12), lineWidth: 0.5)
+                            )
+                            .shadow(color: Color.black.opacity(0.15), radius: 2, x: 0, y: 1)
+                            .frame(width: (tabGeo.size.width - 8) / 3, height: tabGeo.size.height - 6)
+                            .offset(x: offsetForTab(activeTab, in: tabGeo.size.width))
+                    }
+                }
+            )
             .background(Color.white.opacity(0.03))
             .cornerRadius(8)
             .overlay(
@@ -250,7 +321,7 @@ struct PopupView: View {
                 .padding(.vertical, 8)
             
             // Tab Contents
-            Group {
+            ZStack {
                 switch activeTab {
                 case .timer:
                     TimerTabView(timerManager: timerManager)
@@ -261,6 +332,23 @@ struct PopupView: View {
                 }
             }
             .frame(maxHeight: .infinity)
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 15)
+                    .onEnded { gesture in
+                        let threshold: CGFloat = 40
+                        let xDist = abs(gesture.translation.width)
+                        let yDist = abs(gesture.translation.height)
+                        
+                        guard xDist > yDist * 1.5 else { return }
+                        
+                        if gesture.translation.width < -threshold {
+                            switchToNextTab()
+                        } else if gesture.translation.width > threshold {
+                            switchToPrevTab()
+                        }
+                    }
+            )
             
             // Footer Info
             HStack {
@@ -346,15 +434,7 @@ struct TabButton: View {
         .foregroundColor(isActive ? Color(red: 0.15, green: 0.85, blue: 0.45) : (isHovered ? .primary : .secondary))
         .frame(maxWidth: .infinity)
         .padding(.vertical, 6)
-        .background(
-            RoundedRectangle(cornerRadius: 6)
-                .fill(isActive ? Color.white.opacity(0.08) : Color.clear)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 6)
-                .stroke(isActive ? Color.white.opacity(0.12) : Color.clear, lineWidth: 0.5)
-        )
-        .shadow(color: isActive ? Color.black.opacity(0.15) : Color.clear, radius: 2, x: 0, y: 1)
+        .background(Color.clear)
         .contentShape(Rectangle())
         .onTapGesture {
             HapticManager.shared.click()
@@ -1254,6 +1334,11 @@ struct ClipboardRow: View {
     let onCopy: () -> Void
     let onDelete: () -> Void
     @State private var isHovering = false
+    @State private var hoverWorkItem: DispatchWorkItem? = nil
+    
+    private var isTruncated: Bool {
+        item.text.count > 38 || item.text.contains("\n") || item.text.contains("\r")
+    }
     
     private var displayPreviewText: String {
         item.text
@@ -1325,16 +1410,30 @@ struct ClipboardRow: View {
                 withAnimation(.spring(response: 0.25, dampingFraction: 0.7)) {
                     isHovering = hovering
                 }
+                
+                hoverWorkItem?.cancel()
+                
                 if hovering {
-                    let frame = geometry.frame(in: .global)
-                    let midY = frame.midY
-                    PopupWindow.activeInstance?.showPreview(for: item, atRowMidY: midY)
+                    guard isTruncated else { return }
+                    
+                    let workItem = DispatchWorkItem {
+                        if isHovering {
+                            let frame = geometry.frame(in: .global)
+                            let midY = frame.midY
+                            PopupWindow.activeInstance?.showPreview(for: item, atRowMidY: midY)
+                        }
+                    }
+                    hoverWorkItem = workItem
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.8, execute: workItem)
                 } else {
+                    hoverWorkItem = nil
                     PopupWindow.activeInstance?.hidePreview()
                 }
             }
             .onTapGesture {
                 onCopy()
+                hoverWorkItem?.cancel()
+                hoverWorkItem = nil
                 PopupWindow.activeInstance?.hidePreview()
                 PopupWindow.activeInstance?.orderOut(nil)
                 PopupWindow.activeInstance = nil
@@ -1353,41 +1452,78 @@ struct ClipboardRow: View {
 // ==================== DROPZONE TAB ====================
 struct DropzoneTabView: View {
     @ObservedObject var dropzoneManager = DropzoneManager.shared
+    @State private var isShowingSettings = false
     @State private var isTargeted = false
     
     var body: some View {
-        VStack(spacing: 12) {
-            // Drop target slot
+        VStack(spacing: 0) {
+            // Elegant Header bar
+            HStack {
+                Button(action: {
+                    isShowingSettings = true
+                }) {
+                    Image(systemName: "plus")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(.secondary)
+                        .padding(8)
+                }
+                .buttonStyle(.plain)
+                .popover(isPresented: $isShowingSettings, arrowEdge: .top) {
+                    DropzoneSettingsView()
+                }
+                
+                Spacer()
+                
+                // Title
+                Text("FROG DROP")
+                    .font(.system(size: 10, weight: .black, design: .rounded))
+                    .foregroundColor(.primary)
+                    .tracking(1.0)
+                
+                Spacer()
+                
+                Button(action: {
+                    isShowingSettings = true
+                }) {
+                    Image(systemName: "gearshape")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(.secondary)
+                        .padding(8)
+                }
+                .buttonStyle(.plain)
+            }
+            .frame(height: 38)
+            .padding(.horizontal, 8)
+            
+            Divider()
+                .background(Color.white.opacity(0.12))
+                .padding(.horizontal, 10)
+                .padding(.bottom, 8)
+            
+            // Drop target background area
             VStack {
                 ZStack {
                     RoundedRectangle(cornerRadius: 12)
                         .stroke(
-                            isTargeted ? Color.green : Color.white.opacity(0.15),
-                            style: StrokeStyle(lineWidth: isTargeted ? 2 : 1, dash: [4, 4])
+                            isTargeted ? Color.green : Color.white.opacity(0.12),
+                            style: StrokeStyle(lineWidth: isTargeted ? 1.5 : 1, dash: [4, 4])
                         )
-                        .background(isTargeted ? Color.green.opacity(0.05) : Color.black.opacity(0.08))
+                        .background(isTargeted ? Color.green.opacity(0.04) : Color.black.opacity(0.08))
                         .cornerRadius(12)
                     
-                    VStack(spacing: 6) {
+                    VStack(spacing: 4) {
                         Image(systemName: "arrow.down.doc")
-                            .font(.system(size: 24))
+                            .font(.system(size: 18))
                             .foregroundColor(isTargeted ? .green : .secondary)
-                        
-                        Text("Drag files here to store")
-                            .font(.system(.subheadline, design: .rounded))
-                            .fontWeight(.medium)
-                            .foregroundColor(isTargeted ? .green : .primary)
-                        
-                        if !dropzoneManager.shelvedFiles.isEmpty {
-                            Text("\(dropzoneManager.shelvedFiles.count) shelved files")
-                                .font(.system(.caption, design: .rounded))
-                                .foregroundColor(.green)
-                        }
+                        Text(isTargeted ? "Drop files here" : "Drag files here to store")
+                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .foregroundColor(isTargeted ? .green : .secondary)
                     }
                 }
-                .frame(height: 110)
+                .frame(height: 70)
+                .padding(.horizontal, 10)
+                .padding(.bottom, 12)
                 .onDrop(of: [.fileURL], isTargeted: $isTargeted) { providers in
-                    // Retrieve URL representation from providers
                     let fileURLType = UTType.fileURL.identifier
                     for provider in providers {
                         if provider.hasItemConformingToTypeIdentifier(fileURLType) {
@@ -1402,132 +1538,12 @@ struct DropzoneTabView: View {
                     }
                     return true
                 }
-            }
-            .padding(.horizontal, 14)
-            
-            // Shelved items list (if any) or Actions list
-            if !dropzoneManager.shelvedFiles.isEmpty {
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack {
-                        Text("Shelved Files")
-                            .font(.system(.caption, design: .rounded))
-                            .fontWeight(.bold)
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Button(action: {
-                            dropzoneManager.shelvedFiles.removeAll()
-                            HapticManager.shared.click()
-                        }) {
-                            Text("Clear")
-                                .font(.system(size: 10, design: .rounded))
-                                .foregroundColor(.red.opacity(0.8))
-                        }
-                        .buttonStyle(.plain)
-                    }
-                    .padding(.horizontal, 14)
-                    
-                    ScrollView {
-                        VStack(spacing: 4) {
-                            ForEach(dropzoneManager.shelvedFiles, id: \.self) { url in
-                                ShelvedFileRow(url: url) {
-                                    // Remove file
-                                    dropzoneManager.shelvedFiles.removeAll { $0 == url }
-                                }
-                            }
-                        }
-                        .padding(.horizontal, 14)
-                    }
-                }
-            } else {
-                // Dropzone Actions Grid
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Actions Grid")
-                        .font(.system(.caption, design: .rounded))
-                        .fontWeight(.bold)
-                        .foregroundColor(.secondary)
-                        .padding(.horizontal, 14)
-                    
-                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
-                        ActionCard(title: "Downloads", subtitle: "Move items to Downloads", icon: "folder")
-                        ActionCard(title: "AirDrop", subtitle: "Share files quickly", icon: "airplayaudio")
-                        ActionCard(title: "Copy Path", subtitle: "Copy raw path string", icon: "doc.on.doc")
-                        ActionCard(title: "Drop Bar", subtitle: "Saves to temp bar", icon: "square.and.arrow.down")
-                    }
-                    .padding(.horizontal, 14)
+                
+                // Active grid - in idle/normal mode, we set isDraggingMode = false
+                ScrollView {
+                    DropzoneGrid(isDraggingMode: false, windowHeight: 460)
                 }
             }
-            Spacer()
         }
-        .padding(.vertical, 8)
-    }
-}
-
-struct ShelvedFileRow: View {
-    let url: URL
-    let onRemove: () -> Void
-    @State private var isHovering = false
-    
-    var body: some View {
-        HStack(spacing: 8) {
-            Image(nsImage: NSWorkspace.shared.icon(forFile: url.path))
-                .resizable()
-                .frame(width: 16, height: 16)
-            
-            Text(url.lastPathComponent)
-                .font(.system(size: 12, design: .rounded))
-                .foregroundColor(.primary)
-                .lineLimit(1)
-            
-            Spacer()
-            
-            Button(action: onRemove) {
-                Image(systemName: "xmark.circle.fill")
-                    .foregroundColor(.secondary)
-            }
-            .buttonStyle(.plain)
-        }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 6)
-        .background(Color.white.opacity(isHovering ? 0.08 : 0.03))
-        .cornerRadius(6)
-        .onHover { hovering in
-            isHovering = hovering
-        }
-        .onDrag {
-            // Drag out of Dropzone to move elsewhere!
-            return NSItemProvider(object: url as NSURL)
-        }
-    }
-}
-
-struct ActionCard: View {
-    let title: String
-    let subtitle: String
-    let icon: String
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                Image(systemName: icon)
-                    .font(.system(size: 16))
-                    .foregroundColor(.green)
-                Spacer()
-            }
-            Text(title)
-                .font(.system(.subheadline, design: .rounded))
-                .fontWeight(.bold)
-                .foregroundColor(.primary)
-            Text(subtitle)
-                .font(.system(size: 9))
-                .foregroundColor(.secondary)
-        }
-        .padding(10)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.black.opacity(0.08))
-        .cornerRadius(10)
-        .overlay(
-            RoundedRectangle(cornerRadius: 10)
-                .stroke(Color.white.opacity(0.06), lineWidth: 0.5)
-        )
     }
 }
