@@ -11,6 +11,20 @@ struct MenuBarFrogView: View {
     private let tonguePink = Color(red: 250/255, green: 103/255, blue: 146/255) // #FA6792
     private let eyebrowColor = Color(red: 10/255, green: 90/255, blue: 45/255) // Darker green #0A5A2D
     
+    private var isFocusMode: Bool {
+        if let timer = timerManager.getFirstActiveTimer() {
+            return timer.state == .running && !timer.isBreakActive
+        }
+        return false
+    }
+    
+    private var isBreakMode: Bool {
+        if let timer = timerManager.getFirstActiveTimer() {
+            return timer.state == .running && timer.isBreakActive
+        }
+        return false
+    }
+    
     var body: some View {
         HStack(spacing: 4) {
             ZStack {
@@ -22,15 +36,25 @@ struct MenuBarFrogView: View {
                 
                 // Left Eyebrow
                 Path { path in
-                    path.move(to: CGPoint(x: 12 - 6.5, y: 12 - 9.0))
-                    path.addQuadCurve(to: CGPoint(x: 12 - 1.0, y: 12 - 9.0), control: CGPoint(x: 12 - 3.75, y: 12 - 10.8))
+                    if isFocusMode {
+                        path.move(to: CGPoint(x: 12 - 6.0, y: 12 - 9.8))
+                        path.addLine(to: CGPoint(x: 12 - 1.0, y: 12 - 8.0))
+                    } else {
+                        path.move(to: CGPoint(x: 12 - 6.5, y: 12 - 9.0))
+                        path.addQuadCurve(to: CGPoint(x: 12 - 1.0, y: 12 - 9.0), control: CGPoint(x: 12 - 3.75, y: 12 - 10.8))
+                    }
                 }
                 .stroke(eyebrowColor, lineWidth: 1.2)
                 
                 // Right Eyebrow
                 Path { path in
-                    path.move(to: CGPoint(x: 12 + 1.0, y: 12 - 9.0))
-                    path.addQuadCurve(to: CGPoint(x: 12 + 6.5, y: 12 - 9.0), control: CGPoint(x: 12 + 3.75, y: 12 - 10.8))
+                    if isFocusMode {
+                        path.move(to: CGPoint(x: 12 + 1.0, y: 12 - 8.0))
+                        path.addLine(to: CGPoint(x: 12 + 6.0, y: 12 - 9.8))
+                    } else {
+                        path.move(to: CGPoint(x: 12 + 1.0, y: 12 - 9.0))
+                        path.addQuadCurve(to: CGPoint(x: 12 + 6.5, y: 12 - 9.0), control: CGPoint(x: 12 + 3.75, y: 12 - 10.8))
+                    }
                 }
                 .stroke(eyebrowColor, lineWidth: 1.2)
                 
@@ -51,6 +75,54 @@ struct MenuBarFrogView: View {
                     eyeSize: 8.5
                 )
                 .position(x: 12 + 3.4, y: 12 - 4.5)
+                
+                // Focus Mode Red Headband
+                if isFocusMode {
+                    Capsule()
+                        .fill(Color.red)
+                        .frame(width: 17, height: 2.2)
+                        .position(x: 12, y: 12 - 7.2)
+                    
+                    Path { path in
+                        path.move(to: CGPoint(x: 12 - 8.5, y: 12 - 7.2))
+                        path.addLine(to: CGPoint(x: 12 - 11.5, y: 12 - 5.5))
+                        path.move(to: CGPoint(x: 12 - 8.5, y: 12 - 7.2))
+                        path.addLine(to: CGPoint(x: 12 - 10.5, y: 12 - 9.0))
+                    }
+                    .stroke(Color.red, lineWidth: 1.5)
+                }
+                
+                // Break Mode Cool Sunglasses
+                if isBreakMode {
+                    // Left Lens
+                    Circle()
+                        .fill(Color.black)
+                        .frame(width: 9.5, height: 9.5)
+                        .position(x: 12 - 3.4, y: 12 - 4.5)
+                    
+                    // Right Lens
+                    Circle()
+                        .fill(Color.black)
+                        .frame(width: 9.5, height: 9.5)
+                        .position(x: 12 + 3.4, y: 12 - 4.5)
+                    
+                    // Sunglasses Bridge
+                    Path { path in
+                        path.move(to: CGPoint(x: 12 - 3.4, y: 12 - 5.5))
+                        path.addQuadCurve(to: CGPoint(x: 12 + 3.4, y: 12 - 5.5), control: CGPoint(x: 12, y: 12 - 6.5))
+                    }
+                    .stroke(Color.black, lineWidth: 1.5)
+                    
+                    // Glossy highlights
+                    Circle()
+                        .fill(Color.white.opacity(0.7))
+                        .frame(width: 2.0, height: 2.0)
+                        .position(x: 12 - 4.5, y: 12 - 5.5)
+                    Circle()
+                        .fill(Color.white.opacity(0.7))
+                        .frame(width: 2.0, height: 2.0)
+                        .position(x: 12 + 2.3, y: 12 - 5.5)
+                }
                 
                 // Smile Mouth
                 Path { path in

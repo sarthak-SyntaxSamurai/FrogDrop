@@ -1,15 +1,47 @@
 import AppKit
 import Foundation
 
+// Struct representing a rule for clipboard behavior
+struct ClipboardPreferenceRule: Identifiable, Codable, Equatable {
+    var id = UUID()
+    let appName: String
+    enum RuleType: String, Codable {
+        case save = "save"
+        case ignore = "ignore"
+        case temporary = "temporary"
+    }
+    var ruleType: RuleType
+}
+
 struct ClipboardItem: Identifiable, Codable, Equatable, Sendable {
     var id: UUID
     let text: String
     let timestamp: Date
+    let sourceApp: String?
+    var isTemporary: Bool
+    var expiresAt: Date?
 
-    init(id: UUID = UUID(), text: String, timestamp: Date = Date()) {
+    init(id: UUID = UUID(), text: String, timestamp: Date = Date(), sourceApp: String? = nil, isTemporary: Bool = false, expiresAt: Date? = nil) {
         self.id = id
         self.text = text
         self.timestamp = timestamp
+        self.sourceApp = sourceApp
+        self.isTemporary = isTemporary
+        self.expiresAt = expiresAt
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case id, text, timestamp, sourceApp, isTemporary, expiresAt
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        text = try container.decode(String.self, forKey: .text)
+        timestamp = try container.decode(Date.self, forKey: .timestamp)
+        sourceApp = try container.decodeIfPresent(String.self, forKey: .sourceApp)
+        isTemporary = try container.decodeIfPresent(Bool.self, forKey: .isTemporary) ?? false
+        expiresAt = try container.decodeIfPresent(Date.self, forKey: .expiresAt)
     }
 }
 
@@ -18,11 +50,16 @@ class ClipboardManager: ObservableObject {
     static let shared = ClipboardManager()
     
     @Published var items: [ClipboardItem] = []
+    @Published var customRules: [ClipboardPreferenceRule] = []
+    @Published var tempDuration: TimeInterval = 60.0 // Default 60 seconds (1 minute)
     
     private let maxItems = 100
     private let pasteboard = NSPasteboard.general
     private var lastChangeCount = 0
     private var timer: Timer?
+    
+    private let rulesKey = "frogdrop.clipboardRules"
+    private let durationKey = "frogdrop.tempDuration"
     
     private var storageURL: URL {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
@@ -32,6 +69,7 @@ class ClipboardManager: ObservableObject {
     }
     
     private init() {
+        loadSettings()
         loadHistory()
         lastChangeCount = pasteboard.changeCount
         startMonitoring()
@@ -45,34 +83,133 @@ class ClipboardManager: ObservableObject {
         }
     }
     
+    func loadSettings() {
+        if let data = UserDefaults.standard.data(forKey: rulesKey),
+           let decoded = try? JSONDecoder().decode([ClipboardPreferenceRule].self, from: data) {
+            self.customRules = decoded
+        } else {
+            // Default rules for password managers (set to Temporary by default)
+            self.customRules = [
+                ClipboardPreferenceRule(appName: "Keychain Access", ruleType: .temporary),
+                ClipboardPreferenceRule(appName: "1Password", ruleType: .temporary),
+                ClipboardPreferenceRule(appName: "Bitwarden", ruleType: .temporary)
+            ]
+        }
+        
+        let storedDuration = UserDefaults.standard.double(forKey: durationKey)
+        if storedDuration > 0 {
+            self.tempDuration = storedDuration
+        } else {
+            self.tempDuration = 60.0
+        }
+    }
+    
+    func saveSettings() {
+        if let encoded = try? JSONEncoder().encode(customRules) {
+            UserDefaults.standard.set(encoded, forKey: rulesKey)
+        }
+        UserDefaults.standard.set(tempDuration, forKey: durationKey)
+    }
+    
+    func addRule(appName: String, ruleType: ClipboardPreferenceRule.RuleType) {
+        customRules.removeAll(where: { $0.appName.lowercased() == appName.lowercased() })
+        let newRule = ClipboardPreferenceRule(appName: appName, ruleType: ruleType)
+        customRules.append(newRule)
+        saveSettings()
+    }
+    
+    func removeRule(id: UUID) {
+        customRules.removeAll(where: { $0.id == id })
+        saveSettings()
+    }
+    
+    func updateRule(id: UUID, newType: ClipboardPreferenceRule.RuleType) {
+        if let index = customRules.firstIndex(where: { $0.id == id }) {
+            customRules[index].ruleType = newType
+            saveSettings()
+        }
+    }
+    
+    private func checkExpiration() {
+        let now = Date()
+        var changed = false
+        
+        items.removeAll { item in
+            if item.isTemporary, let expiry = item.expiresAt, now >= expiry {
+                changed = true
+                return true
+            }
+            return false
+        }
+        
+        if changed {
+            saveHistory()
+        }
+    }
+    
     private func checkPasteboard() {
+        checkExpiration()
+        
         guard pasteboard.changeCount != lastChangeCount else { return }
         lastChangeCount = pasteboard.changeCount
         
         if let newText = pasteboard.string(forType: .string), !newText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            // Avoid duplicates at the top
             if items.first?.text != newText {
-                addEntry(newText)
+                let activeApp = NSWorkspace.shared.frontmostApplication
+                let appName = activeApp?.localizedName ?? "Unknown"
+                
+                let rule = customRules.first(where: { $0.appName.lowercased() == appName.lowercased() })?.ruleType ?? .save
+                
+                switch rule {
+                case .ignore:
+                    print("[ClipboardManager] Ignored copy from \(appName)")
+                    return
+                case .temporary:
+                    let expires = Date().addingTimeInterval(tempDuration)
+                    let newItem = ClipboardItem(
+                        text: newText,
+                        sourceApp: appName,
+                        isTemporary: true,
+                        expiresAt: expires
+                    )
+                    items.insert(newItem, at: 0)
+                    if items.count > maxItems {
+                        items = Array(items.prefix(maxItems))
+                    }
+                    saveHistory()
+                    NotificationCenter.default.post(name: NSNotification.Name("ShowClipboardToast"), object: newItem)
+                    
+                case .save:
+                    let newItem = ClipboardItem(
+                        text: newText,
+                        sourceApp: appName,
+                        isTemporary: false,
+                        expiresAt: nil
+                    )
+                    items.insert(newItem, at: 0)
+                    if items.count > maxItems {
+                        items = Array(items.prefix(maxItems))
+                    }
+                    saveHistory()
+                    NotificationCenter.default.post(name: NSNotification.Name("ShowClipboardToast"), object: newItem)
+                }
             }
         }
     }
     
-    private func addEntry(_ text: String) {
-        let newItem = ClipboardItem(text: text, timestamp: Date())
-        items.insert(newItem, at: 0)
-        if items.count > maxItems {
-            items = Array(items.prefix(maxItems))
+    func makePermanent(_ item: ClipboardItem) {
+        if let index = items.firstIndex(where: { $0.id == item.id }) {
+            items[index].isTemporary = false
+            items[index].expiresAt = nil
+            saveHistory()
         }
-        saveHistory()
     }
     
     func copyToPasteboard(_ item: ClipboardItem) {
         pasteboard.declareTypes([.string], owner: nil)
         pasteboard.setString(item.text, forType: .string)
-        // Update local changeCount so we don't treat it as a new external copy
         lastChangeCount = pasteboard.changeCount
         
-        // Move item to the top of list
         if let index = items.firstIndex(of: item) {
             items.remove(at: index)
         }

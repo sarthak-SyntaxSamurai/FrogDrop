@@ -36,6 +36,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Warm up managers
         _ = ClipboardManager.shared
         _ = CursorTracker.shared
+        
+        // Listen for clipboard toast notifications
+        NotificationCenter.default.addObserver(
+            forName: NSNotification.Name("ShowClipboardToast"),
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            Task { @MainActor in
+                guard let self = self, let item = notification.object as? ClipboardItem else { return }
+                let frame = self.statusItem?.button?.window?.frame ?? .zero
+                ClipboardToastPanelWindow.shared.show(
+                    statusItemFrame: frame,
+                    text: item.text,
+                    appName: item.sourceApp ?? "Unknown",
+                    isTemporary: item.isTemporary
+                )
+            }
+        }
     }
     
     private func setupStatusItem() {

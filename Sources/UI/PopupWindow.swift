@@ -231,6 +231,9 @@ struct PopupView: View {
     // Clipboard Search
     @State private var clipboardSearchQuery = ""
     
+    // Settings toggle
+    @State private var isShowingSettings = false
+    
     private func offsetForTab(_ tab: Tab, in totalWidth: CGFloat) -> CGFloat {
         let buttonWidth = (totalWidth - 8) / 3
         switch tab {
@@ -352,9 +355,23 @@ struct PopupView: View {
             
             // Footer Info
             HStack {
-                Text("FrogDrop • Premium 3-in-1")
-                    .font(.system(.caption2, design: .rounded))
-                    .foregroundColor(.secondary)
+                HStack(spacing: 6) {
+                    Button(action: {
+                        isShowingSettings = true
+                    }) {
+                        Image(systemName: "gearshape")
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .popover(isPresented: $isShowingSettings, arrowEdge: .top) {
+                        DropzoneSettingsView()
+                    }
+                    
+                    Text("FrogDrop • Premium 3-in-1")
+                        .font(.system(.caption2, design: .rounded))
+                        .foregroundColor(.secondary)
+                }
                 Spacer()
                 QuitButton()
             }
@@ -933,6 +950,7 @@ struct TimerSetupView: View {
     @State private var breakMinutes: Int = 5
     @State private var cycles: Int = 4
     @State private var isTaskHovered = false
+    @State private var focusMinutes: Int = 25
     
     private var totalDuration: TimeInterval {
         if isPomodoro {
@@ -986,6 +1004,39 @@ struct TimerSetupView: View {
             }
             .padding(.horizontal, 4)
             
+            // Focus / Timer Duration Stepper
+            VStack(alignment: .leading, spacing: 4) {
+                Text(isPomodoro ? "FOCUS DURATION" : "TIMER DURATION")
+                    .font(.system(size: 8, weight: .bold))
+                    .foregroundColor(.secondary)
+                    .tracking(1.0)
+                
+                HStack {
+                    Image(systemName: "clock")
+                        .foregroundColor(.secondary)
+                        .font(.system(size: 11))
+                    Text("\(focusMinutes) min")
+                        .font(.system(.subheadline, design: .rounded))
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                    Spacer()
+                    Stepper("", value: $focusMinutes, in: 1...180)
+                        .labelsHidden()
+                        .onChange(of: focusMinutes) { newVal in
+                            timerManager.setupSeconds = Double(newVal * 60)
+                        }
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+                .background(Color.white.opacity(0.04))
+                .cornerRadius(8)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
+                )
+            }
+            .padding(.horizontal, 4)
+            
             Toggle(isOn: $isPomodoro.animation(.spring(response: 0.3, dampingFraction: 0.7))) {
                 Text("Pomodoro Mode")
                     .font(.system(.subheadline, design: .rounded))
@@ -1020,13 +1071,29 @@ struct TimerSetupView: View {
                         }
                     }
                     
-                    HStack(spacing: 4) {
-                        ForEach(0..<(cycles * 2 - 1), id: \.self) { idx in
-                            Capsule()
-                                .fill(idx % 2 == 0 ? Color(red: 0.15, green: 0.85, blue: 0.45) : Color.red.opacity(0.6))
-                                .frame(width: idx % 2 == 0 ? 16 : 8, height: 6)
+                    // Self-calibrating cycle dots using dynamic width calculations to prevent window overflow
+                    GeometryReader { geo in
+                        let containerWidth = geo.size.width
+                        let totalDots = cycles * 2 - 1
+                        let spacing: CGFloat = 3
+                        let totalSpacersWidth = CGFloat(totalDots - 1) * spacing
+                        let remainingWidth = max(20, containerWidth - totalSpacersWidth)
+                        let workCount = CGFloat(cycles)
+                        let breakCount = CGFloat(cycles - 1)
+                        let unitWidth = remainingWidth / (2 * workCount + breakCount)
+                        let breakWidth = max(2, unitWidth)
+                        let workWidth = max(4, unitWidth * 2)
+                        
+                        HStack(spacing: spacing) {
+                            ForEach(0..<totalDots, id: \.self) { idx in
+                                Capsule()
+                                    .fill(idx % 2 == 0 ? Color(red: 0.15, green: 0.85, blue: 0.45) : Color.red.opacity(0.6))
+                                    .frame(width: idx % 2 == 0 ? workWidth : breakWidth, height: 5)
+                            }
                         }
+                        .frame(maxWidth: .infinity, alignment: .center)
                     }
+                    .frame(height: 6)
                     .padding(.top, 4)
                 }
                 .padding(10)
@@ -1314,7 +1381,7 @@ struct ClipboardTabView: View {
                 ScrollView {
                     LazyVStack(spacing: 6) {
                         ForEach(filteredItems) { item in
-                            ClipboardRow(item: item) {
+                            ClipboardRow(item: item, searchQuery: searchQuery) {
                                 clipboardManager.copyToPasteboard(item)
                             } onDelete: {
                                 clipboardManager.deleteItem(item)
@@ -1329,12 +1396,29 @@ struct ClipboardTabView: View {
     }
 }
 
+extension String {
+    func ranges(of searchString: String, options: CompareOptions = []) -> [Range<Index>] {
+        var result: [Range<Index>] = []
+        var start = startIndex
+        while start < endIndex,
+              let range = range(of: searchString, options: options, range: start..<endIndex) {
+            result.append(range)
+            start = range.upperBound
+        }
+        return result
+    }
+}
+
 struct ClipboardRow: View {
     let item: ClipboardItem
+    let searchQuery: String
     let onCopy: () -> Void
     let onDelete: () -> Void
+    
     @State private var isHovering = false
     @State private var hoverWorkItem: DispatchWorkItem? = nil
+    @State private var countdownSecs: Int = 0
+    @State private var countdownTimer: Timer? = nil
     
     private var isTruncated: Bool {
         item.text.count > 38 || item.text.contains("\n") || item.text.contains("\r")
@@ -1348,23 +1432,101 @@ struct ClipboardRow: View {
             .trimmingCharacters(in: .whitespacesAndNewlines)
     }
     
+    private var remainingSeconds: Int {
+        guard let expiry = item.expiresAt else { return 0 }
+        return max(0, Int(expiry.timeIntervalSince(Date())))
+    }
+    
+    private func highlightedText(_ fullText: String, query: String) -> Text {
+        guard !query.isEmpty else {
+            return Text(fullText)
+        }
+        
+        let ranges = fullText.ranges(of: query, options: .caseInsensitive)
+        guard !ranges.isEmpty else {
+            return Text(fullText)
+        }
+        
+        var result = Text("")
+        var currentIndex = fullText.startIndex
+        
+        for range in ranges {
+            let preMatch = String(fullText[currentIndex..<range.lowerBound])
+            result = result + Text(preMatch)
+            
+            let match = String(fullText[range])
+            result = result + Text(match).bold().foregroundColor(Color(red: 0.15, green: 0.85, blue: 0.45))
+            
+            currentIndex = range.upperBound
+        }
+        
+        let postMatch = String(fullText[currentIndex...])
+        result = result + Text(postMatch)
+        
+        return result
+    }
+    
     var body: some View {
         GeometryReader { geometry in
             HStack(spacing: 8) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(displayPreviewText)
+                    highlightedText(displayPreviewText, query: searchQuery)
                         .font(.system(.subheadline, design: .rounded))
                         .fontWeight(.medium)
                         .foregroundColor(.primary)
                         .lineLimit(1)
                         .multilineTextAlignment(.leading)
                     
-                    Text(formatTimestamp(item.timestamp))
-                        .font(.system(size: 10, weight: .medium, design: .rounded))
-                        .foregroundColor(.secondary.opacity(0.7))
+                    HStack(spacing: 4) {
+                        if let app = item.sourceApp {
+                            Text(app)
+                                .font(.system(size: 9, weight: .bold, design: .rounded))
+                                .foregroundColor(.green.opacity(0.8))
+                                .padding(.horizontal, 4)
+                                .padding(.vertical, 1)
+                                .background(Color.green.opacity(0.08))
+                                .cornerRadius(3)
+                            
+                            Text("•")
+                                .font(.system(size: 10))
+                                .foregroundColor(.secondary.opacity(0.4))
+                        }
+                        
+                        Text(formatTimestamp(item.timestamp))
+                            .font(.system(size: 10, weight: .medium, design: .rounded))
+                            .foregroundColor(.secondary.opacity(0.7))
+                    }
                 }
                 
                 Spacer()
+                
+                if item.isTemporary && countdownSecs > 0 {
+                    HStack(spacing: 6) {
+                        Text("\(countdownSecs)s")
+                            .font(.system(size: 10, weight: .bold, design: .monospaced))
+                            .foregroundColor(.orange)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.orange.opacity(0.08))
+                            .cornerRadius(4)
+                        
+                        Button(action: {
+                            ClipboardManager.shared.makePermanent(item)
+                            countdownTimer?.invalidate()
+                            countdownTimer = nil
+                            countdownSecs = 0
+                        }) {
+                            Image(systemName: "pin.fill")
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundColor(.green)
+                                .padding(5)
+                                .background(Color.green.opacity(0.12))
+                                .cornerRadius(5)
+                        }
+                        .buttonStyle(.plain)
+                        .help("Keep Permanent")
+                    }
+                }
                 
                 if isHovering {
                     Button(action: onDelete) {
@@ -1438,6 +1600,42 @@ struct ClipboardRow: View {
                 PopupWindow.activeInstance?.orderOut(nil)
                 PopupWindow.activeInstance = nil
             }
+            .onAppear {
+                if item.isTemporary {
+                    countdownSecs = remainingSeconds
+                    countdownTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+                        if countdownSecs > 0 {
+                            countdownSecs -= 1
+                        } else {
+                            countdownTimer?.invalidate()
+                            countdownTimer = nil
+                        }
+                    }
+                }
+            }
+            .onDisappear {
+                countdownTimer?.invalidate()
+                countdownTimer = nil
+            }
+            .onChange(of: item) { newItem in
+                if newItem.isTemporary {
+                    countdownSecs = remainingSeconds
+                    if countdownTimer == nil {
+                        countdownTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+                            if countdownSecs > 0 {
+                                countdownSecs -= 1
+                            } else {
+                                countdownTimer?.invalidate()
+                                countdownTimer = nil
+                            }
+                        }
+                    }
+                } else {
+                    countdownTimer?.invalidate()
+                    countdownTimer = nil
+                    countdownSecs = 0
+                }
+            }
         }
         .frame(height: 50)
     }
@@ -1482,15 +1680,9 @@ struct DropzoneTabView: View {
                 
                 Spacer()
                 
-                Button(action: {
-                    isShowingSettings = true
-                }) {
-                    Image(systemName: "gearshape")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(.secondary)
-                        .padding(8)
-                }
-                .buttonStyle(.plain)
+                // Invisible placeholder to center title
+                Color.clear
+                    .frame(width: 30, height: 30)
             }
             .frame(height: 38)
             .padding(.horizontal, 8)

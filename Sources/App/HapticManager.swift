@@ -3,20 +3,72 @@ import AppKit
 class HapticManager {
     static let shared = HapticManager()
     
+    enum HapticLevel: String, Codable, CaseIterable {
+        case off = "Off"
+        case soft = "Soft"
+        case medium = "Medium"
+        case strong = "Strong"
+    }
+    
+    private let hapticKey = "frogdrop.hapticLevel"
+    
+    var level: HapticLevel {
+        get {
+            if let stored = UserDefaults.standard.string(forKey: hapticKey),
+               let parsed = HapticLevel(rawValue: stored) {
+                return parsed
+            }
+            return .medium
+        }
+        set {
+            UserDefaults.standard.set(newValue.rawValue, forKey: hapticKey)
+        }
+    }
+    
     private init() {}
     
-    /// A subtle tick, useful for drag increments (like tongue stretching)
     func tick() {
-        NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now)
+        guard level != .off else { return }
+        switch level {
+        case .soft:
+            NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now)
+        case .medium:
+            NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now)
+        case .strong:
+            NSHapticFeedbackManager.defaultPerformer.perform(.generic, performanceTime: .now)
+        case .off:
+            break
+        }
     }
     
-    /// A standard click feedback
     func click() {
-        NSHapticFeedbackManager.defaultPerformer.perform(.generic, performanceTime: .now)
+        guard level != .off else { return }
+        switch level {
+        case .soft:
+            NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now)
+        case .medium:
+            NSHapticFeedbackManager.defaultPerformer.perform(.generic, performanceTime: .now)
+        case .strong:
+            NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
+        case .off:
+            break
+        }
     }
     
-    /// Stronger feedback for actions like timer completion or file drop
     func success() {
-        NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
+        guard level != .off else { return }
+        switch level {
+        case .soft:
+            NSHapticFeedbackManager.defaultPerformer.perform(.generic, performanceTime: .now)
+        case .medium:
+            NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
+        case .strong:
+            NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
+            }
+        case .off:
+            break
+        }
     }
 }
