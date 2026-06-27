@@ -183,10 +183,12 @@ class PopupWindow: NSWindow, NSWindowDelegate {
         if let preview = previewWindow {
             preview.updateContent(text: item.text)
             preview.setFrame(rect, display: true, animate: false)
+            preview.orderFront(nil)
         } else {
             let preview = ClipboardPreviewWindow(contentRect: rect, text: item.text)
             previewWindow = preview
             self.addChildWindow(preview, ordered: .above)
+            preview.orderFront(nil)
         }
     }
     
