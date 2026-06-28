@@ -943,6 +943,29 @@ struct TugTimerCard: View {
     }
 }
 
+// Trackpad/mouse wheel scroll detection for macOS
+struct ScrollDetector: NSViewRepresentable {
+    var onScroll: (CGFloat) -> Void
+    
+    func makeNSView(context: Context) -> NSView {
+        let view = ScrollDetectionView()
+        view.onScroll = onScroll
+        return view
+    }
+    
+    func updateNSView(_ nsView: NSView, context: Context) {}
+}
+
+class ScrollDetectionView: NSView {
+    var onScroll: ((CGFloat) -> Void)?
+    
+    override func scrollWheel(with event: NSEvent) {
+        if let onScroll = onScroll {
+            onScroll(event.scrollingDeltaY)
+        }
+    }
+}
+
 struct TimerSetupView: View {
     @ObservedObject var timerManager: TimerManager
     @State private var taskName: String = ""
@@ -951,6 +974,7 @@ struct TimerSetupView: View {
     @State private var cycles: Int = 4
     @State private var isTaskHovered = false
     @State private var focusMinutes: Int = 25
+    @State private var dragStartSeconds: Double = 0
     
     private var totalDuration: TimeInterval {
         if isPomodoro {
@@ -966,14 +990,56 @@ struct TimerSetupView: View {
         Date().addingTimeInterval(totalDuration)
     }
     
+    private func formatSetupTime(_ seconds: TimeInterval) -> String {
+        let hrs = Int(seconds) / 3600
+        let mins = (Int(seconds) % 3600) / 60
+        return String(format: "%02d:%02d", hrs, mins)
+    }
+    
     var body: some View {
         let displaySeconds = timerManager.setupSeconds
         
         VStack(spacing: 12) {
-            VStack(spacing: 2) {
-                Text(formatTime(displaySeconds))
-                    .font(.system(size: 36, weight: .bold, design: .rounded))
+            VStack(spacing: 4) {
+                // Interactive Scrollable/Draggable Big Timer Text (formatted as hh:mm)
+                Text(formatSetupTime(displaySeconds))
+                    .font(.system(size: 44, weight: .bold, design: .rounded))
                     .foregroundColor(Color(red: 0.15, green: 0.85, blue: 0.45))
+                    .contentShape(Rectangle())
+                    .background(
+                        ScrollDetector { deltaY in
+                            if abs(deltaY) > 0.1 {
+                                let change = deltaY > 0 ? 1 : -1
+                                let currentMins = Int(timerManager.setupSeconds / 60)
+                                let newMins = max(1, min(180, currentMins + change))
+                                timerManager.setupSeconds = Double(newMins * 60)
+                                focusMinutes = newMins
+                                HapticManager.shared.tick()
+                            }
+                        }
+                    )
+                    .gesture(
+                        DragGesture()
+                            .onChanged { value in
+                                if dragStartSeconds == 0 {
+                                    dragStartSeconds = timerManager.setupSeconds
+                                }
+                                let deltaY = -value.translation.height
+                                let deltaMinutes = Int(deltaY / 6.0)
+                                let currentMins = max(1, min(180, Int(dragStartSeconds / 60) + deltaMinutes))
+                                timerManager.setupSeconds = Double(currentMins * 60)
+                                focusMinutes = currentMins
+                            }
+                            .onEnded { _ in
+                                dragStartSeconds = 0
+                                HapticManager.shared.click()
+                            }
+                    )
+                
+                Text("Scroll or drag on time to change")
+                    .font(.system(size: 8, weight: .medium, design: .rounded))
+                    .foregroundColor(.secondary.opacity(0.6))
+                    .padding(.bottom, 2)
                 
                 Text("Ends at \(formatEndTime(endTime))")
                     .font(.system(.caption, design: .rounded))
@@ -1001,39 +1067,6 @@ struct TimerSetupView: View {
                     .onHover { hovering in
                         isTaskHovered = hovering
                     }
-            }
-            .padding(.horizontal, 4)
-            
-            // Focus / Timer Duration Stepper
-            VStack(alignment: .leading, spacing: 4) {
-                Text(isPomodoro ? "FOCUS DURATION" : "TIMER DURATION")
-                    .font(.system(size: 8, weight: .bold))
-                    .foregroundColor(.secondary)
-                    .tracking(1.0)
-                
-                HStack {
-                    Image(systemName: "clock")
-                        .foregroundColor(.secondary)
-                        .font(.system(size: 11))
-                    Text("\(focusMinutes) min")
-                        .font(.system(.subheadline, design: .rounded))
-                        .fontWeight(.bold)
-                        .foregroundColor(.primary)
-                    Spacer()
-                    Stepper("", value: $focusMinutes, in: 1...180)
-                        .labelsHidden()
-                        .onChange(of: focusMinutes) { newVal in
-                            timerManager.setupSeconds = Double(newVal * 60)
-                        }
-                }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 4)
-                .background(Color.white.opacity(0.04))
-                .cornerRadius(8)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
-                )
             }
             .padding(.horizontal, 4)
             
@@ -1153,6 +1186,7 @@ struct TimerSetupView: View {
         }
         .onAppear {
             self.taskName = timerManager.setupTaskName
+            self.focusMinutes = max(1, Int(timerManager.setupSeconds / 60))
         }
     }
     
@@ -1417,8 +1451,7 @@ struct ClipboardRow: View {
     
     @State private var isHovering = false
     @State private var hoverWorkItem: DispatchWorkItem? = nil
-    @State private var countdownSecs: Int = 0
-    @State private var countdownTimer: Timer? = nil
+    // No timer properties - kept static for minimal CPU footprint
     
     private var isTruncated: Bool {
         item.text.count > 38 || item.text.contains("\n") || item.text.contains("\r")
@@ -1500,21 +1533,19 @@ struct ClipboardRow: View {
                 
                 Spacer()
                 
-                if item.isTemporary && countdownSecs > 0 {
+                if item.isTemporary {
                     HStack(spacing: 6) {
-                        Text("\(countdownSecs)s")
-                            .font(.system(size: 10, weight: .bold, design: .monospaced))
+                        Text("Temp")
+                            .font(.system(size: 9, weight: .bold, design: .rounded))
                             .foregroundColor(.orange)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.orange.opacity(0.08))
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, 1.5)
+                            .background(Color.orange.opacity(0.1))
                             .cornerRadius(4)
                         
                         Button(action: {
                             ClipboardManager.shared.makePermanent(item)
-                            countdownTimer?.invalidate()
-                            countdownTimer = nil
-                            countdownSecs = 0
+                            HapticManager.shared.success()
                         }) {
                             Image(systemName: "pin.fill")
                                 .font(.system(size: 10, weight: .bold))
@@ -1600,42 +1631,7 @@ struct ClipboardRow: View {
                 PopupWindow.activeInstance?.orderOut(nil)
                 PopupWindow.activeInstance = nil
             }
-            .onAppear {
-                if item.isTemporary {
-                    countdownSecs = remainingSeconds
-                    countdownTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-                        if countdownSecs > 0 {
-                            countdownSecs -= 1
-                        } else {
-                            countdownTimer?.invalidate()
-                            countdownTimer = nil
-                        }
-                    }
-                }
-            }
-            .onDisappear {
-                countdownTimer?.invalidate()
-                countdownTimer = nil
-            }
-            .onChange(of: item) { newItem in
-                if newItem.isTemporary {
-                    countdownSecs = remainingSeconds
-                    if countdownTimer == nil {
-                        countdownTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-                            if countdownSecs > 0 {
-                                countdownSecs -= 1
-                            } else {
-                                countdownTimer?.invalidate()
-                                countdownTimer = nil
-                            }
-                        }
-                    }
-                } else {
-                    countdownTimer?.invalidate()
-                    countdownTimer = nil
-                    countdownSecs = 0
-                }
-            }
+            // Static appearances - no CPU timers
         }
         .frame(height: 50)
     }

@@ -819,6 +819,8 @@ struct DropzoneSettingsView: View {
     @State private var selectedTab = 0 // 0 = Grid, 1 = General, 2 = Rules
     @State private var newRuleAppName = ""
     @State private var newRuleType: ClipboardPreferenceRule.RuleType = .temporary
+    @State private var runningApps: [String] = []
+    @State private var selectedRunningApp = ""
     
     // Haptic level state
     @State private var hapticLevel: HapticManager.HapticLevel = HapticManager.shared.level
@@ -1013,24 +1015,34 @@ struct DropzoneSettingsView: View {
                             .foregroundColor(.secondary)
                         
                         HStack(spacing: 6) {
-                            TextField("App Name...", text: $newRuleAppName)
-                                .textFieldStyle(.plain)
-                                .font(.system(.subheadline, design: .rounded))
-                                .padding(5)
-                                .background(Color.white.opacity(0.06))
-                                .cornerRadius(6)
+                            if !runningApps.isEmpty {
+                                Picker("", selection: $selectedRunningApp) {
+                                    ForEach(runningApps, id: \.self) { appName in
+                                        Text(appName).tag(appName)
+                                    }
+                                }
+                                .pickerStyle(.menu)
+                                .frame(maxWidth: .infinity)
+                            } else {
+                                TextField("App Name...", text: $newRuleAppName)
+                                    .textFieldStyle(.plain)
+                                    .font(.system(.subheadline, design: .rounded))
+                                    .padding(5)
+                                    .background(Color.white.opacity(0.06))
+                                    .cornerRadius(6)
+                            }
                             
                             Picker("", selection: $newRuleType) {
                                 Text("Temp").tag(ClipboardPreferenceRule.RuleType.temporary)
                                 Text("Ignore").tag(ClipboardPreferenceRule.RuleType.ignore)
                             }
-                            .frame(width: 80)
+                            .frame(width: 70)
                             .labelsHidden()
                             
                             Button(action: {
-                                let trimmed = newRuleAppName.trimmingCharacters(in: .whitespacesAndNewlines)
-                                if !trimmed.isEmpty {
-                                    clipboardManager.addRule(appName: trimmed, ruleType: newRuleType)
+                                let appToSave = runningApps.isEmpty ? newRuleAppName.trimmingCharacters(in: .whitespacesAndNewlines) : selectedRunningApp
+                                if !appToSave.isEmpty {
+                                    clipboardManager.addRule(appName: appToSave, ruleType: newRuleType)
                                     newRuleAppName = ""
                                     HapticManager.shared.success()
                                 }
@@ -1059,6 +1071,17 @@ struct DropzoneSettingsView: View {
         }
         .frame(width: 270, height: 380)
         .background(Color.black.opacity(0.85))
+        .onAppear {
+            let apps = NSWorkspace.shared.runningApplications
+                .filter { $0.activationPolicy == .regular }
+                .compactMap { $0.localizedName }
+                .filter { !$0.isEmpty }
+            let uniqueApps = Array(Set(apps)).sorted()
+            self.runningApps = uniqueApps
+            if let first = uniqueApps.first {
+                self.selectedRunningApp = first
+            }
+        }
     }
     
     private func selectFolder() {

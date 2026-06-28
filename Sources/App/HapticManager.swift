@@ -33,9 +33,11 @@ class HapticManager {
         case .soft:
             NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now)
         case .medium:
-            NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now)
-        case .strong:
+            // Medium tick is generic click so it is easily felt
             NSHapticFeedbackManager.defaultPerformer.perform(.generic, performanceTime: .now)
+        case .strong:
+            // Strong tick uses level change for high tactility
+            NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
         case .off:
             break
         }
@@ -64,7 +66,7 @@ class HapticManager {
             NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
         case .strong:
             NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
                 NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
             }
         case .off:
