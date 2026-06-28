@@ -974,7 +974,12 @@ struct TimerSetupView: View {
     @State private var cycles: Int = 4
     @State private var isTaskHovered = false
     @State private var focusMinutes: Int = 25
-    @State private var dragStartSeconds: Double = 0
+    
+    // Smooth scroll and drag state
+    @State private var dragStartHours: Int = -1
+    @State private var dragStartMinutes: Int = -1
+    @State private var hourAccumulator: CGFloat = 0
+    @State private var minAccumulator: CGFloat = 0
     
     private var totalDuration: TimeInterval {
         if isPomodoro {
@@ -990,56 +995,131 @@ struct TimerSetupView: View {
         Date().addingTimeInterval(totalDuration)
     }
     
-    private func formatSetupTime(_ seconds: TimeInterval) -> String {
-        let hrs = Int(seconds) / 3600
-        let mins = (Int(seconds) % 3600) / 60
-        return String(format: "%02d:%02d", hrs, mins)
+    private func updateSetupSeconds(hours: Int, minutes: Int) {
+        var totalSecs = Double(hours * 3600 + minutes * 60)
+        if totalSecs < 60 {
+            totalSecs = 60 // Minimum 1 minute
+        }
+        timerManager.setupSeconds = totalSecs
+        focusMinutes = Int(totalSecs / 60)
+    }
+    
+    private func formatSummaryMinutes(_ totalMins: Int) -> String {
+        let hrs = totalMins / 60
+        let mins = totalMins % 60
+        if hrs > 0 {
+            if mins > 0 {
+                return "\(hrs)h \(mins)m"
+            } else {
+                return "\(hrs)h"
+            }
+        } else {
+            return "\(mins)m"
+        }
     }
     
     var body: some View {
         let displaySeconds = timerManager.setupSeconds
+        let displayHours = Int(displaySeconds) / 3600
+        let displayMinutes = (Int(displaySeconds) % 3600) / 60
         
         VStack(spacing: 12) {
             VStack(spacing: 4) {
-                // Interactive Scrollable/Draggable Big Timer Text (formatted as hh:mm)
-                Text(formatSetupTime(displaySeconds))
-                    .font(.system(size: 44, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0.15, green: 0.85, blue: 0.45))
-                    .contentShape(Rectangle())
-                    .background(
-                        ScrollDetector { deltaY in
-                            if abs(deltaY) > 0.1 {
-                                let change = deltaY > 0 ? 1 : -1
-                                let currentMins = Int(timerManager.setupSeconds / 60)
-                                let newMins = max(1, min(180, currentMins + change))
-                                timerManager.setupSeconds = Double(newMins * 60)
-                                focusMinutes = newMins
-                                HapticManager.shared.tick()
-                            }
-                        }
-                    )
-                    .gesture(
-                        DragGesture()
-                            .onChanged { value in
-                                if dragStartSeconds == 0 {
-                                    dragStartSeconds = timerManager.setupSeconds
+                // Interactive Scrollable/Draggable Big Timer Text (Split into Hour & Minute blocks)
+                HStack(spacing: 4) {
+                    // Hour Digit
+                    Text(String(format: "%02d", displayHours))
+                        .font(.system(size: 44, weight: .bold, design: .rounded))
+                        .foregroundColor(Color(red: 0.15, green: 0.85, blue: 0.45))
+                        .frame(width: 58)
+                        .contentShape(Rectangle())
+                        .background(
+                            ScrollDetector { deltaY in
+                                hourAccumulator += deltaY
+                                if abs(hourAccumulator) >= 3.0 {
+                                    let change = hourAccumulator > 0 ? 1 : -1
+                                    hourAccumulator = 0
+                                    let currentHrs = Int(timerManager.setupSeconds) / 3600
+                                    let newHrs = max(0, min(6, currentHrs + change))
+                                    updateSetupSeconds(hours: newHrs, minutes: (Int(timerManager.setupSeconds) % 3600) / 60)
+                                    HapticManager.shared.tick()
                                 }
-                                let deltaY = -value.translation.height
-                                let deltaMinutes = Int(deltaY / 6.0)
-                                let currentMins = max(1, min(180, Int(dragStartSeconds / 60) + deltaMinutes))
-                                timerManager.setupSeconds = Double(currentMins * 60)
-                                focusMinutes = currentMins
                             }
-                            .onEnded { _ in
-                                dragStartSeconds = 0
-                                HapticManager.shared.click()
+                        )
+                        .gesture(
+                            DragGesture()
+                                .onChanged { value in
+                                    if dragStartHours == -1 {
+                                        dragStartHours = Int(timerManager.setupSeconds) / 3600
+                                    }
+                                    let deltaY = -value.translation.height
+                                    let change = Int(deltaY / 15.0)
+                                    let newHrs = max(0, min(6, dragStartHours + change))
+                                    updateSetupSeconds(hours: newHrs, minutes: (Int(timerManager.setupSeconds) % 3600) / 60)
+                                }
+                                .onEnded { _ in
+                                    dragStartHours = -1
+                                    HapticManager.shared.click()
+                                }
+                        )
+                    
+                    Text(":")
+                        .font(.system(size: 44, weight: .bold, design: .rounded))
+                        .foregroundColor(Color(red: 0.15, green: 0.85, blue: 0.45).opacity(0.6))
+                    
+                    // Minute Digit
+                    Text(String(format: "%02d", displayMinutes))
+                        .font(.system(size: 44, weight: .bold, design: .rounded))
+                        .foregroundColor(Color(red: 0.15, green: 0.85, blue: 0.45))
+                        .frame(width: 58)
+                        .contentShape(Rectangle())
+                        .background(
+                            ScrollDetector { deltaY in
+                                minAccumulator += deltaY
+                                if abs(minAccumulator) >= 1.2 {
+                                    let change = minAccumulator > 0 ? 1 : -1
+                                    minAccumulator = 0
+                                    let currentMins = (Int(timerManager.setupSeconds) % 3600) / 60
+                                    let newMins = max(0, min(59, currentMins + change))
+                                    updateSetupSeconds(hours: Int(timerManager.setupSeconds) / 3600, minutes: newMins)
+                                    HapticManager.shared.tick()
+                                }
                             }
-                    )
+                        )
+                        .gesture(
+                            DragGesture()
+                                .onChanged { value in
+                                    if dragStartMinutes == -1 {
+                                        dragStartMinutes = (Int(timerManager.setupSeconds) % 3600) / 60
+                                    }
+                                    let deltaY = -value.translation.height
+                                    let change = Int(deltaY / 6.0)
+                                    let newMins = max(0, min(59, dragStartMinutes + change))
+                                    updateSetupSeconds(hours: Int(timerManager.setupSeconds) / 3600, minutes: newMins)
+                                }
+                                .onEnded { _ in
+                                    dragStartMinutes = -1
+                                    HapticManager.shared.click()
+                                }
+                        )
+                }
                 
-                Text("Scroll or drag on time to change")
-                    .font(.system(size: 8, weight: .medium, design: .rounded))
-                    .foregroundColor(.secondary.opacity(0.6))
-                    .padding(.bottom, 2)
+                // Labels below digits
+                HStack(spacing: 0) {
+                    Text("hours")
+                        .font(.system(size: 8, weight: .bold, design: .rounded))
+                        .foregroundColor(.secondary.opacity(0.4))
+                        .frame(width: 58, alignment: .center)
+                    
+                    Spacer().frame(width: 10)
+                    
+                    Text("min")
+                        .font(.system(size: 8, weight: .bold, design: .rounded))
+                        .foregroundColor(.secondary.opacity(0.4))
+                        .frame(width: 58, alignment: .center)
+                }
+                .padding(.top, -2)
+                .padding(.bottom, 2)
                 
                 Text("Ends at \(formatEndTime(endTime))")
                     .font(.system(.caption, design: .rounded))
@@ -1128,6 +1208,24 @@ struct TimerSetupView: View {
                     }
                     .frame(height: 6)
                     .padding(.top, 4)
+                    
+                    // Summary of total work and break times
+                    HStack {
+                        let totalWorkMins = (Int(timerManager.setupSeconds) / 60) * cycles
+                        let totalBreakMins = breakMinutes * (cycles - 1)
+                        
+                        Text("Total Work: \(formatSummaryMinutes(totalWorkMins))")
+                            .font(.system(size: 9, weight: .bold, design: .rounded))
+                            .foregroundColor(Color(red: 0.15, green: 0.85, blue: 0.45))
+                        
+                        Spacer()
+                        
+                        Text("Total Break: \(formatSummaryMinutes(totalBreakMins))")
+                            .font(.system(size: 9, weight: .bold, design: .rounded))
+                            .foregroundColor(.orange)
+                    }
+                    .padding(.top, 4)
+                    .padding(.horizontal, 2)
                 }
                 .padding(10)
                 .background(Color.white.opacity(0.03))
