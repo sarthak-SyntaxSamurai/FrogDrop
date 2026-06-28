@@ -948,58 +948,69 @@ struct ScrollWheelPicker: View {
     let range: ClosedRange<Int>
     @Binding var selection: Int
     
+    @State private var scrollSelection: Int?
+    
     var body: some View {
-        ScrollViewReader { proxy in
-            ZStack {
-                // Highlight bands in center for selected item
+        ZStack {
+            // Highlight bands in center for selected item
+            VStack(spacing: 0) {
+                Divider()
+                    .background(Color(red: 0.15, green: 0.85, blue: 0.45).opacity(0.15))
+                Spacer()
+                Divider()
+                    .background(Color(red: 0.15, green: 0.85, blue: 0.45).opacity(0.15))
+            }
+            .frame(height: 24)
+            .background(Color.white.opacity(0.03))
+            
+            ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
-                    Divider()
-                        .background(Color(red: 0.15, green: 0.85, blue: 0.45).opacity(0.15))
-                    Spacer()
-                    Divider()
-                        .background(Color(red: 0.15, green: 0.85, blue: 0.45).opacity(0.15))
-                }
-                .frame(height: 24)
-                .background(Color.white.opacity(0.03))
-                
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: 0) {
-                        Color.clear.frame(height: 24) // Top spacer
-                        
-                        ForEach(Array(range), id: \.self) { val in
-                            Text(String(format: "%02d", val))
-                                .font(.system(size: selection == val ? 15 : 12, weight: selection == val ? .bold : .medium, design: .rounded))
-                                .foregroundColor(selection == val ? Color(red: 0.15, green: 0.85, blue: 0.45) : .secondary.opacity(0.35))
-                                .frame(height: 24)
-                                .frame(maxWidth: .infinity)
-                                .id(val)
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    selection = val
-                                    HapticManager.shared.click()
-                                }
-                        }
-                        
-                        Color.clear.frame(height: 24) // Bottom spacer
+                    Color.clear.frame(height: 24) // Top spacer
+                    
+                    ForEach(Array(range), id: \.self) { val in
+                        Text(String(format: "%02d", val))
+                            .font(.system(size: selection == val ? 15 : 12, weight: selection == val ? .bold : .medium, design: .rounded))
+                            .foregroundColor(selection == val ? Color(red: 0.15, green: 0.85, blue: 0.45) : .secondary.opacity(0.35))
+                            .frame(height: 24)
+                            .frame(maxWidth: .infinity)
+                            .id(val)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                scrollSelection = val
+                                HapticManager.shared.click()
+                            }
                     }
+                    
+                    Color.clear.frame(height: 24) // Bottom spacer
                 }
-                .frame(height: 72)
-                .onAppear {
-                    proxy.scrollTo(selection, anchor: .center)
+                .scrollTargetLayout()
+            }
+            .scrollTargetBehavior(.viewAligned)
+            .scrollPosition(id: $scrollSelection)
+            .frame(height: 72)
+            .onAppear {
+                scrollSelection = selection
+            }
+            .onChange(of: selection) { _, newValue in
+                if scrollSelection != newValue {
+                    scrollSelection = newValue
                 }
-                .onChange(of: selection) { newVal in
-                    withAnimation(.spring(response: 0.22, dampingFraction: 0.75)) {
-                        proxy.scrollTo(newVal, anchor: .center)
+            }
+            .onChange(of: scrollSelection) { _, newValue in
+                if let newVal = newValue {
+                    if selection != newVal {
+                        selection = newVal
+                        HapticManager.shared.tick()
                     }
                 }
             }
-            .frame(width: 48)
-            .cornerRadius(6)
-            .overlay(
-                RoundedRectangle(cornerRadius: 6)
-                    .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
-            )
         }
+        .frame(width: 48)
+        .cornerRadius(6)
+        .overlay(
+            RoundedRectangle(cornerRadius: 6)
+                .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
+        )
     }
 }
 
@@ -1087,10 +1098,10 @@ struct TimerSetupView: View {
                     .foregroundColor(.secondary)
             }
             .padding(.top, 4)
-            .onChange(of: setupHours) { _ in
+            .onChange(of: setupHours) { _, _ in
                 updateFromWheel()
             }
-            .onChange(of: setupMinutes) { _ in
+            .onChange(of: setupMinutes) { _, _ in
                 updateFromWheel()
             }
             .onAppear {
@@ -1572,27 +1583,12 @@ struct ClipboardRow: View {
     var body: some View {
         GeometryReader { geometry in
             HStack(spacing: 8) {
-                VStack(alignment: .leading, spacing: 4) {
-                    highlightedText(displayPreviewText, query: searchQuery)
-                        .font(.system(.subheadline, design: .rounded))
-                        .fontWeight(.medium)
-                        .foregroundColor(.primary)
-                        .lineLimit(1)
-                        .multilineTextAlignment(.leading)
-                    
-                    HStack(spacing: 4) {
-                        if let app = item.sourceApp {
-                            Text(app)
-                                .font(.system(size: 9, weight: .bold, design: .rounded))
-                                .foregroundColor(.green.opacity(0.8))
-                                .padding(.horizontal, 4)
-                                .padding(.vertical, 1)
-                                .background(Color.green.opacity(0.08))
-                                .cornerRadius(3)
-                            
-                        }
-                    }
-                }
+                highlightedText(displayPreviewText, query: searchQuery)
+                    .font(.system(.subheadline, design: .rounded))
+                    .fontWeight(.medium)
+                    .foregroundColor(.primary)
+                    .lineLimit(1)
+                    .multilineTextAlignment(.leading)
                 
                 Spacer()
                 

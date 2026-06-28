@@ -207,12 +207,6 @@ class ClipboardManager: ObservableObject {
         pasteboard.declareTypes([.string], owner: nil)
         pasteboard.setString(item.text, forType: .string)
         lastChangeCount = pasteboard.changeCount
-        
-        if let index = items.firstIndex(of: item) {
-            items.remove(at: index)
-        }
-        items.insert(item, at: 0)
-        saveHistory()
         HapticManager.shared.click()
     }
     

@@ -318,26 +318,55 @@ class GlobalDragMonitor {
     
     private var dragMonitor: Any?
     private var upMonitor: Any?
+    private var downMonitor: Any?
+    
+    private var startPoint: NSPoint?
+    private var isDragTriggered = false
     
     private init() {}
     
     func start() {
+        // Monitor global mouse down to record start location
+        downMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown]) { _ in
+            DispatchQueue.main.async {
+                self.startPoint = NSEvent.mouseLocation
+                self.isDragTriggered = false
+            }
+        }
+        
         // Monitor global drags
         dragMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDragged]) { _ in
             DispatchQueue.main.async {
-                AppDelegate.shared.dropzonePanel?.showCollapsedIndicator()
+                guard let start = self.startPoint else { return }
+                let current = NSEvent.mouseLocation
+                let dx = current.x - start.x
+                let dy = current.y - start.y
+                let dist = sqrt(dx*dx + dy*dy)
+                
+                // Only show collapsed indicator if the drag distance exceeds 15 pixels
+                // This prevents clicks & double-clicks from triggering it
+                if dist > 15 && !self.isDragTriggered {
+                    self.isDragTriggered = true
+                    AppDelegate.shared.dropzonePanel?.showCollapsedIndicator()
+                }
             }
         }
         
         // Monitor drag ends / mouse up
         upMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseUp]) { _ in
             DispatchQueue.main.async {
+                self.startPoint = nil
+                self.isDragTriggered = false
                 AppDelegate.shared.dropzonePanel?.hideCollapsedIndicator()
             }
         }
     }
     
     func stop() {
+        if let downMonitor = downMonitor {
+            NSEvent.removeMonitor(downMonitor)
+            self.downMonitor = nil
+        }
         if let dragMonitor = dragMonitor {
             NSEvent.removeMonitor(dragMonitor)
             self.dragMonitor = nil

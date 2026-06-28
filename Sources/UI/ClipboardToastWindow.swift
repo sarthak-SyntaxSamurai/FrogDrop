@@ -5,58 +5,49 @@ class ToastModel: ObservableObject {
     @Published var text: String = ""
     @Published var appName: String = ""
     @Published var isTemporary: Bool = false
+    @Published var itemId: UUID? = nil
 }
 
 struct ClipboardToastView: View {
     @ObservedObject var model: ToastModel
+    var onStayClicked: () -> Void
     
     var body: some View {
-        HStack(spacing: 8) {
-            Image(systemName: model.isTemporary ? "clock.arrow.2.circlepath" : "doc.on.clipboard")
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundColor(model.isTemporary ? .orange : Color(red: 0.15, green: 0.85, blue: 0.45))
-                .padding(6)
-                .background((model.isTemporary ? Color.orange : Color(red: 0.15, green: 0.85, blue: 0.45)).opacity(0.12))
+        HStack(spacing: 6) {
+            Image(systemName: "clock.arrow.2.circlepath")
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundColor(.orange)
+                .padding(4)
+                .background(Color.orange.opacity(0.12))
                 .clipShape(Circle())
             
-            VStack(alignment: .leading, spacing: 1) {
-                HStack(spacing: 4) {
-                    Text(model.appName)
-                        .font(.system(size: 9, weight: .bold, design: .rounded))
-                        .foregroundColor(.white.opacity(0.9))
-                    
-                    if model.isTemporary {
-                        Text("Temp")
-                            .font(.system(size: 7, weight: .bold))
-                            .foregroundColor(.orange)
-                            .padding(.horizontal, 3)
-                            .padding(.vertical, 0.5)
-                            .background(Color.orange.opacity(0.15))
-                            .cornerRadius(2)
-                    }
-                }
-                
-                let displayPreviewText = model.text
-                    .replacingOccurrences(of: "\n", with: " ")
-                    .replacingOccurrences(of: "\r", with: " ")
-                    .replacingOccurrences(of: "\t", with: " ")
-                    .trimmingCharacters(in: .whitespacesAndNewlines)
-                
-                Text(displayPreviewText.prefix(28) + (displayPreviewText.count > 28 ? "..." : ""))
-                    .font(.system(size: 11, weight: .medium, design: .rounded))
-                    .foregroundColor(.white.opacity(0.6))
-                    .lineLimit(1)
+            Text("Temporary Item")
+                .font(.system(size: 10, weight: .semibold, design: .rounded))
+                .foregroundColor(.white.opacity(0.9))
+            
+            Spacer().frame(width: 4)
+            
+            Button(action: {
+                onStayClicked()
+            }) {
+                Text("Stay")
+                    .font(.system(size: 9, weight: .bold, design: .rounded))
+                    .foregroundColor(.black)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2.5)
+                    .background(Color(red: 0.15, green: 0.85, blue: 0.45))
+                    .cornerRadius(4)
             }
-            Spacer()
+            .buttonStyle(.plain)
         }
-        .padding(.horizontal, 10)
+        .padding(.horizontal, 8)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(
             VisualEffectView(material: .hudWindow, blendingMode: .withinWindow)
-                .cornerRadius(12)
+                .cornerRadius(8)
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: 8)
                 .stroke(Color.white.opacity(0.12), lineWidth: 0.5)
         )
     }
@@ -71,7 +62,7 @@ class ClipboardToastPanelWindow: NSWindow {
     
     private init() {
         super.init(
-            contentRect: NSRect(x: 0, y: 0, width: 220, height: 42),
+            contentRect: NSRect(x: 0, y: 0, width: 170, height: 32),
             styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
             defer: false
@@ -82,9 +73,19 @@ class ClipboardToastPanelWindow: NSWindow {
         self.level = .statusBar
         self.hasShadow = true
         self.collectionBehavior = [.canJoinAllSpaces, .ignoresCycle, .fullScreenAuxiliary]
-        self.ignoresMouseEvents = true
+        self.ignoresMouseEvents = false // Allow clicking the Stay button
         
-        let view = ClipboardToastView(model: model)
+        let view = ClipboardToastView(model: model) { [weak self] in
+            guard let self = self else { return }
+            Task { @MainActor in
+                // Find and make the active temporary item permanent
+                if let firstTemp = ClipboardManager.shared.items.first(where: { $0.isTemporary }) {
+                    ClipboardManager.shared.makePermanent(firstTemp)
+                    HapticManager.shared.success()
+                }
+            }
+            self.hide()
+        }
         let hostingView = NSHostingView(rootView: view)
         hostingView.frame = self.contentView?.bounds ?? .zero
         hostingView.autoresizingMask = [.width, .height]
@@ -92,8 +93,11 @@ class ClipboardToastPanelWindow: NSWindow {
     }
     
     func show(statusItemFrame: NSRect, text: String, appName: String, isTemporary: Bool) {
-        let width: CGFloat = 220
-        let height: CGFloat = 42
+        // ONLY show the notification panel for temporary copies
+        guard isTemporary else { return }
+        
+        let width: CGFloat = 170
+        let height: CGFloat = 32
         
         self.model.text = text
         self.model.appName = appName
@@ -126,7 +130,7 @@ class ClipboardToastPanelWindow: NSWindow {
         }
         
         hideTimer?.invalidate()
-        hideTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: false) { [weak self] _ in
+        hideTimer = Timer.scheduledTimer(withTimeInterval: 3.5, repeats: false) { [weak self] _ in
             self?.hide()
         }
     }
