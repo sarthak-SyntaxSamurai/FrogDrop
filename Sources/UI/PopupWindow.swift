@@ -234,17 +234,7 @@ struct PopupView: View {
     // Settings toggle
     @State private var isShowingSettings = false
     
-    private func offsetForTab(_ tab: Tab, in totalWidth: CGFloat) -> CGFloat {
-        let buttonWidth = (totalWidth - 8) / 3
-        switch tab {
-        case .timer:
-            return 3
-        case .clipboard:
-            return 3 + buttonWidth + 2
-        case .dropzone:
-            return 3 + 2 * (buttonWidth + 2)
-        }
-    }
+    @Namespace private var tabNamespace
     
     private func switchToNextTab() {
         withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
@@ -278,38 +268,23 @@ struct PopupView: View {
         VStack(spacing: 0) {
             // Header Tab Bar
             HStack(spacing: 2) {
-                TabButton(title: "Timer", icon: "timer", isActive: activeTab == .timer) {
+                TabButton(title: "Timer", icon: "timer", isActive: activeTab == .timer, namespace: tabNamespace) {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
                         activeTab = .timer
                     }
                 }
-                TabButton(title: "Clipboard", icon: "paperclip", isActive: activeTab == .clipboard) {
+                TabButton(title: "Clipboard", icon: "paperclip", isActive: activeTab == .clipboard, namespace: tabNamespace) {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
                         activeTab = .clipboard
                     }
                 }
-                TabButton(title: "Dropzone", icon: "square.and.arrow.down", isActive: activeTab == .dropzone) {
+                TabButton(title: "Dropzone", icon: "square.and.arrow.down", isActive: activeTab == .dropzone, namespace: tabNamespace) {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
                         activeTab = .dropzone
                     }
                 }
             }
             .padding(3)
-            .background(
-                GeometryReader { tabGeo in
-                    ZStack(alignment: .leading) {
-                        RoundedRectangle(cornerRadius: 6)
-                            .fill(Color.white.opacity(0.08))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .stroke(Color.white.opacity(0.12), lineWidth: 0.5)
-                            )
-                            .shadow(color: Color.black.opacity(0.15), radius: 2, x: 0, y: 1)
-                            .frame(width: (tabGeo.size.width - 8) / 3, height: tabGeo.size.height - 6)
-                            .offset(x: offsetForTab(activeTab, in: tabGeo.size.width))
-                    }
-                }
-            )
             .background(Color.white.opacity(0.03))
             .cornerRadius(8)
             .overlay(
@@ -437,6 +412,7 @@ struct TabButton: View {
     let title: String
     let icon: String
     let isActive: Bool
+    let namespace: Namespace.ID
     let action: () -> Void
     
     @State private var isHovered = false
@@ -451,7 +427,20 @@ struct TabButton: View {
         .foregroundColor(isActive ? Color(red: 0.15, green: 0.85, blue: 0.45) : (isHovered ? .primary : .secondary))
         .frame(maxWidth: .infinity)
         .padding(.vertical, 6)
-        .background(Color.clear)
+        .background(
+            ZStack {
+                if isActive {
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color.white.opacity(0.08))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6)
+                                .stroke(Color.white.opacity(0.12), lineWidth: 0.5)
+                        )
+                        .shadow(color: Color.black.opacity(0.15), radius: 2, x: 0, y: 1)
+                        .matchedGeometryEffect(id: "activeTabBackground", in: namespace)
+                }
+            }
+        )
         .contentShape(Rectangle())
         .onTapGesture {
             HapticManager.shared.click()
@@ -943,60 +932,12 @@ struct TugTimerCard: View {
     }
 }
 
-// Trackpad/mouse wheel scroll detection for macOS
-struct ScrollDetector: NSViewRepresentable {
-    var onScroll: (CGFloat) -> Void
-    
-    func makeNSView(context: Context) -> NSView {
-        let view = ScrollDetectionView()
-        view.onScroll = onScroll
-        return view
-    }
-    
-    func updateNSView(_ nsView: NSView, context: Context) {}
-}
-
-class ScrollDetectionView: NSView {
-    var onScroll: ((CGFloat) -> Void)?
-    
-    override var acceptsFirstResponder: Bool { true }
-    
-    override func hitTest(_ point: NSPoint) -> NSView? {
-        return self
-    }
-    
-    override func scrollWheel(with event: NSEvent) {
-        if let onScroll = onScroll {
-            let delta = event.scrollingDeltaY != 0 ? event.scrollingDeltaY : event.deltaY
-            onScroll(delta)
-        }
-    }
-    
-    override func mouseDown(with event: NSEvent) {
-        nextResponder?.mouseDown(with: event)
-    }
-    
-    override func mouseUp(with event: NSEvent) {
-        nextResponder?.mouseUp(with: event)
-    }
-}
-
-// Custom discrete roller wheel picker mimicking iOS wheel picker layout
+// Custom inline roller wheel picker mimicking iOS wheel picker layout
 struct ScrollWheelPicker: View {
     let range: ClosedRange<Int>
     @Binding var selection: Int
     
-    @State private var accumulator: CGFloat = 0
-    
-    private var prevValue: Int? {
-        let val = selection - 1
-        return range.contains(val) ? val : nil
-    }
-    
-    private var nextValue: Int? {
-        let val = selection + 1
-        return range.contains(val) ? val : nil
-    }
+    @State private var scrollSelection: Int?
     
     var body: some View {
         ZStack {
@@ -1011,78 +952,46 @@ struct ScrollWheelPicker: View {
             .frame(height: 24)
             .background(Color.white.opacity(0.03))
             
-            VStack(spacing: 0) {
-                // Top Row (Previous value)
-                Group {
-                    if let prev = prevValue {
-                        Text(String(format: "%02d", prev))
-                            .font(.system(size: 12, weight: .medium, design: .rounded))
-                            .foregroundColor(.secondary.opacity(0.35))
-                    } else {
-                        Text(" ")
-                            .font(.system(size: 12, design: .rounded))
+            ScrollView(showsIndicators: false) {
+                LazyVStack(spacing: 0) {
+                    ForEach(Array(range), id: \.self) { val in
+                        Text(String(format: "%02d", val))
+                            .font(.system(size: selection == val ? 15 : 12, weight: selection == val ? .bold : .medium, design: .rounded))
+                            .foregroundColor(selection == val ? Color(red: 0.15, green: 0.85, blue: 0.45) : .secondary.opacity(0.35))
+                            .frame(height: 24)
+                            .frame(maxWidth: .infinity)
+                            .id(val)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                withAnimation(.spring(response: 0.22, dampingFraction: 0.8)) {
+                                    scrollSelection = val
+                                }
+                                HapticManager.shared.click()
+                            }
                     }
                 }
-                .frame(height: 24)
-                .frame(maxWidth: .infinity)
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    if let prev = prevValue {
-                        withAnimation(.spring(response: 0.18, dampingFraction: 0.8)) {
-                            selection = prev
-                        }
-                        HapticManager.shared.click()
-                    }
-                }
-                
-                // Center Row (Active selection - always in the center and highlighted green)
-                Text(String(format: "%02d", selection))
-                    .font(.system(size: 15, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0.15, green: 0.85, blue: 0.45))
-                    .frame(height: 24)
-                    .frame(maxWidth: .infinity)
-                    .contentShape(Rectangle())
-                
-                // Bottom Row (Next value)
-                Group {
-                    if let next = nextValue {
-                        Text(String(format: "%02d", next))
-                            .font(.system(size: 12, weight: .medium, design: .rounded))
-                            .foregroundColor(.secondary.opacity(0.35))
-                    } else {
-                        Text(" ")
-                            .font(.system(size: 12, design: .rounded))
-                    }
-                }
-                .frame(height: 24)
-                .frame(maxWidth: .infinity)
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    if let next = nextValue {
-                        withAnimation(.spring(response: 0.18, dampingFraction: 0.8)) {
-                            selection = next
-                        }
-                        HapticManager.shared.click()
+                .scrollTargetLayout()
+            }
+            .scrollTargetBehavior(.viewAligned)
+            .scrollPosition(id: $scrollSelection)
+            .safeAreaPadding(.vertical, 24)
+            .frame(height: 72)
+            .onAppear {
+                scrollSelection = selection
+            }
+            .onChange(of: selection) { _, newValue in
+                if scrollSelection != newValue {
+                    withAnimation(.spring(response: 0.2, dampingFraction: 0.85)) {
+                        scrollSelection = newValue
                     }
                 }
             }
-            .background(
-                ScrollDetector { deltaY in
-                    accumulator += deltaY
-                    // Highly sensitive snapping scroll logic
-                    if abs(accumulator) >= 0.8 {
-                        let change = accumulator > 0 ? -1 : 1
-                        accumulator = 0
-                        let newValue = selection + change
-                        if range.contains(newValue) {
-                            withAnimation(.spring(response: 0.15, dampingFraction: 0.85)) {
-                                selection = newValue
-                            }
-                            HapticManager.shared.tick()
-                        }
-                    }
+            .onChange(of: scrollSelection) { _, newValue in
+                if let newVal = newValue, selection != newVal {
+                    selection = newVal
+                    HapticManager.shared.tick()
                 }
-            )
+            }
         }
         .frame(width: 48, height: 72)
         .cornerRadius(6)
