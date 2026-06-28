@@ -943,41 +943,63 @@ struct TugTimerCard: View {
     }
 }
 
-// Trackpad/mouse wheel scroll detection for macOS
-struct ScrollDetector: NSViewRepresentable {
-    var onScroll: (CGFloat) -> Void
+// Custom inline roller wheel picker mimicking iOS wheel picker layout
+struct ScrollWheelPicker: View {
+    let range: ClosedRange<Int>
+    @Binding var selection: Int
     
-    func makeNSView(context: Context) -> NSView {
-        let view = ScrollDetectionView()
-        view.onScroll = onScroll
-        return view
-    }
-    
-    func updateNSView(_ nsView: NSView, context: Context) {}
-}
-
-class ScrollDetectionView: NSView {
-    var onScroll: ((CGFloat) -> Void)?
-    
-    override var acceptsFirstResponder: Bool { true }
-    
-    override func hitTest(_ point: NSPoint) -> NSView? {
-        return self
-    }
-    
-    override func scrollWheel(with event: NSEvent) {
-        if let onScroll = onScroll {
-            let delta = event.scrollingDeltaY != 0 ? event.scrollingDeltaY : event.deltaY
-            onScroll(delta * 1.5)
+    var body: some View {
+        ScrollViewReader { proxy in
+            ZStack {
+                // Highlight bands in center for selected item
+                VStack(spacing: 0) {
+                    Divider()
+                        .background(Color(red: 0.15, green: 0.85, blue: 0.45).opacity(0.15))
+                    Spacer()
+                    Divider()
+                        .background(Color(red: 0.15, green: 0.85, blue: 0.45).opacity(0.15))
+                }
+                .frame(height: 24)
+                .background(Color.white.opacity(0.03))
+                
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 0) {
+                        Color.clear.frame(height: 24) // Top spacer
+                        
+                        ForEach(Array(range), id: \.self) { val in
+                            Text(String(format: "%02d", val))
+                                .font(.system(size: selection == val ? 15 : 12, weight: selection == val ? .bold : .medium, design: .rounded))
+                                .foregroundColor(selection == val ? Color(red: 0.15, green: 0.85, blue: 0.45) : .secondary.opacity(0.35))
+                                .frame(height: 24)
+                                .frame(maxWidth: .infinity)
+                                .id(val)
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    selection = val
+                                    HapticManager.shared.click()
+                                }
+                        }
+                        
+                        Color.clear.frame(height: 24) // Bottom spacer
+                    }
+                }
+                .frame(height: 72)
+                .onAppear {
+                    proxy.scrollTo(selection, anchor: .center)
+                }
+                .onChange(of: selection) { newVal in
+                    withAnimation(.spring(response: 0.22, dampingFraction: 0.75)) {
+                        proxy.scrollTo(newVal, anchor: .center)
+                    }
+                }
+            }
+            .frame(width: 48)
+            .cornerRadius(6)
+            .overlay(
+                RoundedRectangle(cornerRadius: 6)
+                    .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
+            )
         }
-    }
-    
-    override func mouseDown(with event: NSEvent) {
-        nextResponder?.mouseDown(with: event)
-    }
-    
-    override func mouseUp(with event: NSEvent) {
-        nextResponder?.mouseUp(with: event)
     }
 }
 
@@ -990,11 +1012,9 @@ struct TimerSetupView: View {
     @State private var isTaskHovered = false
     @State private var focusMinutes: Int = 25
     
-    // Smooth scroll and drag state
-    @State private var dragStartHours: Int = -1
-    @State private var dragStartMinutes: Int = -1
-    @State private var hourAccumulator: CGFloat = 0
-    @State private var minAccumulator: CGFloat = 0
+    // Inline roller selection states
+    @State private var setupHours: Int = 0
+    @State private var setupMinutes: Int = 25
     
     private var totalDuration: TimeInterval {
         if isPomodoro {
@@ -1010,10 +1030,11 @@ struct TimerSetupView: View {
         Date().addingTimeInterval(totalDuration)
     }
     
-    private func updateSetupSeconds(hours: Int, minutes: Int) {
-        var totalSecs = Double(hours * 3600 + minutes * 60)
+    private func updateFromWheel() {
+        var totalSecs = Double(setupHours * 3600 + setupMinutes * 60)
         if totalSecs < 60 {
             totalSecs = 60 // Minimum 1 minute
+            setupMinutes = 1
         }
         timerManager.setupSeconds = totalSecs
         focusMinutes = Int(totalSecs / 60)
@@ -1034,101 +1055,49 @@ struct TimerSetupView: View {
     }
     
     var body: some View {
-        let displaySeconds = timerManager.setupSeconds
-        let displayHours = Int(displaySeconds) / 3600
-        let displayMinutes = (Int(displaySeconds) % 3600) / 60
-        
         VStack(spacing: 12) {
-            VStack(spacing: 4) {
-                // Interactive Scrollable/Draggable Big Timer Text (Split into Hour & Minute blocks with dropdown lists)
-                HStack(spacing: 4) {
-                    // Hour Digit Dropdown List
-                    Menu {
-                        ForEach(0...6, id: \.self) { hr in
-                            Button(String(format: "%02d", hr)) {
-                                updateSetupSeconds(hours: hr, minutes: displayMinutes)
-                                HapticManager.shared.click()
-                            }
-                        }
-                    } label: {
-                        Text(String(format: "%02d", displayHours))
-                            .font(.system(size: 44, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0.15, green: 0.85, blue: 0.45))
-                            .contentShape(Rectangle())
-                            .background(
-                                ScrollDetector { deltaY in
-                                    hourAccumulator += deltaY
-                                    if abs(hourAccumulator) >= 1.0 {
-                                        let change = hourAccumulator > 0 ? 1 : -1
-                                        hourAccumulator = 0
-                                        let currentHrs = Int(timerManager.setupSeconds) / 3600
-                                        let newHrs = max(0, min(6, currentHrs + change))
-                                        updateSetupSeconds(hours: newHrs, minutes: (Int(timerManager.setupSeconds) % 3600) / 60)
-                                        HapticManager.shared.tick()
-                                    }
-                                }
-                            )
-                    }
-                    .menuStyle(.borderlessButton)
-                    .frame(width: 58)
-                    
-                    Text(":")
-                        .font(.system(size: 44, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0.15, green: 0.85, blue: 0.45).opacity(0.6))
-                    
-                    // Minute Digit Dropdown List
-                    Menu {
-                        ForEach(0...59, id: \.self) { minVal in
-                            Button(String(format: "%02d", minVal)) {
-                                updateSetupSeconds(hours: displayHours, minutes: minVal)
-                                HapticManager.shared.click()
-                            }
-                        }
-                    } label: {
-                        Text(String(format: "%02d", displayMinutes))
-                            .font(.system(size: 44, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0.15, green: 0.85, blue: 0.45))
-                            .contentShape(Rectangle())
-                            .background(
-                                ScrollDetector { deltaY in
-                                    minAccumulator += deltaY
-                                    if abs(minAccumulator) >= 0.5 {
-                                        let change = minAccumulator > 0 ? 1 : -1
-                                        minAccumulator = 0
-                                        let currentMins = (Int(timerManager.setupSeconds) % 3600) / 60
-                                        let newMins = max(0, min(59, currentMins + change))
-                                        updateSetupSeconds(hours: Int(timerManager.setupSeconds) / 3600, minutes: newMins)
-                                        HapticManager.shared.tick()
-                                    }
-                                }
-                            )
-                    }
-                    .menuStyle(.borderlessButton)
-                    .frame(width: 58)
-                }
-                
-                // Labels below digits
+            VStack(spacing: 6) {
+                // Inline Hours & Minutes iOS Clock style roller wheel selectors
                 HStack(spacing: 0) {
-                    Text("hours")
-                        .font(.system(size: 8, weight: .bold, design: .rounded))
-                        .foregroundColor(.secondary.opacity(0.4))
-                        .frame(width: 58, alignment: .center)
+                    Spacer()
                     
-                    Spacer().frame(width: 10)
+                    HStack(spacing: 6) {
+                        ScrollWheelPicker(range: 0...6, selection: $setupHours)
+                        Text("hours")
+                            .font(.system(size: 11, weight: .bold, design: .rounded))
+                            .foregroundColor(.secondary)
+                    }
                     
-                    Text("min")
-                        .font(.system(size: 8, weight: .bold, design: .rounded))
-                        .foregroundColor(.secondary.opacity(0.4))
-                        .frame(width: 58, alignment: .center)
+                    Spacer().frame(width: 16)
+                    
+                    HStack(spacing: 6) {
+                        ScrollWheelPicker(range: 0...59, selection: $setupMinutes)
+                        Text("min")
+                            .font(.system(size: 11, weight: .bold, design: .rounded))
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    Spacer()
                 }
-                .padding(.top, -2)
-                .padding(.bottom, 2)
+                .frame(height: 74)
+                .padding(.top, 4)
                 
                 Text("Ends at \(formatEndTime(endTime))")
                     .font(.system(.caption, design: .rounded))
                     .foregroundColor(.secondary)
             }
             .padding(.top, 4)
+            .onChange(of: setupHours) { _ in
+                updateFromWheel()
+            }
+            .onChange(of: setupMinutes) { _ in
+                updateFromWheel()
+            }
+            .onAppear {
+                let totalSecs = timerManager.setupSeconds
+                self.setupHours = Int(totalSecs) / 3600
+                self.setupMinutes = (Int(totalSecs) % 3600) / 60
+            }
             
             VStack(alignment: .leading, spacing: 4) {
                 Text("TASK NAME")
