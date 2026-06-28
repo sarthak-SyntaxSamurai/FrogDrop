@@ -816,7 +816,7 @@ struct DropzoneSettingsView: View {
     @ObservedObject var clipboardManager = ClipboardManager.shared
     @Environment(\.presentationMode) var presentationMode
     
-    @State private var selectedTab = 0 // 0 = Grid, 1 = General, 2 = Rules
+    @State private var selectedTab = 0 // 0 = General, 1 = Grid, 2 = Rules
     @State private var newRuleAppName = ""
     @State private var newRuleType: ClipboardPreferenceRule.RuleType = .temporary
     @State private var runningApps: [String] = []
@@ -826,250 +826,288 @@ struct DropzoneSettingsView: View {
     @State private var hapticLevel: HapticManager.HapticLevel = HapticManager.shared.level
     
     var body: some View {
-        VStack(spacing: 8) {
-            Picker("", selection: $selectedTab) {
-                Text("Grid").tag(0)
-                Text("General").tag(1)
-                Text("Rules").tag(2)
+        VStack(spacing: 0) {
+            // Minimalist Tab Bar
+            HStack(spacing: 16) {
+                TabButton(title: "General", isSelected: selectedTab == 0) {
+                    withAnimation(.spring(response: 0.22, dampingFraction: 0.8)) {
+                        selectedTab = 0
+                    }
+                }
+                TabButton(title: "Grid", isSelected: selectedTab == 1) {
+                    withAnimation(.spring(response: 0.22, dampingFraction: 0.8)) {
+                        selectedTab = 1
+                    }
+                }
+                TabButton(title: "Rules", isSelected: selectedTab == 2) {
+                    withAnimation(.spring(response: 0.22, dampingFraction: 0.8)) {
+                        selectedTab = 2
+                    }
+                }
             }
-            .pickerStyle(.segmented)
-            .padding(.horizontal, 12)
-            .padding(.top, 10)
+            .padding(.horizontal, 16)
+            .padding(.top, 14)
+            .padding(.bottom, 8)
             
             Divider()
-                .background(Color.white.opacity(0.12))
+                .background(Color.white.opacity(0.08))
             
-            if selectedTab == 0 {
-                ScrollView {
+            // Tab Contents
+            ZStack {
+                if selectedTab == 0 {
+                    // General Options
                     VStack(alignment: .leading, spacing: 14) {
                         VStack(alignment: .leading, spacing: 6) {
-                            Text("FOLDERS / APPS")
-                                .font(.system(size: 10, weight: .bold, design: .rounded))
+                            Text("HAPTICS")
+                                .font(.system(size: 9, weight: .bold))
                                 .foregroundColor(.secondary)
+                                .tracking(1.0)
                             
-                            ForEach(manager.customFolders) { folder in
-                                HStack {
-                                    Image(systemName: "folder.fill")
-                                        .foregroundColor(.blue)
-                                    Text(folder.name)
-                                        .font(.system(.subheadline, design: .rounded))
-                                    Spacer()
+                            HStack(spacing: 4) {
+                                ForEach(HapticManager.HapticLevel.allCases, id: \.self) { val in
                                     Button(action: {
-                                        manager.removeFolder(id: folder.id)
+                                        hapticLevel = val
+                                        HapticManager.shared.level = val
+                                        HapticManager.shared.click()
                                     }) {
-                                        Image(systemName: "trash")
-                                            .foregroundColor(.red)
+                                        Text(val.rawValue)
+                                            .font(.system(size: 11, weight: hapticLevel == val ? .bold : .medium, design: .rounded))
+                                            .foregroundColor(hapticLevel == val ? .black : .primary)
+                                            .padding(.horizontal, 8)
+                                            .padding(.vertical, 4)
+                                            .frame(maxWidth: .infinity)
+                                            .background(hapticLevel == val ? Color(red: 0.15, green: 0.85, blue: 0.45) : Color.white.opacity(0.04))
+                                            .cornerRadius(6)
                                     }
                                     .buttonStyle(.plain)
                                 }
-                                .padding(6)
-                                .background(Color.white.opacity(0.04))
-                                .cornerRadius(6)
                             }
-                            
-                            Button(action: {
-                                selectFolder()
-                            }) {
-                                HStack {
-                                    Image(systemName: "plus.circle.fill")
-                                    Text("Add Folder...")
-                                }
-                                .font(.system(.subheadline, design: .rounded))
-                                .foregroundColor(.green)
-                            }
-                            .buttonStyle(.plain)
-                            .padding(.top, 4)
                         }
                         
                         Divider()
-                            .background(Color.white.opacity(0.1))
+                            .background(Color.white.opacity(0.06))
                         
                         VStack(alignment: .leading, spacing: 6) {
-                            Text("ACTIONS")
-                                .font(.system(size: 10, weight: .bold, design: .rounded))
-                                .foregroundColor(.secondary)
+                            HStack {
+                                Text("TEMP EXPIRATION")
+                                    .font(.system(size: 9, weight: .bold))
+                                    .foregroundColor(.secondary)
+                                    .tracking(1.0)
+                                Spacer()
+                                Text("\(Int(clipboardManager.tempDuration))s")
+                                    .font(.system(size: 11, weight: .bold, design: .monospaced))
+                                    .foregroundColor(.orange)
+                            }
                             
-                            ToggleActionRow(title: "AirDrop", actionType: "airdrop")
-                            ToggleActionRow(title: "Email", actionType: "email")
-                            ToggleActionRow(title: "Imgur Upload", actionType: "imgur")
-                            ToggleActionRow(title: "Shorten URL", actionType: "shortenURL")
-                            ToggleActionRow(title: "Copy Path", actionType: "copyPath")
+                            Slider(value: $clipboardManager.tempDuration, in: 15...120, step: 5)
+                                .accentColor(Color(red: 0.15, green: 0.85, blue: 0.45))
+                                .onChange(of: clipboardManager.tempDuration) { _, _ in
+                                    clipboardManager.saveSettings()
+                                }
+                            
+                            Text("Auto-delete items copied from temporary applications.")
+                                .font(.system(size: 9))
+                                .foregroundColor(.secondary)
                         }
+                        
+                        Spacer()
                     }
-                    .padding(.horizontal, 12)
-                }
-            } else if selectedTab == 1 {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 16) {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("HAPTIC FEEDBACK INTENSITY")
-                                .font(.system(size: 10, weight: .bold, design: .rounded))
-                                .foregroundColor(.secondary)
+                    .padding(16)
+                    .transition(.opacity)
+                } else if selectedTab == 1 {
+                    // Grid Folders & Actions
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 14) {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("FOLDERS & APPS")
+                                    .font(.system(size: 9, weight: .bold))
+                                    .foregroundColor(.secondary)
+                                    .tracking(1.0)
+                                
+                                ForEach(manager.customFolders) { folder in
+                                    HStack {
+                                        Image(systemName: "folder.fill")
+                                            .foregroundColor(.blue.opacity(0.8))
+                                            .font(.system(size: 11))
+                                        Text(folder.name)
+                                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                                            .foregroundColor(.primary)
+                                        Spacer()
+                                        Button(action: {
+                                            manager.removeFolder(id: folder.id)
+                                        }) {
+                                            Image(systemName: "minus.circle.fill")
+                                                .foregroundColor(.red.opacity(0.7))
+                                                .font(.system(size: 12))
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 5)
+                                    .background(Color.white.opacity(0.03))
+                                    .cornerRadius(6)
+                                }
+                                
+                                Button(action: {
+                                    selectFolder()
+                                }) {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "plus.circle.fill")
+                                        Text("Add Folder...")
+                                    }
+                                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                                    .foregroundColor(Color(red: 0.15, green: 0.85, blue: 0.45))
+                                }
+                                .buttonStyle(.plain)
+                                .padding(.top, 4)
+                            }
                             
-                            Picker("", selection: $hapticLevel) {
-                                ForEach(HapticManager.HapticLevel.allCases, id: \.self) { val in
-                                    Text(val.rawValue).tag(val)
+                            Divider()
+                                .background(Color.white.opacity(0.06))
+                            
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("BUILT-IN ACTIONS")
+                                    .font(.system(size: 9, weight: .bold))
+                                    .foregroundColor(.secondary)
+                                    .tracking(1.0)
+                                
+                                ToggleActionRow(title: "AirDrop", actionType: "airdrop")
+                                ToggleActionRow(title: "Email", actionType: "email")
+                                ToggleActionRow(title: "Imgur Upload", actionType: "imgur")
+                                ToggleActionRow(title: "Shorten URL", actionType: "shortenURL")
+                                ToggleActionRow(title: "Copy Path", actionType: "copyPath")
+                            }
+                        }
+                        .padding(16)
+                    }
+                    .transition(.opacity)
+                } else {
+                    // Application Rules
+                    VStack(spacing: 0) {
+                        ScrollView {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("APP PREFERENCES")
+                                    .font(.system(size: 9, weight: .bold))
+                                    .foregroundColor(.secondary)
+                                    .tracking(1.0)
+                                
+                                ForEach(clipboardManager.customRules) { rule in
+                                    HStack {
+                                        VStack(alignment: .leading, spacing: 1) {
+                                            Text(rule.appName)
+                                                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                                .foregroundColor(.primary)
+                                            Text(rule.ruleType.rawValue.capitalized)
+                                                .font(.system(size: 8, weight: .bold))
+                                                .foregroundColor(rule.ruleType == .temporary ? .orange : (rule.ruleType == .save ? .green : .red))
+                                        }
+                                        
+                                        Spacer()
+                                        
+                                        Menu {
+                                            Button("Save (Permanent)") {
+                                                clipboardManager.updateRule(id: rule.id, newType: .save)
+                                            }
+                                            Button("Temporary") {
+                                                clipboardManager.updateRule(id: rule.id, newType: .temporary)
+                                            }
+                                            Button("Ignore (Don't Save)") {
+                                                clipboardManager.updateRule(id: rule.id, newType: .ignore)
+                                            }
+                                        } label: {
+                                            Image(systemName: "ellipsis.circle.fill")
+                                                .foregroundColor(.secondary.opacity(0.8))
+                                                .font(.system(size: 14))
+                                        }
+                                        .menuStyle(.borderlessButton)
+                                        .frame(width: 20)
+                                        
+                                        Button(action: {
+                                            clipboardManager.removeRule(id: rule.id)
+                                        }) {
+                                            Image(systemName: "minus.circle.fill")
+                                                .foregroundColor(.red.opacity(0.8))
+                                                .font(.system(size: 12))
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 5)
+                                    .background(Color.white.opacity(0.03))
+                                    .cornerRadius(6)
                                 }
                             }
-                            .pickerStyle(.segmented)
-                            .onChange(of: hapticLevel) { newVal in
-                                HapticManager.shared.level = newVal
-                                HapticManager.shared.click()
-                            }
+                            .padding(16)
                         }
                         
                         Divider()
-                            .background(Color.white.opacity(0.1))
+                            .background(Color.white.opacity(0.06))
                         
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("CLIPBOARD TEMP DURATION")
-                                .font(.system(size: 10, weight: .bold, design: .rounded))
+                        // Add rule block
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("ADD NEW PREFERENCE")
+                                .font(.system(size: 8, weight: .bold))
                                 .foregroundColor(.secondary)
                             
-                            HStack {
-                                Slider(value: $clipboardManager.tempDuration, in: 15...120, step: 5)
-                                    .accentColor(.green)
-                                    .onChange(of: clipboardManager.tempDuration) { _ in
-                                        clipboardManager.saveSettings()
+                            HStack(spacing: 6) {
+                                if !runningApps.isEmpty {
+                                    Picker("", selection: $selectedRunningApp) {
+                                        ForEach(runningApps, id: \.self) { app in
+                                            Text(app).tag(app)
+                                        }
                                     }
+                                    .pickerStyle(.menu)
+                                    .labelsHidden()
+                                    .frame(maxWidth: .infinity)
+                                } else {
+                                    TextField("App Name...", text: $newRuleAppName)
+                                        .textFieldStyle(.plain)
+                                        .font(.system(size: 11, design: .rounded))
+                                        .padding(5)
+                                        .background(Color.white.opacity(0.05))
+                                        .cornerRadius(6)
+                                }
                                 
-                                Text("\(Int(clipboardManager.tempDuration))s")
-                                    .font(.system(.subheadline, design: .monospaced))
-                                    .fontWeight(.bold)
-                                    .foregroundColor(.orange)
-                                    .frame(width: 40, alignment: .trailing)
-                            }
-                            
-                            Text("Copied items from temporary apps will be auto-deleted from your history after this duration unless pinned.")
-                                .font(.system(size: 10))
-                                .foregroundColor(.secondary)
-                                .lineLimit(3)
-                        }
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.top, 4)
-                }
-            } else {
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("APPLICATION SPECIFIC RULES")
-                        .font(.system(size: 10, weight: .bold, design: .rounded))
-                        .foregroundColor(.secondary)
-                        .padding(.horizontal, 12)
-                    
-                    ScrollView {
-                        VStack(spacing: 8) {
-                            ForEach(clipboardManager.customRules) { rule in
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 1) {
-                                        Text(rule.appName)
-                                            .font(.system(.subheadline, design: .rounded))
-                                            .fontWeight(.semibold)
-                                            .foregroundColor(.white)
-                                        Text(rule.ruleType.rawValue.capitalized)
-                                            .font(.system(size: 9))
-                                            .foregroundColor(rule.ruleType == .temporary ? .orange : (rule.ruleType == .save ? .green : .red))
-                                    }
-                                    
-                                    Spacer()
-                                    
-                                    Menu {
-                                        Button("Save (Permanent)") {
-                                            clipboardManager.updateRule(id: rule.id, newType: .save)
-                                        }
-                                        Button("Temporary") {
-                                            clipboardManager.updateRule(id: rule.id, newType: .temporary)
-                                        }
-                                        Button("Ignore (Don't Save)") {
-                                            clipboardManager.updateRule(id: rule.id, newType: .ignore)
-                                        }
-                                    } label: {
-                                        Image(systemName: "ellipsis.circle.fill")
-                                            .foregroundColor(.secondary)
-                                            .font(.system(size: 16))
-                                    }
-                                    .menuStyle(.borderlessButton)
-                                    .frame(width: 24)
-                                    
-                                    Button(action: {
-                                        clipboardManager.removeRule(id: rule.id)
-                                    }) {
-                                        Image(systemName: "minus.circle.fill")
-                                            .foregroundColor(.red.opacity(0.8))
-                                    }
-                                    .buttonStyle(.plain)
+                                Picker("", selection: $newRuleType) {
+                                    Text("Temp").tag(ClipboardPreferenceRule.RuleType.temporary)
+                                    Text("Ignore").tag(ClipboardPreferenceRule.RuleType.ignore)
                                 }
-                                .padding(8)
-                                .background(Color.white.opacity(0.04))
-                                .cornerRadius(8)
+                                .labelsHidden()
+                                .frame(width: 60)
+                                
+                                Button(action: {
+                                    let appToSave = runningApps.isEmpty ? newRuleAppName.trimmingCharacters(in: .whitespacesAndNewlines) : selectedRunningApp
+                                    if !appToSave.isEmpty {
+                                        clipboardManager.addRule(appName: appToSave, ruleType: newRuleType)
+                                        newRuleAppName = ""
+                                        HapticManager.shared.success()
+                                    }
+                                }) {
+                                    Image(systemName: "plus.circle.fill")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(Color(red: 0.15, green: 0.85, blue: 0.45))
+                                }
+                                .buttonStyle(.plain)
                             }
                         }
-                        .padding(.horizontal, 12)
+                        .padding(12)
+                        .background(Color.white.opacity(0.015))
                     }
-                    
-                    Divider()
-                        .background(Color.white.opacity(0.1))
-                    
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("ADD RULE FOR APP")
-                            .font(.system(size: 9, weight: .bold, design: .rounded))
-                            .foregroundColor(.secondary)
-                        
-                        HStack(spacing: 6) {
-                            if !runningApps.isEmpty {
-                                Picker("", selection: $selectedRunningApp) {
-                                    ForEach(runningApps, id: \.self) { appName in
-                                        Text(appName).tag(appName)
-                                    }
-                                }
-                                .pickerStyle(.menu)
-                                .frame(maxWidth: .infinity)
-                            } else {
-                                TextField("App Name...", text: $newRuleAppName)
-                                    .textFieldStyle(.plain)
-                                    .font(.system(.subheadline, design: .rounded))
-                                    .padding(5)
-                                    .background(Color.white.opacity(0.06))
-                                    .cornerRadius(6)
-                            }
-                            
-                            Picker("", selection: $newRuleType) {
-                                Text("Temp").tag(ClipboardPreferenceRule.RuleType.temporary)
-                                Text("Ignore").tag(ClipboardPreferenceRule.RuleType.ignore)
-                            }
-                            .frame(width: 70)
-                            .labelsHidden()
-                            
-                            Button(action: {
-                                let appToSave = runningApps.isEmpty ? newRuleAppName.trimmingCharacters(in: .whitespacesAndNewlines) : selectedRunningApp
-                                if !appToSave.isEmpty {
-                                    clipboardManager.addRule(appName: appToSave, ruleType: newRuleType)
-                                    newRuleAppName = ""
-                                    HapticManager.shared.success()
-                                }
-                            }) {
-                                Image(systemName: "plus.circle.fill")
-                                    .foregroundColor(.green)
-                                    .font(.system(size: 18))
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.bottom, 6)
+                    .transition(.opacity)
                 }
             }
             
             Divider()
-                .background(Color.white.opacity(0.12))
+                .background(Color.white.opacity(0.08))
             
             Button("Done") {
                 presentationMode.wrappedValue.dismiss()
             }
             .buttonStyle(.borderedProminent)
-            .tint(.green)
-            .padding(.bottom, 8)
+            .tint(Color(red: 0.15, green: 0.85, blue: 0.45))
+            .padding(.vertical, 8)
         }
-        .frame(width: 270, height: 380)
+        .frame(width: 260, height: 330)
         .background(Color.black.opacity(0.85))
         .onAppear {
             let apps = NSWorkspace.shared.runningApplications
@@ -1081,6 +1119,28 @@ struct DropzoneSettingsView: View {
             if let first = uniqueApps.first {
                 self.selectedRunningApp = first
             }
+        }
+    }
+    
+    // TabButton helper component
+    struct TabButton: View {
+        let title: String
+        let isSelected: Bool
+        let action: () -> Void
+        
+        var body: some View {
+            Button(action: action) {
+                VStack(spacing: 3) {
+                    Text(title)
+                        .font(.system(size: 11, weight: isSelected ? .bold : .medium, design: .rounded))
+                        .foregroundColor(isSelected ? Color(red: 0.15, green: 0.85, blue: 0.45) : .secondary)
+                    
+                    Circle()
+                        .fill(isSelected ? Color(red: 0.15, green: 0.85, blue: 0.45) : Color.clear)
+                        .frame(width: 4, height: 4)
+                }
+            }
+            .buttonStyle(.plain)
         }
     }
     

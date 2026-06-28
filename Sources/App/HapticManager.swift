@@ -33,11 +33,13 @@ class HapticManager {
         case .soft:
             NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now)
         case .medium:
-            // Medium tick is generic click so it is easily felt
             NSHapticFeedbackManager.defaultPerformer.perform(.generic, performanceTime: .now)
         case .strong:
-            // Strong tick uses level change for high tactility
+            // Heavy double click pulse for high tactility
             NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                NSHapticFeedbackManager.defaultPerformer.perform(.generic, performanceTime: .now)
+            }
         case .off:
             break
         }
@@ -51,7 +53,11 @@ class HapticManager {
         case .medium:
             NSHapticFeedbackManager.defaultPerformer.perform(.generic, performanceTime: .now)
         case .strong:
+            // Double levelChange thumps
             NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
+            }
         case .off:
             break
         }
@@ -65,8 +71,12 @@ class HapticManager {
         case .medium:
             NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
         case .strong:
+            // Dynamic triple thump cascade
             NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
+                NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.16) {
                 NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
             }
         case .off:

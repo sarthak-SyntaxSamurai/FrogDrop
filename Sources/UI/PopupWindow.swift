@@ -1438,10 +1438,17 @@ struct ClipboardTabView: View {
     @State private var isSearchHovered = false
     
     var filteredItems: [ClipboardItem] {
+        let baseItems: [ClipboardItem]
         if searchQuery.isEmpty {
-            return clipboardManager.items
+            baseItems = clipboardManager.items
         } else {
-            return clipboardManager.items.filter { $0.text.localizedCaseInsensitiveContains(searchQuery) }
+            baseItems = clipboardManager.items.filter { $0.text.localizedCaseInsensitiveContains(searchQuery) }
+        }
+        return baseItems.sorted { a, b in
+            if a.isPinned != b.isPinned {
+                return a.isPinned && !b.isPinned
+            }
+            return a.timestamp > b.timestamp
         }
     }
     
@@ -1583,58 +1590,74 @@ struct ClipboardRow: View {
     var body: some View {
         GeometryReader { geometry in
             HStack(spacing: 8) {
-                highlightedText(displayPreviewText, query: searchQuery)
-                    .font(.system(.subheadline, design: .rounded))
-                    .fontWeight(.medium)
-                    .foregroundColor(.primary)
-                    .lineLimit(1)
-                    .multilineTextAlignment(.leading)
+                HStack(spacing: 4) {
+                    if item.isPinned {
+                        Image(systemName: "pin.fill")
+                            .font(.system(size: 9))
+                            .foregroundColor(.green)
+                            .padding(.trailing, 2)
+                    }
+                    
+                    highlightedText(displayPreviewText, query: searchQuery)
+                        .font(.system(.subheadline, design: .rounded))
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
+                        .lineLimit(1)
+                        .multilineTextAlignment(.leading)
+                }
                 
                 Spacer()
                 
                 if item.isTemporary {
-                    HStack(spacing: 6) {
-                        Text("Temp")
+                    Button(action: {
+                        ClipboardManager.shared.makePermanent(item)
+                        HapticManager.shared.success()
+                    }) {
+                        Text("Stay")
                             .font(.system(size: 9, weight: .bold, design: .rounded))
-                            .foregroundColor(.orange)
-                            .padding(.horizontal, 5)
-                            .padding(.vertical, 1.5)
-                            .background(Color.orange.opacity(0.1))
+                            .foregroundColor(.black)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2.5)
+                            .background(Color(red: 0.15, green: 0.85, blue: 0.45))
                             .cornerRadius(4)
-                        
-                        Button(action: {
-                            ClipboardManager.shared.makePermanent(item)
-                            HapticManager.shared.success()
-                        }) {
-                            Image(systemName: "pin.fill")
-                                .font(.system(size: 10, weight: .bold))
-                                .foregroundColor(.green)
-                                .padding(5)
-                                .background(Color.green.opacity(0.12))
-                                .cornerRadius(5)
-                        }
-                        .buttonStyle(.plain)
-                        .help("Keep Permanent")
-                    }
-                }
-                
-                if isHovering {
-                    Button(action: onDelete) {
-                        Image(systemName: "trash")
-                            .font(.system(size: 11))
-                            .foregroundColor(.red)
-                            .padding(6)
-                            .background(Color.red.opacity(0.12))
-                            .cornerRadius(6)
                     }
                     .buttonStyle(.plain)
                 }
+                
+                if isHovering {
+                    HStack(spacing: 4) {
+                        Button(action: {
+                            ClipboardManager.shared.togglePin(item)
+                            HapticManager.shared.click()
+                        }) {
+                            Image(systemName: item.isPinned ? "pin.slash.fill" : "pin.fill")
+                                .font(.system(size: 10))
+                                .foregroundColor(item.isPinned ? .orange : .green)
+                                .padding(5)
+                                .background(Color.white.opacity(0.08))
+                                .cornerRadius(5)
+                        }
+                        .buttonStyle(.plain)
+                        .help(item.isPinned ? "Unpin Item" : "Pin Item")
+                        
+                        Button(action: onDelete) {
+                            Image(systemName: "trash")
+                                .font(.system(size: 10))
+                                .foregroundColor(.red)
+                                .padding(5)
+                                .background(Color.red.opacity(0.12))
+                                .cornerRadius(5)
+                        }
+                        .buttonStyle(.plain)
+                        .help("Delete Item")
+                    }
+                }
             }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 8)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             .background(
-                RoundedRectangle(cornerRadius: 10)
+                RoundedRectangle(cornerRadius: 6)
                     .fill(
                         LinearGradient(
                             colors: isHovering ?
@@ -1646,7 +1669,7 @@ struct ClipboardRow: View {
                     )
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 10)
+                RoundedRectangle(cornerRadius: 6)
                     .stroke(
                         isHovering ?
                             LinearGradient(colors: [Color.white.opacity(0.18), Color.white.opacity(0.05)], startPoint: .topLeading, endPoint: .bottomTrailing) :
@@ -1690,9 +1713,8 @@ struct ClipboardRow: View {
                 PopupWindow.activeInstance?.orderOut(nil)
                 PopupWindow.activeInstance = nil
             }
-            // Static appearances - no CPU timers
         }
-        .frame(height: 50)
+        .frame(height: 34)
     }
     
     private func formatTimestamp(_ date: Date) -> String {

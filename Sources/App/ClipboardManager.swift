@@ -20,18 +20,20 @@ struct ClipboardItem: Identifiable, Codable, Equatable, Sendable {
     let sourceApp: String?
     var isTemporary: Bool
     var expiresAt: Date?
+    var isPinned: Bool = false
 
-    init(id: UUID = UUID(), text: String, timestamp: Date = Date(), sourceApp: String? = nil, isTemporary: Bool = false, expiresAt: Date? = nil) {
+    init(id: UUID = UUID(), text: String, timestamp: Date = Date(), sourceApp: String? = nil, isTemporary: Bool = false, expiresAt: Date? = nil, isPinned: Bool = false) {
         self.id = id
         self.text = text
         self.timestamp = timestamp
         self.sourceApp = sourceApp
         self.isTemporary = isTemporary
         self.expiresAt = expiresAt
+        self.isPinned = isPinned
     }
     
     enum CodingKeys: String, CodingKey {
-        case id, text, timestamp, sourceApp, isTemporary, expiresAt
+        case id, text, timestamp, sourceApp, isTemporary, expiresAt, isPinned
     }
     
     init(from decoder: Decoder) throws {
@@ -42,6 +44,7 @@ struct ClipboardItem: Identifiable, Codable, Equatable, Sendable {
         sourceApp = try container.decodeIfPresent(String.self, forKey: .sourceApp)
         isTemporary = try container.decodeIfPresent(Bool.self, forKey: .isTemporary) ?? false
         expiresAt = try container.decodeIfPresent(Date.self, forKey: .expiresAt)
+        isPinned = try container.decodeIfPresent(Bool.self, forKey: .isPinned) ?? false
     }
 }
 
@@ -199,6 +202,13 @@ class ClipboardManager: ObservableObject {
         if let index = items.firstIndex(where: { $0.id == item.id }) {
             items[index].isTemporary = false
             items[index].expiresAt = nil
+            saveHistory()
+        }
+    }
+    
+    func togglePin(_ item: ClipboardItem) {
+        if let index = items.firstIndex(where: { $0.id == item.id }) {
+            items[index].isPinned.toggle()
             saveHistory()
         }
     }
