@@ -943,12 +943,60 @@ struct TugTimerCard: View {
     }
 }
 
-// Custom inline roller wheel picker mimicking iOS wheel picker layout
+// Trackpad/mouse wheel scroll detection for macOS
+struct ScrollDetector: NSViewRepresentable {
+    var onScroll: (CGFloat) -> Void
+    
+    func makeNSView(context: Context) -> NSView {
+        let view = ScrollDetectionView()
+        view.onScroll = onScroll
+        return view
+    }
+    
+    func updateNSView(_ nsView: NSView, context: Context) {}
+}
+
+class ScrollDetectionView: NSView {
+    var onScroll: ((CGFloat) -> Void)?
+    
+    override var acceptsFirstResponder: Bool { true }
+    
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        return self
+    }
+    
+    override func scrollWheel(with event: NSEvent) {
+        if let onScroll = onScroll {
+            let delta = event.scrollingDeltaY != 0 ? event.scrollingDeltaY : event.deltaY
+            onScroll(delta)
+        }
+    }
+    
+    override func mouseDown(with event: NSEvent) {
+        nextResponder?.mouseDown(with: event)
+    }
+    
+    override func mouseUp(with event: NSEvent) {
+        nextResponder?.mouseUp(with: event)
+    }
+}
+
+// Custom discrete roller wheel picker mimicking iOS wheel picker layout
 struct ScrollWheelPicker: View {
     let range: ClosedRange<Int>
     @Binding var selection: Int
     
-    @State private var scrollSelection: Int?
+    @State private var accumulator: CGFloat = 0
+    
+    private var prevValue: Int? {
+        let val = selection - 1
+        return range.contains(val) ? val : nil
+    }
+    
+    private var nextValue: Int? {
+        let val = selection + 1
+        return range.contains(val) ? val : nil
+    }
     
     var body: some View {
         ZStack {
@@ -963,49 +1011,80 @@ struct ScrollWheelPicker: View {
             .frame(height: 24)
             .background(Color.white.opacity(0.03))
             
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 0) {
-                    Color.clear.frame(height: 24) // Top spacer
-                    
-                    ForEach(Array(range), id: \.self) { val in
-                        Text(String(format: "%02d", val))
-                            .font(.system(size: selection == val ? 15 : 12, weight: selection == val ? .bold : .medium, design: .rounded))
-                            .foregroundColor(selection == val ? Color(red: 0.15, green: 0.85, blue: 0.45) : .secondary.opacity(0.35))
-                            .frame(height: 24)
-                            .frame(maxWidth: .infinity)
-                            .id(val)
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                scrollSelection = val
-                                HapticManager.shared.click()
+            VStack(spacing: 0) {
+                // Top Row (Previous value)
+                Group {
+                    if let prev = prevValue {
+                        Text(String(format: "%02d", prev))
+                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                            .foregroundColor(.secondary.opacity(0.35))
+                    } else {
+                        Text(" ")
+                            .font(.system(size: 12, design: .rounded))
+                    }
+                }
+                .frame(height: 24)
+                .frame(maxWidth: .infinity)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    if let prev = prevValue {
+                        withAnimation(.spring(response: 0.18, dampingFraction: 0.8)) {
+                            selection = prev
+                        }
+                        HapticManager.shared.click()
+                    }
+                }
+                
+                // Center Row (Active selection - always in the center and highlighted green)
+                Text(String(format: "%02d", selection))
+                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                    .foregroundColor(Color(red: 0.15, green: 0.85, blue: 0.45))
+                    .frame(height: 24)
+                    .frame(maxWidth: .infinity)
+                    .contentShape(Rectangle())
+                
+                // Bottom Row (Next value)
+                Group {
+                    if let next = nextValue {
+                        Text(String(format: "%02d", next))
+                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                            .foregroundColor(.secondary.opacity(0.35))
+                    } else {
+                        Text(" ")
+                            .font(.system(size: 12, design: .rounded))
+                    }
+                }
+                .frame(height: 24)
+                .frame(maxWidth: .infinity)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    if let next = nextValue {
+                        withAnimation(.spring(response: 0.18, dampingFraction: 0.8)) {
+                            selection = next
+                        }
+                        HapticManager.shared.click()
+                    }
+                }
+            }
+            .background(
+                ScrollDetector { deltaY in
+                    accumulator += deltaY
+                    // Highly sensitive snapping scroll logic
+                    if abs(accumulator) >= 0.8 {
+                        let change = accumulator > 0 ? -1 : 1
+                        accumulator = 0
+                        let newValue = selection + change
+                        if range.contains(newValue) {
+                            withAnimation(.spring(response: 0.15, dampingFraction: 0.85)) {
+                                selection = newValue
                             }
-                    }
-                    
-                    Color.clear.frame(height: 24) // Bottom spacer
-                }
-                .scrollTargetLayout()
-            }
-            .scrollTargetBehavior(.viewAligned)
-            .scrollPosition(id: $scrollSelection)
-            .frame(height: 72)
-            .onAppear {
-                scrollSelection = selection
-            }
-            .onChange(of: selection) { _, newValue in
-                if scrollSelection != newValue {
-                    scrollSelection = newValue
-                }
-            }
-            .onChange(of: scrollSelection) { _, newValue in
-                if let newVal = newValue {
-                    if selection != newVal {
-                        selection = newVal
-                        HapticManager.shared.tick()
+                            HapticManager.shared.tick()
+                        }
                     }
                 }
-            }
+            )
         }
-        .frame(width: 48)
+        .frame(width: 48, height: 72)
         .cornerRadius(6)
         .overlay(
             RoundedRectangle(cornerRadius: 6)
