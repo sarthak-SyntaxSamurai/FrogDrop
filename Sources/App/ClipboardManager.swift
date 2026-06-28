@@ -132,17 +132,15 @@ class ClipboardManager: ObservableObject {
     
     private func checkExpiration() {
         let now = Date()
-        var changed = false
-        
-        items.removeAll { item in
-            if item.isTemporary, let expiry = item.expiresAt, now >= expiry {
-                changed = true
-                return true
+        let filtered = items.filter { item in
+            if item.isTemporary, let expiry = item.expiresAt {
+                return now < expiry
             }
-            return false
+            return true
         }
         
-        if changed {
+        if filtered.count != items.count {
+            items = filtered
             saveHistory()
         }
     }

@@ -959,10 +959,25 @@ struct ScrollDetector: NSViewRepresentable {
 class ScrollDetectionView: NSView {
     var onScroll: ((CGFloat) -> Void)?
     
+    override var acceptsFirstResponder: Bool { true }
+    
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        return self
+    }
+    
     override func scrollWheel(with event: NSEvent) {
         if let onScroll = onScroll {
-            onScroll(event.scrollingDeltaY)
+            let delta = event.scrollingDeltaY != 0 ? event.scrollingDeltaY : event.deltaY
+            onScroll(delta * 1.5)
         }
+    }
+    
+    override func mouseDown(with event: NSEvent) {
+        nextResponder?.mouseDown(with: event)
+    }
+    
+    override func mouseUp(with event: NSEvent) {
+        nextResponder?.mouseUp(with: event)
     }
 }
 
@@ -1025,83 +1040,71 @@ struct TimerSetupView: View {
         
         VStack(spacing: 12) {
             VStack(spacing: 4) {
-                // Interactive Scrollable/Draggable Big Timer Text (Split into Hour & Minute blocks)
+                // Interactive Scrollable/Draggable Big Timer Text (Split into Hour & Minute blocks with dropdown lists)
                 HStack(spacing: 4) {
-                    // Hour Digit
-                    Text(String(format: "%02d", displayHours))
-                        .font(.system(size: 44, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0.15, green: 0.85, blue: 0.45))
-                        .frame(width: 58)
-                        .contentShape(Rectangle())
-                        .background(
-                            ScrollDetector { deltaY in
-                                hourAccumulator += deltaY
-                                if abs(hourAccumulator) >= 3.0 {
-                                    let change = hourAccumulator > 0 ? 1 : -1
-                                    hourAccumulator = 0
-                                    let currentHrs = Int(timerManager.setupSeconds) / 3600
-                                    let newHrs = max(0, min(6, currentHrs + change))
-                                    updateSetupSeconds(hours: newHrs, minutes: (Int(timerManager.setupSeconds) % 3600) / 60)
-                                    HapticManager.shared.tick()
-                                }
+                    // Hour Digit Dropdown List
+                    Menu {
+                        ForEach(0...6, id: \.self) { hr in
+                            Button(String(format: "%02d", hr)) {
+                                updateSetupSeconds(hours: hr, minutes: displayMinutes)
+                                HapticManager.shared.click()
                             }
-                        )
-                        .gesture(
-                            DragGesture()
-                                .onChanged { value in
-                                    if dragStartHours == -1 {
-                                        dragStartHours = Int(timerManager.setupSeconds) / 3600
+                        }
+                    } label: {
+                        Text(String(format: "%02d", displayHours))
+                            .font(.system(size: 44, weight: .bold, design: .rounded))
+                            .foregroundColor(Color(red: 0.15, green: 0.85, blue: 0.45))
+                            .contentShape(Rectangle())
+                            .background(
+                                ScrollDetector { deltaY in
+                                    hourAccumulator += deltaY
+                                    if abs(hourAccumulator) >= 1.0 {
+                                        let change = hourAccumulator > 0 ? 1 : -1
+                                        hourAccumulator = 0
+                                        let currentHrs = Int(timerManager.setupSeconds) / 3600
+                                        let newHrs = max(0, min(6, currentHrs + change))
+                                        updateSetupSeconds(hours: newHrs, minutes: (Int(timerManager.setupSeconds) % 3600) / 60)
+                                        HapticManager.shared.tick()
                                     }
-                                    let deltaY = -value.translation.height
-                                    let change = Int(deltaY / 15.0)
-                                    let newHrs = max(0, min(6, dragStartHours + change))
-                                    updateSetupSeconds(hours: newHrs, minutes: (Int(timerManager.setupSeconds) % 3600) / 60)
                                 }
-                                .onEnded { _ in
-                                    dragStartHours = -1
-                                    HapticManager.shared.click()
-                                }
-                        )
+                            )
+                    }
+                    .menuStyle(.borderlessButton)
+                    .frame(width: 58)
                     
                     Text(":")
                         .font(.system(size: 44, weight: .bold, design: .rounded))
                         .foregroundColor(Color(red: 0.15, green: 0.85, blue: 0.45).opacity(0.6))
                     
-                    // Minute Digit
-                    Text(String(format: "%02d", displayMinutes))
-                        .font(.system(size: 44, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0.15, green: 0.85, blue: 0.45))
-                        .frame(width: 58)
-                        .contentShape(Rectangle())
-                        .background(
-                            ScrollDetector { deltaY in
-                                minAccumulator += deltaY
-                                if abs(minAccumulator) >= 1.2 {
-                                    let change = minAccumulator > 0 ? 1 : -1
-                                    minAccumulator = 0
-                                    let currentMins = (Int(timerManager.setupSeconds) % 3600) / 60
-                                    let newMins = max(0, min(59, currentMins + change))
-                                    updateSetupSeconds(hours: Int(timerManager.setupSeconds) / 3600, minutes: newMins)
-                                    HapticManager.shared.tick()
-                                }
+                    // Minute Digit Dropdown List
+                    Menu {
+                        ForEach(0...59, id: \.self) { minVal in
+                            Button(String(format: "%02d", minVal)) {
+                                updateSetupSeconds(hours: displayHours, minutes: minVal)
+                                HapticManager.shared.click()
                             }
-                        )
-                        .gesture(
-                            DragGesture()
-                                .onChanged { value in
-                                    if dragStartMinutes == -1 {
-                                        dragStartMinutes = (Int(timerManager.setupSeconds) % 3600) / 60
+                        }
+                    } label: {
+                        Text(String(format: "%02d", displayMinutes))
+                            .font(.system(size: 44, weight: .bold, design: .rounded))
+                            .foregroundColor(Color(red: 0.15, green: 0.85, blue: 0.45))
+                            .contentShape(Rectangle())
+                            .background(
+                                ScrollDetector { deltaY in
+                                    minAccumulator += deltaY
+                                    if abs(minAccumulator) >= 0.5 {
+                                        let change = minAccumulator > 0 ? 1 : -1
+                                        minAccumulator = 0
+                                        let currentMins = (Int(timerManager.setupSeconds) % 3600) / 60
+                                        let newMins = max(0, min(59, currentMins + change))
+                                        updateSetupSeconds(hours: Int(timerManager.setupSeconds) / 3600, minutes: newMins)
+                                        HapticManager.shared.tick()
                                     }
-                                    let deltaY = -value.translation.height
-                                    let change = Int(deltaY / 6.0)
-                                    let newMins = max(0, min(59, dragStartMinutes + change))
-                                    updateSetupSeconds(hours: Int(timerManager.setupSeconds) / 3600, minutes: newMins)
                                 }
-                                .onEnded { _ in
-                                    dragStartMinutes = -1
-                                    HapticManager.shared.click()
-                                }
-                        )
+                            )
+                    }
+                    .menuStyle(.borderlessButton)
+                    .frame(width: 58)
                 }
                 
                 // Labels below digits
@@ -1618,14 +1621,7 @@ struct ClipboardRow: View {
                                 .background(Color.green.opacity(0.08))
                                 .cornerRadius(3)
                             
-                            Text("•")
-                                .font(.system(size: 10))
-                                .foregroundColor(.secondary.opacity(0.4))
                         }
-                        
-                        Text(formatTimestamp(item.timestamp))
-                            .font(.system(size: 10, weight: .medium, design: .rounded))
-                            .foregroundColor(.secondary.opacity(0.7))
                     }
                 }
                 
