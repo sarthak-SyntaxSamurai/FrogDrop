@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/macOS-13.0+-blue?style=flat-square&logo=apple" alt="macOS Support">
+  <img src="https://img.shields.io/badge/macOS-14.0%2B%20(Sonoma)-blue?style=flat-square&logo=apple" alt="macOS Support">
   <img src="https://img.shields.io/badge/Swift-5.8+-orange?style=flat-square&logo=swift" alt="Swift Support">
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License">
   <a href="https://www.buymeacoffee.com/sarthakanand"><img src="https://img.shields.io/badge/Donate-Buy%20Me%20A%20Coffee-yellow?style=flat-square&logo=buy-me-a-coffee" alt="Donate"></a>
@@ -100,13 +100,31 @@ graph TD
 
 ---
 
-## 🚀 Installation & Deploy
+## 🚀 Installation
 
 1. Go to the [Releases](https://github.com/sarthak-SyntaxSamurai/FrogDrop/releases) page.
 2. Download `FrogDrop.dmg` from the latest release.
 3. Double-click `FrogDrop.dmg` to mount the disk image.
 4. Drag `FrogDrop.app` into your **Applications** folder.
-5. Double-click the app to launch. You're ready to go!
+5. Launch FrogDrop!
+
+### ⚠️ macOS Security Warning ("App is damaged")
+
+FrogDrop is **free & open-source** and is not signed with an Apple Developer certificate ($99/year). macOS Gatekeeper may block it with a *"damaged"* message. This is **not a virus** — it's expected for indie open-source apps.
+
+**Fix it in 2 seconds with one Terminal command:**
+
+```bash
+xattr -cr /Applications/FrogDrop.app
+```
+
+Then double-click FrogDrop normally — it will open fine every time after that.
+
+> **Why this works:** macOS adds a `com.apple.quarantine` attribute to everything downloaded from the internet. This command removes that flag. It's completely safe and is the standard workaround for open-source macOS apps without Apple notarization.
+
+**Alternative (no Terminal):**
+- Right-click `FrogDrop.app` in Applications → **Open** → Click **Open** in the dialog.
+- This bypasses Gatekeeper once and the app opens normally forever after.
 
 ---
 
