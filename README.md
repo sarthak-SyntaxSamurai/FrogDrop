@@ -17,6 +17,20 @@
 
 ---
 
+## 📸 App Preview
+
+| 🟢 Active Dropzone Grid | 📋 Clipboard History Manager |
+| --- | --- |
+| <img src="https://raw.githubusercontent.com/sarthak-SyntaxSamurai/FrogDrop/main/media/shot1.png" width="380" alt="Dropzone Grid"> | <img src="https://raw.githubusercontent.com/sarthak-SyntaxSamurai/FrogDrop/main/media/shot2.png" width="380" alt="Clipboard Manager"> |
+
+| ⏱️ Daily Focus Timer | ⚙️ App Preferences |
+| --- | --- |
+| <img src="https://raw.githubusercontent.com/sarthak-SyntaxSamurai/FrogDrop/main/media/shot3.png" width="380" alt="Focus Timer"> | <img src="https://raw.githubusercontent.com/sarthak-SyntaxSamurai/FrogDrop/main/media/shot4.png" width="380" alt="Settings Preferences"> |
+
+*Explore all 13 detailed screenshots inside the [media/](https://github.com/sarthak-SyntaxSamurai/FrogDrop/tree/main/media) folder.*
+
+---
+
 ## 🌟 The 3-in-1 Core Features
 
 ### 1. 📦 Interactive Dropzone Workspace
