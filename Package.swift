@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
     name: "FrogDrop",
     platforms: [
-        .macOS("16.0")
+        .macOS(.v14)
     ],
     products: [
         .executable(name: "FrogDrop", targets: ["FrogDrop"])
