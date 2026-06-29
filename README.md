@@ -17,18 +17,6 @@
 
 ---
 
-## 📸 Screenshots
-
-| 🏡 Daily Dashboard & Goal Blooming | 📦 Dropzone Hub (Drag/Click Grid) |
-| --- | --- |
-| <img src="https://raw.githubusercontent.com/sarthak-SyntaxSamurai/FrogDrop/main/media/dashboard.png" width="380" alt="Daily Goals Dashboard"> | <img src="https://raw.githubusercontent.com/sarthak-SyntaxSamurai/FrogDrop/main/media/dropzone.png" width="380" alt="Dropzone File Shelf"> |
-
-| 📋 Clipboard Manager & Link Shortener | ⚙️ App Preferences & Aligned Rules |
-| --- | --- |
-| <img src="https://raw.githubusercontent.com/sarthak-SyntaxSamurai/FrogDrop/main/media/clipboard.png" width="380" alt="Clipboard History list"> | <img src="https://raw.githubusercontent.com/sarthak-SyntaxSamurai/FrogDrop/main/media/settings.png" width="380" alt="Rules & Settings Preferences"> |
-
----
-
 ## 🌟 The 3-in-1 Core Features
 
 ### 1. 📦 Interactive Dropzone Workspace
