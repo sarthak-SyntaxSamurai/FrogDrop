@@ -6,5 +6,7 @@ FrogDrop.zip
 *.icns
 *.png
 !AppIcon.png
+!media/
+!media/*.png
 *.sh
 *.json
