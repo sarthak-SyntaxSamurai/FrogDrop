@@ -1,162 +1,140 @@
 # 🐸 FrogDrop
 
-> **The Ultimate macOS Menu Bar Companion**
->
-> A beautiful 3-in-1 Menu Bar productivity tool fusing your **Clipboard History**, **Drag-and-Drop Dropzone Hub**, and **Pomodoro Daily Goal Tracker** into a single cohesive, premium macOS experience.
-
 <p align="center">
-  <img src="https://raw.githubusercontent.com/sarthak-SyntaxSamurai/FrogDrop/main/AppIcon.png" width="128" height="128" alt="FrogDrop Logo">
+  <img src="https://raw.githubusercontent.com/sarthak-SyntaxSamurai/FrogDrop/main/AppIcon.png" width="120" height="120" alt="FrogDrop">
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/macOS-14.0%2B%20(Sonoma)-blue?style=flat-square&logo=apple" alt="macOS Support">
-  <img src="https://img.shields.io/badge/Swift-5.8+-orange?style=flat-square&logo=swift" alt="Swift Support">
-  <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License">
-  <a href="https://www.buymeacoffee.com/sarthakanand"><img src="https://img.shields.io/badge/Donate-Buy%20Me%20A%20Coffee-yellow?style=flat-square&logo=buy-me-a-coffee" alt="Donate"></a>
+  <strong>A tiny frog in your Menu Bar. A powerful productivity layer on your Mac.</strong>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/macOS-14.0%2B-black?style=flat-square&logo=apple" alt="macOS">
+  <img src="https://img.shields.io/badge/Swift-5.9-orange?style=flat-square&logo=swift" alt="Swift">
+  <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT">
+  <img src="https://img.shields.io/badge/Price-Free-brightgreen?style=flat-square" alt="Free">
+  <a href="https://www.buymeacoffee.com/sarthakanand"><img src="https://img.shields.io/badge/☕-Buy%20me%20a%20coffee-FFDD00?style=flat-square" alt="Donate"></a>
 </p>
 
 ---
 
-## 📸 App Preview
-
-| 🟢 Active Dropzone Grid | 📋 Clipboard History Manager |
-| --- | --- |
-| <img src="https://raw.githubusercontent.com/sarthak-SyntaxSamurai/FrogDrop/main/media/shot1.png" width="380" alt="Dropzone Grid"> | <img src="https://raw.githubusercontent.com/sarthak-SyntaxSamurai/FrogDrop/main/media/shot2.png" width="380" alt="Clipboard Manager"> |
-
-| ⏱️ Daily Focus Timer | ⚙️ App Preferences |
-| --- | --- |
-| <img src="https://raw.githubusercontent.com/sarthak-SyntaxSamurai/FrogDrop/main/media/shot3.png" width="380" alt="Focus Timer"> | <img src="https://raw.githubusercontent.com/sarthak-SyntaxSamurai/FrogDrop/main/media/shot4.png" width="380" alt="Settings Preferences"> |
-
-*Explore all 13 detailed screenshots inside the [media/](https://github.com/sarthak-SyntaxSamurai/FrogDrop/tree/main/media) folder.*
+FrogDrop is a **zero-bloat macOS Menu Bar app** that quietly handles three things you do every day — file dragging, clipboard history, and focus timing — all from a single animated frog icon. No subscriptions, no accounts, no cloud sync. Just open it and it works.
 
 ---
 
-## 🌟 The 3-in-1 Core Features
+## What it does
 
-### 1. 📦 Interactive Dropzone Workspace
-Drag files or folders to the Menu Bar status icon to "shelve" them. 
-* **Dynamic Grid**: Click folders in your custom target grid to move shelved files instantly, or open directories in Finder if the shelf is empty.
-* **Built-in Actions**: Trigger actions like AirDrop, Email, Imgur uploads, and Path Copying. 
-* **Fallback Mode**: If you click any action button when the shelf is empty, FrogDrop automatically prompts you with a native file dialog to choose target files on the fly.
+### 🐸 The Menu Bar Frog
+A hand-drawn pixel frog lives in your menu bar. It **blinks**, **winks**, and **changes expression** based on what you're doing — relaxed when idle, focused brows when a timer's running, pink tongue out when something drops in. It's alive.
 
-### 2. 📋 Smart Clipboard History Manager
-Track copied text strings, URLs, and image captures.
-* **Pin & Keep**: Pin items to keep them permanent in your clipboard database.
-* **Hover Link Shortener**: Hover over any URL in your history to see a `link.badge.plus` button. Click it to call the TinyURL API, shorten the link, and copy it back to your pasteboard.
-* **Modern Swipe Actions**: Easily swipe to delete or copy clipboard items.
+### 📦 Dropzone — Drag files anywhere, instantly
 
-### 3. ⏱️ Daily Focus Timer & Goal Tracker
-Keep track of your focus targets with an interactive Pomodoro style timer.
-* **Blooming Tulip Indicator**: Watch your progress come to life! A beautifully styled custom flower card features a Tulip that gradually blooms into a full-flowered rose as you complete daily Pomodoro sessions.
-* **Goal Settings**: Modify your daily focus minute goals and log named task sessions.
+Drag any file (or 100 files) onto the frog and it gets **shelved**. A smart grid pops up with your custom target folders and quick actions.
+
+- **Custom folder grid** — add your most-used folders, move files in one drag
+- **Built-in actions** — AirDrop, Email, Imgur upload, URL shortener
+- **Fallback dialogs** — clicking any action when no file is shelved opens a native file picker
+- Works with single files, bulk selections, anything Finder can drag
+
+### 📋 Clipboard History — Everything you ever copied, right here
+
+FrogDrop silently watches your clipboard in the background. Every text you copy appears instantly in the history panel.
+
+- **100 items** stored locally
+- **Pin items** to keep them from rotating out
+- **Per-app rules** — mark apps like password managers as "ignore" or "temporary"
+- **Temporary mode** — items auto-expire after a time you set
+- **URL shortener** — hover any URL → click the badge → TinyURL link copied
+- **Toast notifications** — a subtle popup shows what was just copied, with source app name
+
+### ⏱️ Focus Timer — Pomodoro, stopwatch, or custom
+
+A full-featured timer that lives in your sidebar, not in a cluttered app.
+
+- **Pomodoro mode** — configurable cycles, focus duration, break duration
+- **Stopwatch mode** — open-ended sessions
+- **Custom countdowns** — set any time you want
+- **Multiple simultaneous timers** — run parallel sessions
+- **System notifications** — get pinged when a session ends
+- **Session log** — every session is saved with name, duration, and date
+
+### 🌸 Dashboard — Your day at a glance
+
+A home screen that shows today's focus progress as a **blooming flower**. The flower starts as a bud and fully blooms as you hit your daily focus goal. Tap it — it bounces.
 
 ---
 
-## 🔒 Local-First Privacy (No Data Uploads)
+## Privacy
 
-> [!IMPORTANT]
-> **Your data is 100% private and stays locally on your Mac.**
-> FrogDrop does NOT upload, track, or share your clipboard history, files, or task sessions. 
+Everything is local. FrogDrop doesn't make any network requests except when you explicitly ask it to (AirDrop, Imgur, TinyURL). Your clipboard history lives at:
 
-### Where is your data stored?
-All information is kept strictly on your local machine under the application support directory:
-* **Clipboard & Session Database**: `~/Library/Application Support/FrogDrop/history.json`
-* **Local Settings**: Stored securely using macOS `UserDefaults`.
-
-Both `history.json` and compiled binary caches are explicitly configured in `.gitignore` so they are never tracked in Git or pushed to GitHub.
-
----
-
-## 🛠️ App Architecture & File Structure
-
-```mermaid
-graph TD
-    A[App Entry & Lifecycle] --> B[AppDelegate]
-    B --> C[MainWindow & PopupWindow]
-    C --> D[MainSidebarView]
-    D --> E[DashboardView - Focus Goals]
-    D --> F[DropzoneGrid - File Shelving]
-    D --> G[ClipboardRow - History & URL Shortener]
-    
-    C -.-> H[Stores & Managers]
-    H --> I[HistoryStore - local JSON]
-    H --> J[ClipboardManager - local Cache]
-    H --> K[DropzoneManager - UserDefaults]
-    H --> L[HapticManager - Taptic Engine]
+```
+~/Library/Application Support/FrogDrop/history.json
 ```
 
-### Components:
-* **App Layer**: 
-  - `AppEntry.swift` & `AppDelegate.swift`: Setup Menu Bar status item lifecycle.
-  - `HapticManager.swift`: Feeds physical click response using system taptic engines.
-* **Store Layer**:
-  - `HistoryStore.swift`: Manages local daily goal history.
-  - `ClipboardManager.swift`: Monitors system pasteboard and caches clips.
-* **UI Layer (SwiftUI & AppKit)**:
-  - `PopupWindow.swift` & `MainWindow.swift`: Implements floating panel layout.
-  - `DashboardView.swift`: Displays the spring stat cards and the blooming tulip progress animation.
-  - `DropzoneWindow.swift`: Implements shelving and drop grid buttons.
-  - `AppSettingsView.swift`: Displays preferences with aligned input grids and dropdown menus.
+It's never uploaded. It's never read by anyone else. It's just a JSON file on your Mac.
 
 ---
 
-## 🚀 Installation
+## Installation
 
-### ⭐ Option 1 — Homebrew (Recommended · No Security Warning)
+### ⭐ Homebrew (Recommended — no security warning)
 
 ```bash
 brew tap sarthak-SyntaxSamurai/tap
 brew install --cask frogdrop
 ```
 
-Installs silently to `/Applications` — **zero Gatekeeper warning, completely free**. ✅
-
----
-
-### Option 2 — One-Line Terminal Installer
+### One-liner installer
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/sarthak-SyntaxSamurai/FrogDrop/main/install.sh | bash
 ```
 
-Auto-downloads, installs, and clears the security flag. Done.
+### Manual DMG
 
----
-
-### Option 3 — Manual DMG
-
-1. Go to the [Releases](https://github.com/sarthak-SyntaxSamurai/FrogDrop/releases) page.
-2. Download `FrogDrop.dmg` from the latest release.
-3. Double-click `FrogDrop.dmg` to mount the disk image.
-4. Drag `FrogDrop.app` into your **Applications** folder.
-5. Launch FrogDrop!
-
-### ⚠️ macOS Security Warning ("App is damaged")
-
-FrogDrop is **free & open-source** and is not signed with an Apple Developer certificate ($99/year). macOS Gatekeeper may block it with a *"damaged"* message. This is **not a virus** — it's expected for indie open-source apps.
-
-**Fix it in 2 seconds with one Terminal command:**
+Download from [Releases](https://github.com/sarthak-SyntaxSamurai/FrogDrop/releases) → drag to Applications → run once:
 
 ```bash
 xattr -cr /Applications/FrogDrop.app
 ```
 
-Then double-click FrogDrop normally — it will open fine every time after that.
-
-> **Why this works:** macOS adds a `com.apple.quarantine` attribute to everything downloaded from the internet. This command removes that flag. It's completely safe and is the standard workaround for open-source macOS apps without Apple notarization.
-
-**Alternative (no Terminal):**
-- Right-click `FrogDrop.app` in Applications → **Open** → Click **Open** in the dialog.
-- This bypasses Gatekeeper once and the app opens normally forever after.
+> **Why the security warning?** Apple charges $99/yr for app notarization. FrogDrop is free. Use Homebrew instead — it handles this automatically.
 
 ---
 
-## ☕ Support
+## Build from source
 
-If FrogDrop supercharges your macOS workflow, support its open-source development:
+```bash
+git clone https://github.com/sarthak-SyntaxSamurai/FrogDrop.git
+cd FrogDrop
+swift build -c release
+```
 
-<p align="left">
-  <a href="https://www.buymeacoffee.com/sarthakanand">
-    <img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Donate-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" alt="Buy Me A Coffee">
-  </a>
-</p>
+Requires Xcode Command Line Tools and macOS 14+.
+
+---
+
+## Stack
+
+| Layer | Tech |
+|---|---|
+| Language | Swift 5.9 |
+| UI | SwiftUI + AppKit |
+| Storage | JSON (local) + UserDefaults |
+| Packaging | Swift Package Manager |
+| Distribution | Homebrew Cask + DMG |
+
+---
+
+## Support
+
+If FrogDrop saves you time, a coffee goes a long way:
+
+<a href="https://www.buymeacoffee.com/sarthakanand">
+  <img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-☕%20Donate-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" alt="Buy Me A Coffee">
+</a>
+
+---
+
+MIT License · Made with 🐸 by [@sarthak-SyntaxSamurai](https://github.com/sarthak-SyntaxSamurai)
