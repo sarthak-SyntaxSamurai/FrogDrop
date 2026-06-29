@@ -7,7 +7,6 @@ FrogDrop.dmg
 *.icns
 *.png
 !AppIcon.png
-!dmg_bg.png
 !media/
 !media/*.png
 !install.sh
