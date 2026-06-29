@@ -18,14 +18,30 @@
 
 ---
 
-FrogDrop is a **zero-bloat macOS Menu Bar app** that quietly handles three things you do every day — file dragging, clipboard history, and focus timing — all from a single animated frog icon. No subscriptions, no accounts, no cloud sync. Just open it and it works.
+## 👀 Preview
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/sarthak-SyntaxSamurai/FrogDrop/main/media/preview.png" alt="FrogDrop Preview — Clipboard History, Focus Dashboard, Dropzone Hub" width="100%">
+</p>
+
+> Real screenshots coming soon. Drop a star ⭐ to stay updated.
+
+---
+
+## Why I built this
+
+My menu bar already had **Clipboard manager, Dropzone, focus timer, and a file shelf** — four separate apps, four icons, four subscriptions.
+
+I wanted one thing that does all of it, stays out of the way, and doesn't cost $10/month. So I built FrogDrop — a single animated frog that replaces all four.
+
+**One icon. No clutter. No subscriptions.**
 
 ---
 
 ## What it does
 
 ### 🐸 The Menu Bar Frog
-A hand-drawn pixel frog lives in your menu bar. It **blinks**, **winks**, and **changes expression** based on what you're doing — relaxed when idle, focused brows when a timer's running, pink tongue out when something drops in. It's alive.
+A hand-drawn frog lives in your menu bar. It **blinks**, **winks**, and **changes expression** based on what you're doing — relaxed when idle, focused brows when a timer's running, pink tongue out when something drops in. It's alive.
 
 ### 📦 Dropzone — Drag files anywhere, instantly
 
@@ -76,6 +92,20 @@ It's never uploaded. It's never read by anyone else. It's just a JSON file on yo
 
 ---
 
+## 🤔 Is this a virus?
+
+Totally fair question. macOS shows a security warning on any app that isn't paid-notarized by Apple ($99/yr). FrogDrop is free and open-source, so it triggers that warning.
+
+**You can verify it yourself in 30 seconds:**
+
+> Copy this repo link → paste it into ChatGPT, Gemini, or any AI → ask *"Is this a legit open-source app or a virus?"*
+> 
+> 🔗 `https://github.com/sarthak-SyntaxSamurai/FrogDrop`
+
+Every line of code is public. The app makes zero network calls on its own. Use Homebrew to install — it clears the warning automatically.
+
+---
+
 ## Installation
 
 ### ⭐ Homebrew (Recommended — no security warning)
@@ -99,7 +129,7 @@ Download from [Releases](https://github.com/sarthak-SyntaxSamurai/FrogDrop/relea
 xattr -cr /Applications/FrogDrop.app
 ```
 
-> **Why the security warning?** Apple charges $99/yr for app notarization. FrogDrop is free. Use Homebrew instead — it handles this automatically.
+> **Why the warning?** Apple charges $99/yr for app notarization. FrogDrop is free. Use Homebrew instead — it handles this automatically.
 
 ---
 
@@ -112,6 +142,14 @@ swift build -c release
 ```
 
 Requires Xcode Command Line Tools and macOS 14+.
+
+---
+
+## 💬 Feedback & Ideas
+
+Found a bug? Have a feature idea? Just want to say hi?
+
+**[Open an Issue](https://github.com/sarthak-SyntaxSamurai/FrogDrop/issues)** — all feedback welcome. If something feels off, broken, or annoying, I genuinely want to know. And if you have an idea, there's a good chance it'll end up in the app.
 
 ---
 
