@@ -102,6 +102,29 @@ graph TD
 
 ## 🚀 Installation
 
+### ⭐ Option 1 — Homebrew (Recommended · No Security Warning)
+
+```bash
+brew tap sarthak-SyntaxSamurai/tap
+brew install --cask frogdrop
+```
+
+Installs silently to `/Applications` — **zero Gatekeeper warning, completely free**. ✅
+
+---
+
+### Option 2 — One-Line Terminal Installer
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/sarthak-SyntaxSamurai/FrogDrop/main/install.sh | bash
+```
+
+Auto-downloads, installs, and clears the security flag. Done.
+
+---
+
+### Option 3 — Manual DMG
+
 1. Go to the [Releases](https://github.com/sarthak-SyntaxSamurai/FrogDrop/releases) page.
 2. Download `FrogDrop.dmg` from the latest release.
 3. Double-click `FrogDrop.dmg` to mount the disk image.
