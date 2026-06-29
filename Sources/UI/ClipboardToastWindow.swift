@@ -123,8 +123,8 @@ class ClipboardToastPanelWindow: NSWindow {
         self.makeKeyAndOrderFront(nil)
         
         NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.22
-            context.timingFunction = CAMediaTimingFunction(name: .easeOut)
+            context.duration = 0.3
+            context.timingFunction = CAMediaTimingFunction(controlPoints: 0.15, 0.85, 0.35, 1.1)
             self.animator().setFrame(endRect, display: true)
             self.animator().alphaValue = 1.0
         }

@@ -28,6 +28,7 @@ struct MainSidebarView: View {
     @ObservedObject var dropzoneManager = DropzoneManager.shared
     
     @State private var clipboardSearchQuery = ""
+    @Namespace private var sidebarNamespace
     
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -40,7 +41,7 @@ struct MainSidebarView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "circle.grid.3x3.fill")
                                 .font(.system(size: 14))
-                                .foregroundColor(Color(red: 0.15, green: 0.85, blue: 0.45))
+                                .foregroundColor(Color.brandGreenEnd)
                             Text("FrogDrop")
                                 .font(.system(.body, design: .rounded))
                                 .fontWeight(.bold)
@@ -50,14 +51,17 @@ struct MainSidebarView: View {
                         .padding(.top, 56) // Clean gap to avoid overlap with toggle button
                         
                         // Nav items
-                        VStack(spacing: 4) {
+                        VStack(spacing: 6) {
                             ForEach(Tab.allCases) { tab in
                                 SidebarButton(
                                     title: tab.rawValue,
                                     icon: tab.icon,
-                                    isActive: activeTab == tab
+                                    isActive: activeTab == tab,
+                                    namespace: sidebarNamespace
                                 ) {
-                                    activeTab = tab
+                                    withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {
+                                        activeTab = tab
+                                    }
                                 }
                             }
                         }
@@ -81,7 +85,7 @@ struct MainSidebarView: View {
                         }
                     }
                     .frame(width: 170)
-                    .background(Color.black.opacity(0.15))
+                    .background(Color.brandDarkBg.opacity(0.4))
                     .transition(.move(edge: .leading).combined(with: .opacity))
                 }
                 
@@ -130,8 +134,8 @@ struct MainSidebarView: View {
                     )
             }
             .buttonStyle(.plain)
-            .padding(.leading, 78)
-            .padding(.top, 12)
+            .padding(.leading, isSidebarVisible ? 130 : 78)
+            .padding(.top, 8)
         }
         .edgesIgnoringSafeArea(.all)
     }
@@ -141,6 +145,7 @@ struct SidebarButton: View {
     let title: String
     let icon: String
     let isActive: Bool
+    let namespace: Namespace.ID
     let action: () -> Void
     
     @State private var isHovered = false
@@ -158,15 +163,30 @@ struct SidebarButton: View {
                 
                 Spacer()
             }
-            .foregroundColor(isActive ? Color(red: 0.15, green: 0.85, blue: 0.45) : (isHovered ? .primary : .secondary))
+            .foregroundColor(isActive ? Color.brandGreenEnd : (isHovered ? .primary : .secondary))
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
             .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(isActive ? Color.white.opacity(0.06) : (isHovered ? Color.white.opacity(0.03) : Color.clear))
+                ZStack(alignment: .leading) {
+                    if isActive {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.white.opacity(0.055))
+                            .matchedGeometryEffect(id: "activeTabPill", in: namespace)
+                        
+                        Capsule()
+                            .fill(Color.brandGradient)
+                            .frame(width: 3.5, height: 16)
+                            .padding(.leading, 1)
+                            .matchedGeometryEffect(id: "activeTabIndicator", in: namespace)
+                    } else if isHovered {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.white.opacity(0.02))
+                    }
+                }
             )
         }
         .buttonStyle(.plain)
         .onHover { isHovered = $0 }
+        .animation(.easeOut(duration: 0.15), value: isHovered)
     }
 }

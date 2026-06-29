@@ -199,6 +199,25 @@ class PopupWindow: NSWindow, NSWindowDelegate {
             previewWindow = nil
         }
     }
+    
+    func animateIn() {
+        let finalFrame = self.frame
+        let startFrame = NSRect(
+            x: finalFrame.minX,
+            y: finalFrame.minY + 25,
+            width: finalFrame.width,
+            height: finalFrame.height
+        )
+        self.setFrame(startFrame, display: true)
+        self.alphaValue = 0.0
+        
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.3
+            context.timingFunction = CAMediaTimingFunction(controlPoints: 0.15, 0.85, 0.35, 1.15)
+            self.animator().setFrame(finalFrame, display: true)
+            self.animator().alphaValue = 1.0
+        }
+    }
 }
 
 fileprivate extension View {
@@ -1299,6 +1318,91 @@ struct TimerSetupView: View {
     }
 }
 
+struct TimerHistoryListView: View {
+    @ObservedObject var historyStore = HistoryStore.shared
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Text("Focus History")
+                    .font(.system(.subheadline, design: .rounded))
+                    .fontWeight(.bold)
+                    .foregroundColor(.secondary)
+                Spacer()
+                if !historyStore.history.isEmpty {
+                    Button(action: {
+                        historyStore.clearHistory()
+                    }) {
+                        Text("Clear")
+                            .font(.system(size: 9, weight: .bold, design: .rounded))
+                            .foregroundColor(.red.opacity(0.6))
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, 4)
+            .padding(.top, 4)
+            
+            if historyStore.history.isEmpty {
+                Text("No sessions logged yet")
+                    .font(.system(.caption, design: .rounded))
+                    .foregroundColor(.secondary.opacity(0.5))
+                    .padding(.vertical, 8)
+                    .frame(maxWidth: .infinity, alignment: .center)
+            } else {
+                VStack(spacing: 5) {
+                    ForEach(historyStore.history.prefix(5)) { session in
+                        HStack {
+                            Image(systemName: session.isPomodoro ? "flame.fill" : "timer")
+                                .font(.system(size: 9))
+                                .foregroundColor(session.isPomodoro ? .orange : .green)
+                            
+                            Text(session.name)
+                                .font(.system(.caption, design: .rounded))
+                                .foregroundColor(.primary.opacity(0.9))
+                                .lineLimit(1)
+                            
+                            Spacer()
+                            
+                            Text(formatDuration(session.duration))
+                                .font(.system(size: 9, weight: .semibold, design: .rounded))
+                                .foregroundColor(.secondary)
+                            
+                            Text(formatDate(session.date))
+                                .font(.system(size: 8))
+                                .foregroundColor(.secondary.opacity(0.7))
+                        }
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 6)
+                        .background(Color.white.opacity(0.02))
+                        .cornerRadius(6)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6)
+                                .stroke(Color.white.opacity(0.04), lineWidth: 0.5)
+                        )
+                    }
+                }
+            }
+        }
+    }
+    
+    private func formatDuration(_ duration: TimeInterval) -> String {
+        let mins = Int(duration) / 60
+        let secs = Int(duration) % 60
+        if mins > 0 {
+            return "\(mins)m"
+        } else {
+            return "\(secs)s"
+        }
+    }
+    
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        return formatter.string(from: date)
+    }
+}
+
 struct TimerTabView: View {
     @ObservedObject var timerManager = TimerManager.shared
     
@@ -1315,7 +1419,7 @@ struct TimerTabView: View {
                     .padding(.vertical, 2)
                 
                 ScrollView {
-                    VStack(spacing: 8) {
+                    VStack(spacing: 12) {
                         if timerManager.activeTimers.isEmpty {
                             StopwatchControlView(timerManager: timerManager)
                         } else {
@@ -1323,6 +1427,9 @@ struct TimerTabView: View {
                                 TugTimerCard(timer: timer, timerManager: timerManager)
                             }
                         }
+                        
+                        TimerHistoryListView()
+                            .padding(.top, 4)
                     }
                     .padding(.horizontal, 4)
                 }
@@ -1614,6 +1721,21 @@ struct ClipboardRow: View {
                 
                 if isHovering {
                     HStack(spacing: 4) {
+                        if isURL {
+                            Button(action: {
+                                shortenItemLink()
+                            }) {
+                                Image(systemName: "link.badge.plus")
+                                    .font(.system(size: 10))
+                                    .foregroundColor(.blue)
+                                    .padding(5)
+                                    .background(Color.blue.opacity(0.12))
+                                    .cornerRadius(5)
+                            }
+                            .buttonStyle(.plain)
+                            .help("Shorten Link")
+                        }
+                        
                         Button(action: {
                             ClipboardManager.shared.togglePin(item)
                             HapticManager.shared.click()
@@ -1705,6 +1827,33 @@ struct ClipboardRow: View {
         .frame(height: 34)
     }
     
+    private var isURL: Bool {
+        if let url = URL(string: item.text.trimmingCharacters(in: .whitespacesAndNewlines)) {
+            return url.scheme == "http" || url.scheme == "https"
+        }
+        return false
+    }
+    
+    private func shortenItemLink() {
+        let originalString = item.text.trimmingCharacters(in: .whitespacesAndNewlines)
+        let tinyURLString = "https://tinyurl.com/api-create?url=\(originalString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
+        guard let fetchURL = URL(string: tinyURLString) else { return }
+        
+        HapticManager.shared.click()
+        
+        URLSession.shared.dataTask(with: fetchURL) { data, _, _ in
+            if let data = data, let shortened = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) {
+                DispatchQueue.main.async {
+                    let pasteboard = NSPasteboard.general
+                    pasteboard.declareTypes([.string], owner: nil)
+                    pasteboard.setString(shortened, forType: .string)
+                    HapticManager.shared.success()
+                }
+            }
+        }
+        .resume()
+    }
+    
     private func formatTimestamp(_ date: Date) -> String {
         let formatter = RelativeDateTimeFormatter()
         formatter.unitsStyle = .abbreviated
@@ -1715,26 +1864,12 @@ struct ClipboardRow: View {
 // ==================== DROPZONE TAB ====================
 struct DropzoneTabView: View {
     @ObservedObject var dropzoneManager = DropzoneManager.shared
-    @State private var isShowingSettings = false
     @State private var isTargeted = false
     
     var body: some View {
         VStack(spacing: 0) {
             // Elegant Header bar
             HStack {
-                Button(action: {
-                    isShowingSettings = true
-                }) {
-                    Image(systemName: "plus")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(.secondary)
-                        .padding(8)
-                }
-                .buttonStyle(.plain)
-                .popover(isPresented: $isShowingSettings, arrowEdge: .top) {
-                    DropzoneSettingsView()
-                }
-                
                 Spacer()
                 
                 // Title
@@ -1744,10 +1879,6 @@ struct DropzoneTabView: View {
                     .tracking(1.0)
                 
                 Spacer()
-                
-                // Invisible placeholder to center title
-                Color.clear
-                    .frame(width: 30, height: 30)
             }
             .frame(height: 38)
             .padding(.horizontal, 8)

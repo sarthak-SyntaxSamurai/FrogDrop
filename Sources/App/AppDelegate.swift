@@ -13,10 +13,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         AppDelegate.shared = self
         
-        // Run as accessory app (no Dock icon)
-        NSApp.setActivationPolicy(.accessory)
+        // Run as regular app (shows in Dock)
+        NSApp.setActivationPolicy(.regular)
         
         setupStatusItem()
+        
+        // Initialize and show Main Window
+        let mainWindow = MainWindow()
+        MainWindow.shared = mainWindow
+        mainWindow.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
         
         // Initialize the DropzonePanel immediately on launch (Zero-Permission!)
         let statusItemFrame = statusItem?.button?.window?.frame ?? .zero
@@ -126,6 +132,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let popup = PopupWindow(statusItemFrame: statusItemFrame)
             PopupWindow.activeInstance = popup
             popup.makeKeyAndOrderFront(nil)
+            popup.animateIn()
             NSApp.activate(ignoringOtherApps: true)
             HapticManager.shared.click()
         }
@@ -375,6 +382,13 @@ class GlobalDragMonitor {
             NSEvent.removeMonitor(upMonitor)
             self.upMonitor = nil
         }
+    }
+    
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        if !flag {
+            MainWindow.shared?.makeKeyAndOrderFront(nil)
+        }
+        return true
     }
 }
 

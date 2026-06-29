@@ -409,7 +409,13 @@ class DropzonePanelWindow: NSWindow {
         collapsedHostingView.isHidden = true
         expandedContainer.isHidden = false
         
-        self.setFrame(Self.getExpandedRect(statusItemFrame: self.statusItemFrame), display: true)
+        let targetRect = Self.getExpandedRect(statusItemFrame: self.statusItemFrame)
+        
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.3
+            context.timingFunction = CAMediaTimingFunction(controlPoints: 0.15, 0.85, 0.35, 1.1)
+            self.animator().setFrame(targetRect, display: true)
+        }
         HapticManager.shared.tick()
     }
     
@@ -418,10 +424,18 @@ class DropzonePanelWindow: NSWindow {
         isExpanded = false
         self.hasShadow = false
         
-        self.setFrame(Self.getCollapsedRect(statusItemFrame: self.statusItemFrame), display: true)
-        self.collapsedHostingView.isHidden = false
-        self.expandedContainer.isHidden = true
-        self.orderOut(nil)
+        let targetRect = Self.getCollapsedRect(statusItemFrame: self.statusItemFrame)
+        
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.25
+            context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            self.animator().setFrame(targetRect, display: true)
+        } completionHandler: { [weak self] in
+            guard let self = self else { return }
+            self.collapsedHostingView.isHidden = false
+            self.expandedContainer.isHidden = true
+            self.orderOut(nil)
+        }
     }
     
     func showCollapsedIndicator() {
@@ -540,31 +554,41 @@ struct DropzoneGrid: View {
         VStack(spacing: 12) {
             // Core Row: Add to Grid, Drop Bar, Shelved Files
             LazyVGrid(columns: columns, spacing: 12) {
-                // Add to Grid
-                Button(action: {
-                    isShowingSettings = true
-                }) {
+                if isDraggingMode {
+                    // Drop Bar
                     DropzoneCoreTargetView(
-                        title: "Add to Grid",
-                        icon: "plus",
-                        isHovered: manager.hoveredActionKey == "addGrid",
+                        title: "Drop Bar",
+                        icon: "arrow.down",
+                        isHovered: manager.hoveredActionKey == "shelf",
                         isDashed: true
                     )
+                    .background(FrameRegistrationHelper(key: "shelf", windowHeight: windowHeight))
+                } else {
+                    // Add to Grid
+                    Button(action: {
+                        let panel = NSOpenPanel()
+                        panel.canChooseFiles = false
+                        panel.canChooseDirectories = true
+                        panel.allowsMultipleSelection = false
+                        panel.prompt = "Add to Grid"
+                        panel.message = "Choose a folder to add to your Dropzone grid"
+                        if panel.runModal() == .OK, let url = panel.url {
+                            let newItem = DropzoneItem(type: "folder", name: url.lastPathComponent, path: url.path)
+                            manager.customFolders.append(newItem)
+                            manager.saveSettings()
+                            HapticManager.shared.success()
+                        }
+                    }) {
+                        DropzoneCoreTargetView(
+                            title: "Add to Grid",
+                            icon: "plus",
+                            isHovered: manager.hoveredActionKey == "addGrid",
+                            isDashed: true
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .background(FrameRegistrationHelper(key: "addGrid", windowHeight: windowHeight))
                 }
-                .buttonStyle(.plain)
-                .background(FrameRegistrationHelper(key: "addGrid", windowHeight: windowHeight))
-                .popover(isPresented: $isShowingSettings, arrowEdge: .top) {
-                    DropzoneSettingsView()
-                }
-                
-                // Drop Bar
-                DropzoneCoreTargetView(
-                    title: "Drop Bar",
-                    icon: "arrow.down",
-                    isHovered: manager.hoveredActionKey == "shelf",
-                    isDashed: true
-                )
-                .background(FrameRegistrationHelper(key: "shelf", windowHeight: windowHeight))
                 
                 // Shelved Files
                 ForEach(Array(manager.shelvedFiles.enumerated()), id: \.offset) { index, url in
@@ -611,19 +635,18 @@ struct DropzoneGrid: View {
             }
             .padding(.horizontal, 10)
             
-            // FOLDERS & ACTIONS (Only shown in Dragging mode, i.e. when sliding down on drag)
-            if isDraggingMode {
-                // FOLDERS / APPS
-                if !manager.customFolders.isEmpty {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("FOLDERS / APPS")
-                            .font(.system(size: 8, weight: .bold, design: .rounded))
-                            .foregroundColor(.secondary.opacity(0.6))
-                            .padding(.horizontal, 12)
-                            .padding(.top, 4)
-                        
-                        LazyVGrid(columns: columns, spacing: 12) {
-                            ForEach(manager.customFolders) { folder in
+            // FOLDERS / APPS (Always shown, interactive when not dragging)
+            if !manager.customFolders.isEmpty {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("FOLDERS / APPS")
+                        .font(.system(size: 8, weight: .bold, design: .rounded))
+                        .foregroundColor(.secondary.opacity(0.6))
+                        .padding(.horizontal, 12)
+                        .padding(.top, 4)
+                    
+                    LazyVGrid(columns: columns, spacing: 12) {
+                        ForEach(manager.customFolders) { folder in
+                            if isDraggingMode {
                                 DropzoneTargetView(
                                     title: folder.name,
                                     icon: "folder.fill",
@@ -631,76 +654,202 @@ struct DropzoneGrid: View {
                                     isHovered: manager.hoveredActionKey == "folder_\(folder.path ?? "")"
                                 )
                                 .background(FrameRegistrationHelper(key: "folder_\(folder.path ?? "")", windowHeight: windowHeight))
+                            } else {
+                                Button(action: {
+                                    if !manager.shelvedFiles.isEmpty {
+                                        manager.handleDrop(urls: manager.shelvedFiles, onKey: "folder_\(folder.path ?? "")")
+                                        manager.shelvedFiles.removeAll()
+                                    } else {
+                                        if let path = folder.path {
+                                            NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: path)
+                                        }
+                                    }
+                                }) {
+                                    DropzoneTargetView(
+                                        title: folder.name,
+                                        icon: "folder.fill",
+                                        iconColor: .blue,
+                                        isHovered: false
+                                    )
+                                }
+                                .buttonStyle(.plain)
                             }
                         }
-                        .padding(.horizontal, 10)
                     }
+                    .padding(.horizontal, 10)
                 }
+            }
+            
+            // ACTIONS (Always shown, interactive when not dragging)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("ACTIONS")
+                    .font(.system(size: 8, weight: .bold, design: .rounded))
+                    .foregroundColor(.secondary.opacity(0.6))
+                    .padding(.horizontal, 12)
+                    .padding(.top, 4)
                 
-                // ACTIONS
-                if !manager.enabledActions.isEmpty {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("ACTIONS")
-                            .font(.system(size: 8, weight: .bold, design: .rounded))
-                            .foregroundColor(.secondary.opacity(0.6))
-                            .padding(.horizontal, 12)
-                            .padding(.top, 4)
-                        
-                        LazyVGrid(columns: columns, spacing: 12) {
-                            if manager.enabledActions.contains("airdrop") {
+                LazyVGrid(columns: columns, spacing: 12) {
+                    if manager.enabledActions.contains("airdrop") {
+                        if isDraggingMode {
+                            DropzoneTargetView(
+                                title: "AirDrop",
+                                icon: "antenna.radiowaves.left.and.right",
+                                iconColor: .blue,
+                                isHovered: manager.hoveredActionKey == "action_airdrop"
+                            )
+                            .background(FrameRegistrationHelper(key: "action_airdrop", windowHeight: windowHeight))
+                        } else {
+                            Button(action: {
+                                if !manager.shelvedFiles.isEmpty {
+                                    manager.handleDrop(urls: manager.shelvedFiles, onKey: "action_airdrop")
+                                    manager.shelvedFiles.removeAll()
+                                } else {
+                                    selectFilesAndRun(actionKey: "action_airdrop")
+                                }
+                            }) {
                                 DropzoneTargetView(
                                     title: "AirDrop",
                                     icon: "antenna.radiowaves.left.and.right",
                                     iconColor: .blue,
-                                    isHovered: manager.hoveredActionKey == "action_airdrop"
+                                    isHovered: false
                                 )
-                                .background(FrameRegistrationHelper(key: "action_airdrop", windowHeight: windowHeight))
                             }
-                            
-                            if manager.enabledActions.contains("email") {
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    
+                    if manager.enabledActions.contains("email") {
+                        if isDraggingMode {
+                            DropzoneTargetView(
+                                title: "Email",
+                                icon: "envelope.fill",
+                                iconColor: .blue,
+                                isHovered: manager.hoveredActionKey == "action_email"
+                            )
+                            .background(FrameRegistrationHelper(key: "action_email", windowHeight: windowHeight))
+                        } else {
+                            Button(action: {
+                                if !manager.shelvedFiles.isEmpty {
+                                    manager.handleDrop(urls: manager.shelvedFiles, onKey: "action_email")
+                                    manager.shelvedFiles.removeAll()
+                                } else {
+                                    selectFilesAndRun(actionKey: "action_email")
+                                }
+                            }) {
                                 DropzoneTargetView(
                                     title: "Email",
                                     icon: "envelope.fill",
                                     iconColor: .blue,
-                                    isHovered: manager.hoveredActionKey == "action_email"
+                                    isHovered: false
                                 )
-                                .background(FrameRegistrationHelper(key: "action_email", windowHeight: windowHeight))
                             }
-                            
-                            if manager.enabledActions.contains("imgur") {
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    
+                    if manager.enabledActions.contains("imgur") {
+                        if isDraggingMode {
+                            DropzoneTargetView(
+                                title: "Imgur",
+                                icon: "photo.fill",
+                                iconColor: .green,
+                                isHovered: manager.hoveredActionKey == "action_imgur"
+                            )
+                            .background(FrameRegistrationHelper(key: "action_imgur", windowHeight: windowHeight))
+                        } else {
+                            Button(action: {
+                                if !manager.shelvedFiles.isEmpty {
+                                    manager.handleDrop(urls: manager.shelvedFiles, onKey: "action_imgur")
+                                    manager.shelvedFiles.removeAll()
+                                } else {
+                                    selectFilesAndRun(actionKey: "action_imgur")
+                                }
+                            }) {
                                 DropzoneTargetView(
                                     title: "Imgur",
                                     icon: "photo.fill",
                                     iconColor: .green,
-                                    isHovered: manager.hoveredActionKey == "action_imgur"
+                                    isHovered: false
                                 )
-                                .background(FrameRegistrationHelper(key: "action_imgur", windowHeight: windowHeight))
                             }
-                            
-                            if manager.enabledActions.contains("shortenURL") {
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    
+                    if manager.enabledActions.contains("shortenURL") {
+                        if isDraggingMode {
+                            DropzoneTargetView(
+                                title: "Shorten URL",
+                                icon: "link",
+                                iconColor: .blue,
+                                isHovered: manager.hoveredActionKey == "action_shortenURL"
+                            )
+                            .background(FrameRegistrationHelper(key: "action_shortenURL", windowHeight: windowHeight))
+                        } else {
+                            Button(action: {
+                                if !manager.shelvedFiles.isEmpty {
+                                    manager.handleDrop(urls: manager.shelvedFiles, onKey: "action_shortenURL")
+                                    manager.shelvedFiles.removeAll()
+                                } else {
+                                    selectFilesAndRun(actionKey: "action_shortenURL")
+                                }
+                            }) {
                                 DropzoneTargetView(
                                     title: "Shorten URL",
                                     icon: "link",
                                     iconColor: .blue,
-                                    isHovered: manager.hoveredActionKey == "action_shortenURL"
+                                    isHovered: false
                                 )
-                                .background(FrameRegistrationHelper(key: "action_shortenURL", windowHeight: windowHeight))
                             }
-                            
-                            if manager.enabledActions.contains("copyPath") {
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    
+                    if manager.enabledActions.contains("copyPath") {
+                        if isDraggingMode {
+                            DropzoneTargetView(
+                                title: "Copy Path",
+                                icon: "doc.on.doc.fill",
+                                iconColor: .purple,
+                                isHovered: manager.hoveredActionKey == "action_copyPath"
+                            )
+                            .background(FrameRegistrationHelper(key: "action_copyPath", windowHeight: windowHeight))
+                        } else {
+                            Button(action: {
+                                if !manager.shelvedFiles.isEmpty {
+                                    manager.handleDrop(urls: manager.shelvedFiles, onKey: "action_copyPath")
+                                    manager.shelvedFiles.removeAll()
+                                } else {
+                                    selectFilesAndRun(actionKey: "action_copyPath")
+                                }
+                            }) {
                                 DropzoneTargetView(
                                     title: "Copy Path",
                                     icon: "doc.on.doc.fill",
                                     iconColor: .purple,
-                                    isHovered: manager.hoveredActionKey == "action_copyPath"
+                                    isHovered: false
                                 )
-                                .background(FrameRegistrationHelper(key: "action_copyPath", windowHeight: windowHeight))
                             }
+                            .buttonStyle(.plain)
                         }
-                        .padding(.horizontal, 10)
                     }
                 }
+                .padding(.horizontal, 10)
             }
+        }
+    }
+
+    private func selectFilesAndRun(actionKey: String) {
+        let panel = NSOpenPanel()
+        panel.allowsMultipleSelection = true
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = true
+        panel.prompt = "Run Action"
+        panel.message = "Select files or folders to run this action"
+        
+        let response = panel.runModal()
+        if response == .OK {
+            manager.handleDrop(urls: panel.urls, onKey: actionKey)
         }
     }
 }

@@ -116,6 +116,8 @@ class TimerManager: ObservableObject {
         if timer.isPomodoro {
             if !timer.isBreakActive {
                 // Focus session finished
+                HistoryStore.shared.logSession(name: timer.name, duration: timer.focusDuration, isPomodoro: true)
+                
                 if timer.currentCycle < timer.totalCycles {
                     // Switch to Break
                     timer.isBreakActive = true
@@ -138,6 +140,7 @@ class TimerManager: ObservableObject {
             }
         } else {
             // Regular timer finished
+            HistoryStore.shared.logSession(name: timer.name, duration: timer.totalSeconds, isPomodoro: false)
             sendSessionCompleteNotification(title: "Timer Finished!", body: "Your timer for \"\(timer.name)\" has completed.")
         }
     }
@@ -233,6 +236,12 @@ class TimerManager: ObservableObject {
     }
     
     func stopTimer(timerId: UUID) {
+        if let idx = activeTimers.firstIndex(where: { $0.id == timerId }) {
+            let timer = activeTimers[idx]
+            if timer.isStopwatch && timer.secondsElapsed >= 5 {
+                HistoryStore.shared.logSession(name: timer.name, duration: timer.secondsElapsed, isPomodoro: false)
+            }
+        }
         activeTimers.removeAll { $0.id == timerId }
         HapticManager.shared.click()
         updateMenuBar()
