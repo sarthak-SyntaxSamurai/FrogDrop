@@ -21,7 +21,7 @@
 ## 👀 Preview
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/sarthak-SyntaxSamurai/FrogDrop/main/media/shot1.png" alt="FrogDrop App Preview" width="100%">
+  <img src="https://raw.githubusercontent.com/sarthak-SyntaxSamurai/FrogDrop/main/media/collage.png" alt="FrogDrop — Clipboard, Timer, Dropzone" width="100%">
 </p>
 
 <p align="center">
