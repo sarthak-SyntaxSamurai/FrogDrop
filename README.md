@@ -89,10 +89,10 @@ graph TD
 ## 🚀 Installation & Deploy
 
 1. Go to the [Releases](https://github.com/sarthak-SyntaxSamurai/FrogDrop/releases) page.
-2. Download the `FrogDrop.zip` archive from the latest release.
-3. Double-click the archive to extract `FrogDrop.app`.
-4. Drag `FrogDrop.app` to your **Applications** folder.
-5. Double-click to launch. You're ready to go!
+2. Download `FrogDrop.dmg` from the latest release.
+3. Double-click `FrogDrop.dmg` to mount the disk image.
+4. Drag `FrogDrop.app` into your **Applications** folder.
+5. Double-click the app to launch. You're ready to go!
 
 ---
 

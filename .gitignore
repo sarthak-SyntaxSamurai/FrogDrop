@@ -3,6 +3,7 @@
 Packages/
 FrogDrop.app/
 FrogDrop.zip
+FrogDrop.dmg
 *.icns
 *.png
 !AppIcon.png

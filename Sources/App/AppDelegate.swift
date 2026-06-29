@@ -13,8 +13,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         AppDelegate.shared = self
         
-        // Run as regular app (shows in Dock)
-        NSApp.setActivationPolicy(.regular)
+        // Run as accessory app (only in Menu Bar, hides from Dock)
+        NSApp.setActivationPolicy(.accessory)
         
         setupStatusItem()
         
@@ -60,6 +60,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 )
             }
         }
+    }
+    
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        if !flag {
+            MainWindow.shared?.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+        }
+        return true
     }
     
     private func setupStatusItem() {
@@ -382,13 +390,6 @@ class GlobalDragMonitor {
             NSEvent.removeMonitor(upMonitor)
             self.upMonitor = nil
         }
-    }
-    
-    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        if !flag {
-            MainWindow.shared?.makeKeyAndOrderFront(nil)
-        }
-        return true
     }
 }
 

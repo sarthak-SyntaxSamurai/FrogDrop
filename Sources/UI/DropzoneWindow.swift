@@ -646,34 +646,11 @@ struct DropzoneGrid: View {
                     
                     LazyVGrid(columns: columns, spacing: 12) {
                         ForEach(manager.customFolders) { folder in
-                            if isDraggingMode {
-                                DropzoneTargetView(
-                                    title: folder.name,
-                                    icon: "folder.fill",
-                                    iconColor: .blue,
-                                    isHovered: manager.hoveredActionKey == "folder_\(folder.path ?? "")"
-                                )
-                                .background(FrameRegistrationHelper(key: "folder_\(folder.path ?? "")", windowHeight: windowHeight))
-                            } else {
-                                Button(action: {
-                                    if !manager.shelvedFiles.isEmpty {
-                                        manager.handleDrop(urls: manager.shelvedFiles, onKey: "folder_\(folder.path ?? "")")
-                                        manager.shelvedFiles.removeAll()
-                                    } else {
-                                        if let path = folder.path {
-                                            NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: path)
-                                        }
-                                    }
-                                }) {
-                                    DropzoneTargetView(
-                                        title: folder.name,
-                                        icon: "folder.fill",
-                                        iconColor: .blue,
-                                        isHovered: false
-                                    )
-                                }
-                                .buttonStyle(.plain)
-                            }
+                            CustomFolderCellView(
+                                folder: folder,
+                                isDraggingMode: isDraggingMode,
+                                windowHeight: windowHeight
+                            )
                         }
                     }
                     .padding(.horizontal, 10)
@@ -698,6 +675,12 @@ struct DropzoneGrid: View {
                                 isHovered: manager.hoveredActionKey == "action_airdrop"
                             )
                             .background(FrameRegistrationHelper(key: "action_airdrop", windowHeight: windowHeight))
+                            .onDrop(of: [.fileURL], isTargeted: Binding(
+                                get: { manager.hoveredActionKey == "action_airdrop" },
+                                set: { targeted in manager.hoveredActionKey = targeted ? "action_airdrop" : nil }
+                            )) { providers in
+                                handleSwiftUIDrop(providers: providers, onKey: "action_airdrop")
+                            }
                         } else {
                             Button(action: {
                                 if !manager.shelvedFiles.isEmpty {
@@ -711,10 +694,16 @@ struct DropzoneGrid: View {
                                     title: "AirDrop",
                                     icon: "antenna.radiowaves.left.and.right",
                                     iconColor: .blue,
-                                    isHovered: false
+                                    isHovered: manager.hoveredActionKey == "action_airdrop"
                                 )
                             }
                             .buttonStyle(.plain)
+                            .onDrop(of: [.fileURL], isTargeted: Binding(
+                                get: { manager.hoveredActionKey == "action_airdrop" },
+                                set: { targeted in manager.hoveredActionKey = targeted ? "action_airdrop" : nil }
+                            )) { providers in
+                                handleSwiftUIDrop(providers: providers, onKey: "action_airdrop")
+                            }
                         }
                     }
                     
@@ -727,6 +716,12 @@ struct DropzoneGrid: View {
                                 isHovered: manager.hoveredActionKey == "action_email"
                             )
                             .background(FrameRegistrationHelper(key: "action_email", windowHeight: windowHeight))
+                            .onDrop(of: [.fileURL], isTargeted: Binding(
+                                get: { manager.hoveredActionKey == "action_email" },
+                                set: { targeted in manager.hoveredActionKey = targeted ? "action_email" : nil }
+                            )) { providers in
+                                handleSwiftUIDrop(providers: providers, onKey: "action_email")
+                            }
                         } else {
                             Button(action: {
                                 if !manager.shelvedFiles.isEmpty {
@@ -740,10 +735,16 @@ struct DropzoneGrid: View {
                                     title: "Email",
                                     icon: "envelope.fill",
                                     iconColor: .blue,
-                                    isHovered: false
+                                    isHovered: manager.hoveredActionKey == "action_email"
                                 )
                             }
                             .buttonStyle(.plain)
+                            .onDrop(of: [.fileURL], isTargeted: Binding(
+                                get: { manager.hoveredActionKey == "action_email" },
+                                set: { targeted in manager.hoveredActionKey = targeted ? "action_email" : nil }
+                            )) { providers in
+                                handleSwiftUIDrop(providers: providers, onKey: "action_email")
+                            }
                         }
                     }
                     
@@ -756,6 +757,12 @@ struct DropzoneGrid: View {
                                 isHovered: manager.hoveredActionKey == "action_imgur"
                             )
                             .background(FrameRegistrationHelper(key: "action_imgur", windowHeight: windowHeight))
+                            .onDrop(of: [.fileURL], isTargeted: Binding(
+                                get: { manager.hoveredActionKey == "action_imgur" },
+                                set: { targeted in manager.hoveredActionKey = targeted ? "action_imgur" : nil }
+                            )) { providers in
+                                handleSwiftUIDrop(providers: providers, onKey: "action_imgur")
+                            }
                         } else {
                             Button(action: {
                                 if !manager.shelvedFiles.isEmpty {
@@ -769,10 +776,16 @@ struct DropzoneGrid: View {
                                     title: "Imgur",
                                     icon: "photo.fill",
                                     iconColor: .green,
-                                    isHovered: false
+                                    isHovered: manager.hoveredActionKey == "action_imgur"
                                 )
                             }
                             .buttonStyle(.plain)
+                            .onDrop(of: [.fileURL], isTargeted: Binding(
+                                get: { manager.hoveredActionKey == "action_imgur" },
+                                set: { targeted in manager.hoveredActionKey = targeted ? "action_imgur" : nil }
+                            )) { providers in
+                                handleSwiftUIDrop(providers: providers, onKey: "action_imgur")
+                            }
                         }
                     }
                     
@@ -785,6 +798,12 @@ struct DropzoneGrid: View {
                                 isHovered: manager.hoveredActionKey == "action_shortenURL"
                             )
                             .background(FrameRegistrationHelper(key: "action_shortenURL", windowHeight: windowHeight))
+                            .onDrop(of: [.fileURL], isTargeted: Binding(
+                                get: { manager.hoveredActionKey == "action_shortenURL" },
+                                set: { targeted in manager.hoveredActionKey = targeted ? "action_shortenURL" : nil }
+                            )) { providers in
+                                handleSwiftUIDrop(providers: providers, onKey: "action_shortenURL")
+                            }
                         } else {
                             Button(action: {
                                 if !manager.shelvedFiles.isEmpty {
@@ -798,10 +817,16 @@ struct DropzoneGrid: View {
                                     title: "Shorten URL",
                                     icon: "link",
                                     iconColor: .blue,
-                                    isHovered: false
+                                    isHovered: manager.hoveredActionKey == "action_shortenURL"
                                 )
                             }
                             .buttonStyle(.plain)
+                            .onDrop(of: [.fileURL], isTargeted: Binding(
+                                get: { manager.hoveredActionKey == "action_shortenURL" },
+                                set: { targeted in manager.hoveredActionKey = targeted ? "action_shortenURL" : nil }
+                            )) { providers in
+                                handleSwiftUIDrop(providers: providers, onKey: "action_shortenURL")
+                            }
                         }
                     }
                     
@@ -814,6 +839,12 @@ struct DropzoneGrid: View {
                                 isHovered: manager.hoveredActionKey == "action_copyPath"
                             )
                             .background(FrameRegistrationHelper(key: "action_copyPath", windowHeight: windowHeight))
+                            .onDrop(of: [.fileURL], isTargeted: Binding(
+                                get: { manager.hoveredActionKey == "action_copyPath" },
+                                set: { targeted in manager.hoveredActionKey = targeted ? "action_copyPath" : nil }
+                            )) { providers in
+                                handleSwiftUIDrop(providers: providers, onKey: "action_copyPath")
+                            }
                         } else {
                             Button(action: {
                                 if !manager.shelvedFiles.isEmpty {
@@ -827,10 +858,16 @@ struct DropzoneGrid: View {
                                     title: "Copy Path",
                                     icon: "doc.on.doc.fill",
                                     iconColor: .purple,
-                                    isHovered: false
+                                    isHovered: manager.hoveredActionKey == "action_copyPath"
                                 )
                             }
                             .buttonStyle(.plain)
+                            .onDrop(of: [.fileURL], isTargeted: Binding(
+                                get: { manager.hoveredActionKey == "action_copyPath" },
+                                set: { targeted in manager.hoveredActionKey = targeted ? "action_copyPath" : nil }
+                            )) { providers in
+                                handleSwiftUIDrop(providers: providers, onKey: "action_copyPath")
+                            }
                         }
                     }
                 }
@@ -851,6 +888,115 @@ struct DropzoneGrid: View {
         if response == .OK {
             manager.handleDrop(urls: panel.urls, onKey: actionKey)
         }
+    }
+
+    private func handleSwiftUIDrop(providers: [NSItemProvider], onKey: String) -> Bool {
+        let group = DispatchGroup()
+        var urls: [URL] = []
+        
+        for provider in providers {
+            group.enter()
+            _ = provider.loadObject(ofClass: NSURL.self) { object, error in
+                if let nsUrl = object as? NSURL, let url = nsUrl as URL? {
+                    urls.append(url)
+                }
+                group.leave()
+            }
+        }
+        
+        group.notify(queue: .main) {
+            if !urls.isEmpty {
+                for url in urls {
+                    if let idx = manager.shelvedFiles.firstIndex(where: { $0.path == url.path }) {
+                        manager.shelvedFiles.remove(at: idx)
+                    }
+                }
+                manager.handleDrop(urls: urls, onKey: onKey)
+            }
+            manager.hoveredActionKey = nil
+        }
+        return true
+    }
+}
+
+struct CustomFolderCellView: View {
+    let folder: DropzoneItem
+    let isDraggingMode: Bool
+    let windowHeight: CGFloat
+    @ObservedObject var manager = DropzoneManager.shared
+    
+    var body: some View {
+        let path = folder.path ?? ""
+        let key = "folder_\(path)"
+        
+        if isDraggingMode {
+            DropzoneTargetView(
+                title: folder.name,
+                icon: "folder.fill",
+                iconColor: .blue,
+                isHovered: manager.hoveredActionKey == key
+            )
+            .background(FrameRegistrationHelper(key: key, windowHeight: windowHeight))
+            .onDrop(of: [.fileURL], isTargeted: Binding(
+                get: { manager.hoveredActionKey == key },
+                set: { targeted in manager.hoveredActionKey = targeted ? key : nil }
+            )) { providers in
+                handleSwiftUIDrop(providers: providers, onKey: key)
+            }
+        } else {
+            Button(action: {
+                if !manager.shelvedFiles.isEmpty {
+                    manager.handleDrop(urls: manager.shelvedFiles, onKey: key)
+                    manager.shelvedFiles.removeAll()
+                } else {
+                    if !path.isEmpty {
+                        NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: path)
+                    }
+                }
+            }) {
+                DropzoneTargetView(
+                    title: folder.name,
+                    icon: "folder.fill",
+                    iconColor: .blue,
+                    isHovered: manager.hoveredActionKey == key
+                )
+            }
+            .buttonStyle(.plain)
+            .onDrop(of: [.fileURL], isTargeted: Binding(
+                get: { manager.hoveredActionKey == key },
+                set: { targeted in manager.hoveredActionKey = targeted ? key : nil }
+            )) { providers in
+                handleSwiftUIDrop(providers: providers, onKey: key)
+            }
+        }
+    }
+    
+    private func handleSwiftUIDrop(providers: [NSItemProvider], onKey: String) -> Bool {
+        let group = DispatchGroup()
+        var urls: [URL] = []
+        
+        for provider in providers {
+            group.enter()
+            _ = provider.loadObject(ofClass: NSURL.self) { object, error in
+                if let nsUrl = object as? NSURL, let url = nsUrl as URL? {
+                    urls.append(url)
+                }
+                group.leave()
+            }
+        }
+        
+        group.notify(queue: .main) {
+            if !urls.isEmpty {
+                for url in urls {
+                    if let idx = manager.shelvedFiles.firstIndex(where: { $0.path == url.path }) {
+                        manager.shelvedFiles.remove(at: idx)
+                    }
+                }
+                manager.handleDrop(urls: urls, onKey: onKey)
+            }
+            manager.hoveredActionKey = nil
+        }
+        return true
     }
 }
 
