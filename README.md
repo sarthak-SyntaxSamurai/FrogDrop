@@ -21,10 +21,12 @@
 ## 👀 Preview
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/sarthak-SyntaxSamurai/FrogDrop/main/media/preview.png" alt="FrogDrop Preview — Clipboard History, Focus Dashboard, Dropzone Hub" width="100%">
+  <img src="https://raw.githubusercontent.com/sarthak-SyntaxSamurai/FrogDrop/main/media/shot1.png" alt="FrogDrop App Preview" width="100%">
 </p>
 
-> Real screenshots coming soon. Drop a star ⭐ to stay updated.
+<p align="center">
+  📸 <a href="https://github.com/sarthak-SyntaxSamurai/FrogDrop/tree/main/media">For more previews, go to media →</a>
+</p>
 
 ---
 
