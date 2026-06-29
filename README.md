@@ -169,11 +169,17 @@ Found a bug? Have a feature idea? Just want to say hi?
 
 ## Support
 
-If FrogDrop saves you time, a coffee goes a long way:
+FrogDrop is free, open-source, and built solo. If it saves you time:
 
-<a href="https://www.buymeacoffee.com/sarthakanand">
-  <img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-☕%20Donate-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" alt="Buy Me A Coffee">
+<a href="https://ko-fi.com/sarthakanand">
+  <img src="https://img.shields.io/badge/Ko--fi-Support%20on%20Ko--fi-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Ko-fi">
 </a>
+&nbsp;
+<a href="https://github.com/sponsors/sarthak-SyntaxSamurai">
+  <img src="https://img.shields.io/badge/GitHub%20Sponsors-♥%20Sponsor-EA4AAA?style=for-the-badge&logo=github-sponsors&logoColor=white" alt="GitHub Sponsors">
+</a>
+
+No pressure. A ⭐ star on this repo means just as much.
 
 ---
 
