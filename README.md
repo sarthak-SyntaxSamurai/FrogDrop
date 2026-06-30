@@ -171,10 +171,6 @@ Found a bug? Have a feature idea? Just want to say hi?
 
 FrogDrop is free, open-source, and built solo. If it saves you time:
 
-<a href="https://ko-fi.com/sarthakanand">
-  <img src="https://img.shields.io/badge/Ko--fi-Support%20on%20Ko--fi-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Ko-fi">
-</a>
-&nbsp;
 <a href="https://github.com/sponsors/sarthak-SyntaxSamurai">
   <img src="https://img.shields.io/badge/GitHub%20Sponsors-♥%20Sponsor-EA4AAA?style=for-the-badge&logo=github-sponsors&logoColor=white" alt="GitHub Sponsors">
 </a>
