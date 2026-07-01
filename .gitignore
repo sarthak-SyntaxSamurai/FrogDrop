@@ -11,3 +11,4 @@ FrogDrop.dmg
 !media/*.png
 !install.sh
 *.json
+.swiftpm/
