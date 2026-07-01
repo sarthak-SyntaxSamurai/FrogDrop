@@ -98,7 +98,12 @@ class PopupWindow: NSWindow, NSWindowDelegate {
     static var activeInstance: PopupWindow?
     private var previewWindow: ClipboardPreviewWindow?
     
+    private let statusItemFrame: NSRect
+    private var localClickMonitor: Any?
+    private var globalClickMonitor: Any?
+    
     init(statusItemFrame: NSRect) {
+        self.statusItemFrame = statusItemFrame
         let width: CGFloat = 340
         let height: CGFloat = 460
         
@@ -123,7 +128,7 @@ class PopupWindow: NSWindow, NSWindowDelegate {
         self.delegate = self
         self.appearance = NSAppearance(named: .vibrantDark)
 
-        let hostingView = NSHostingView(rootView: PopupView())
+        let hostingView = DropzoneHostingView(rootView: PopupView())
         hostingView.translatesAutoresizingMaskIntoConstraints = false
         
         let nsView = NSView()
@@ -160,11 +165,64 @@ class PopupWindow: NSWindow, NSWindowDelegate {
         return true
     }
     
+    deinit {
+        removeClickMonitors()
+    }
+    
     func windowDidResignKey(_ notification: Notification) {
         hidePreview()
         self.orderOut(nil)
+        self.removeClickMonitors()
         if PopupWindow.activeInstance == self {
             PopupWindow.activeInstance = nil
+        }
+    }
+    
+    private func setupClickMonitors() {
+        // Monitor clicks inside our application
+        localClickMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
+            guard let self = self else { return event }
+            self.handleOuterClick(event: event)
+            return event
+        }
+        
+        // Monitor clicks outside our application
+        globalClickMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
+            guard let self = self else { return }
+            self.handleOuterClick(event: event)
+        }
+    }
+    
+    private func removeClickMonitors() {
+        if let monitor = localClickMonitor {
+            NSEvent.removeMonitor(monitor)
+            localClickMonitor = nil
+        }
+        if let monitor = globalClickMonitor {
+            NSEvent.removeMonitor(monitor)
+            globalClickMonitor = nil
+        }
+    }
+    
+    private func handleOuterClick(event: NSEvent) {
+        let mouseLoc = NSEvent.mouseLocation
+        
+        // Check if click was inside the popup window frame or the preview window frame
+        if self.frame.contains(mouseLoc) { return }
+        if let preview = previewWindow, preview.frame.contains(mouseLoc) { return }
+        
+        // Check if click was inside the menu bar status item frame (to prevent double-toggling)
+        if statusItemFrame.contains(mouseLoc) { return }
+        
+        // Click was outside everything: dismiss!
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.hidePreview()
+            self.orderOut(nil)
+            self.removeClickMonitors()
+            if PopupWindow.activeInstance == self {
+                PopupWindow.activeInstance = nil
+            }
         }
     }
     
@@ -201,6 +259,7 @@ class PopupWindow: NSWindow, NSWindowDelegate {
     }
     
     func animateIn() {
+        setupClickMonitors()
         let finalFrame = self.frame
         let startFrame = NSRect(
             x: finalFrame.minX,
@@ -220,10 +279,7 @@ class PopupWindow: NSWindow, NSWindowDelegate {
     }
 }
 
-fileprivate extension View {
-    func wantsLayer(_ wants: Bool) -> some View { self }
-    func cornerRadius(_ radius: CGFloat) -> some View { self }
-}
+    
 
 struct PopupView: View {
     enum Tab {
@@ -284,114 +340,152 @@ struct PopupView: View {
     }
     
     var body: some View {
-        VStack(spacing: 0) {
-            // Header Tab Bar
-            HStack(spacing: 2) {
-                TabButton(title: "Timer", icon: "timer", isActive: activeTab == .timer, namespace: tabNamespace) {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
-                        activeTab = .timer
-                    }
-                }
-                TabButton(title: "Clipboard", icon: "paperclip", isActive: activeTab == .clipboard, namespace: tabNamespace) {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
-                        activeTab = .clipboard
-                    }
-                }
-                TabButton(title: "Dropzone", icon: "square.and.arrow.down", isActive: activeTab == .dropzone, namespace: tabNamespace) {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
-                        activeTab = .dropzone
-                    }
-                }
-            }
-            .padding(3)
-            .background(Color.white.opacity(0.03))
-            .cornerRadius(8)
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(Color.white.opacity(0.06), lineWidth: 0.5)
-            )
-            .padding(.top, 14)
-            .padding(.horizontal, 14)
-            
-            Divider()
-                .background(Color.white.opacity(0.1))
-                .padding(.vertical, 8)
-            
-            // Tab Contents
-            ZStack {
-                switch activeTab {
-                case .timer:
-                    TimerTabView(timerManager: timerManager)
-                case .clipboard:
-                    ClipboardTabView(clipboardManager: clipboardManager, searchQuery: $clipboardSearchQuery)
-                case .dropzone:
-                    DropzoneTabView()
-                }
-            }
-            .frame(maxHeight: .infinity)
-            .contentShape(Rectangle())
-            .gesture(
-                DragGesture(minimumDistance: 15)
-                    .onEnded { gesture in
-                        let threshold: CGFloat = 40
-                        let xDist = abs(gesture.translation.width)
-                        let yDist = abs(gesture.translation.height)
-                        
-                        guard xDist > yDist * 1.5 else { return }
-                        
-                        if gesture.translation.width < -threshold {
-                            switchToNextTab()
-                        } else if gesture.translation.width > threshold {
-                            switchToPrevTab()
+        ZStack {
+            VStack(spacing: 0) {
+                // Header Tab Bar
+                HStack(spacing: 2) {
+                    TabButton(title: "Timer", icon: "timer", isActive: activeTab == .timer, namespace: tabNamespace) {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                            activeTab = .timer
                         }
                     }
-            )
-            
-            // Footer Info
-            HStack {
-                HStack(spacing: 6) {
-                    Button(action: {
-                        isShowingSettings = true
-                    }) {
-                        Image(systemName: "gearshape")
-                            .font(.system(size: 11))
+                    TabButton(title: "Clipboard", icon: "paperclip", isActive: activeTab == .clipboard, namespace: tabNamespace) {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                            activeTab = .clipboard
+                        }
+                    }
+                    TabButton(title: "Dropzone", icon: "square.and.arrow.down", isActive: activeTab == .dropzone, namespace: tabNamespace) {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                            activeTab = .dropzone
+                        }
+                    }
+                }
+                .padding(3)
+                .background(Color.white.opacity(0.03))
+                .cornerRadius(8)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.white.opacity(0.06), lineWidth: 0.5)
+                )
+                .padding(.top, 14)
+                .padding(.horizontal, 14)
+                
+                Divider()
+                    .background(Color.white.opacity(0.1))
+                    .padding(.vertical, 8)
+                
+                // Tab Contents
+                ZStack {
+                    switch activeTab {
+                    case .timer:
+                        TimerTabView(timerManager: timerManager)
+                    case .clipboard:
+                        ClipboardTabView(clipboardManager: clipboardManager, searchQuery: $clipboardSearchQuery)
+                    case .dropzone:
+                        DropzoneTabView()
+                    }
+                }
+                .frame(maxHeight: .infinity)
+                .contentShape(Rectangle())
+                .gesture(
+                    DragGesture(minimumDistance: 15)
+                        .onEnded { gesture in
+                            let threshold: CGFloat = 40
+                            let xDist = abs(gesture.translation.width)
+                            let yDist = abs(gesture.translation.height)
+                            
+                            guard xDist > yDist * 1.5 else { return }
+                            
+                            if gesture.translation.width < -threshold {
+                                switchToNextTab()
+                            } else if gesture.translation.width > threshold {
+                                switchToPrevTab()
+                            }
+                        }
+                )
+                
+                // Footer Info
+                HStack {
+                    HStack(spacing: 6) {
+                        Button(action: {
+                            isShowingSettings = true
+                        }) {
+                            Image(systemName: "gearshape")
+                                .font(.system(size: 11))
+                                .foregroundColor(.secondary)
+                        }
+                        .buttonStyle(.plain)
+                        .popover(isPresented: $isShowingSettings, arrowEdge: .top) {
+                            DropzoneSettingsView()
+                        }
+                        
+                        Text("FrogDrop • Premium 3-in-1")
+                            .font(.system(.caption2, design: .rounded))
                             .foregroundColor(.secondary)
                     }
-                    .buttonStyle(.plain)
-                    .popover(isPresented: $isShowingSettings, arrowEdge: .top) {
-                        DropzoneSettingsView()
-                    }
-                    
-                    Text("FrogDrop • Premium 3-in-1")
-                        .font(.system(.caption2, design: .rounded))
-                        .foregroundColor(.secondary)
+                    Spacer()
+                    QuitButton()
                 }
-                Spacer()
-                QuitButton()
+                .padding(12)
+                .background(Color.black.opacity(0.12))
             }
-            .padding(12)
-            .background(Color.black.opacity(0.12))
+            .frame(width: 340, height: 460)
+            .background(
+                ZStack {
+                    RadialGradient(
+                        gradient: Gradient(colors: [Color(red: 0.15, green: 0.85, blue: 0.45).opacity(0.12), Color.clear]),
+                        center: .topLeading,
+                        startRadius: 0,
+                        endRadius: 280
+                    )
+                    LinearGradient(
+                        colors: [Color.white.opacity(0.04), Color.clear],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                }
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 18)
+                    .stroke(Color.white.opacity(0.12), lineWidth: 1)
+            )
+            
+            if dropzoneManager.isShowingCombinePopover {
+                Color.black.opacity(0.35)
+                    .edgesIgnoringSafeArea(.all)
+                    .transition(.opacity)
+                    .onTapGesture {
+                        withAnimation {
+                            dropzoneManager.isShowingCombinePopover = false
+                        }
+                    }
+                
+                CombinePopoverView(
+                    selectedIDs: $dropzoneManager.selectedGroupIDs,
+                    onCombine: {
+                        dropzoneManager.combineGroups(withIDs: dropzoneManager.selectedGroupIDs)
+                        withAnimation {
+                            dropzoneManager.isShowingCombinePopover = false
+                        }
+                    },
+                    onCancel: {
+                        withAnimation {
+                            dropzoneManager.isShowingCombinePopover = false
+                        }
+                    }
+                )
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(red: 0.1, green: 0.1, blue: 0.1))
+                        .shadow(color: .black.opacity(0.5), radius: 10, x: 0, y: 5)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.white.opacity(0.12), lineWidth: 1)
+                )
+                .transition(.scale.combined(with: .opacity))
+            }
         }
-        .frame(width: 340, height: 460)
-        .background(
-            ZStack {
-                RadialGradient(
-                    gradient: Gradient(colors: [Color(red: 0.15, green: 0.85, blue: 0.45).opacity(0.12), Color.clear]),
-                    center: .topLeading,
-                    startRadius: 0,
-                    endRadius: 280
-                )
-                LinearGradient(
-                    colors: [Color.white.opacity(0.04), Color.clear],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            }
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 18)
-                .stroke(Color.white.opacity(0.12), lineWidth: 1)
-        )
         .onChange(of: activeTab) {
             PopupWindow.activeInstance?.hidePreview()
         }
@@ -1868,69 +1962,64 @@ struct DropzoneTabView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Elegant Header bar
+            // Header
             HStack {
                 Spacer()
-                
-                // Title
                 Text("FROG DROP")
                     .font(.system(size: 10, weight: .black, design: .rounded))
                     .foregroundColor(.primary)
                     .tracking(1.0)
-                
                 Spacer()
             }
-            .frame(height: 38)
-            .padding(.horizontal, 8)
+            .frame(height: 16)
             
             Divider()
                 .background(Color.white.opacity(0.12))
                 .padding(.horizontal, 10)
-                .padding(.bottom, 8)
             
-            // Drop target background area
-            VStack {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(
-                            isTargeted ? Color.green : Color.white.opacity(0.12),
-                            style: StrokeStyle(lineWidth: isTargeted ? 1.5 : 1, dash: [4, 4])
-                        )
-                        .background(isTargeted ? Color.green.opacity(0.04) : Color.black.opacity(0.08))
-                        .cornerRadius(12)
-                    
-                    VStack(spacing: 4) {
-                        Image(systemName: "arrow.down.doc")
-                            .font(.system(size: 18))
-                            .foregroundColor(isTargeted ? .green : .secondary)
-                        Text(isTargeted ? "Drop files here" : "Drag files here to store")
-                            .font(.system(size: 11, weight: .medium, design: .rounded))
-                            .foregroundColor(isTargeted ? .green : .secondary)
+            // Compact drop zone — always visible at top
+            ZStack {
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(
+                        isTargeted ? Color.green : Color.white.opacity(0.1),
+                        style: StrokeStyle(lineWidth: isTargeted ? 1.5 : 1, dash: [4, 4])
+                    )
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(isTargeted ? Color.green.opacity(0.04) : Color.black.opacity(0.05))
+                    )
+                HStack(spacing: 6) {
+                    Image(systemName: "arrow.down.doc")
+                        .font(.system(size: 12))
+                        .foregroundColor(isTargeted ? .green : .secondary)
+                    Text(isTargeted ? "Drop files here" : "Drag files here to store")
+                        .font(.system(size: 10, weight: .medium, design: .rounded))
+                        .foregroundColor(isTargeted ? .green : .secondary)
+                }
+            }
+            .frame(height: 40)
+            .padding(.horizontal, 10)
+            .padding(.top, 4)
+            .padding(.bottom, 0)
+            .onDrop(of: [.fileURL], isTargeted: $isTargeted) { providers in
+                var urls: [URL] = []
+                let group = DispatchGroup()
+                for provider in providers {
+                    group.enter()
+                    _ = provider.loadObject(ofClass: URL.self) { url, _ in
+                        if let url = url { urls.append(url) }
+                        group.leave()
                     }
                 }
-                .frame(height: 70)
-                .padding(.horizontal, 10)
-                .padding(.bottom, 12)
-                .onDrop(of: [.fileURL], isTargeted: $isTargeted) { providers in
-                    let fileURLType = UTType.fileURL.identifier
-                    for provider in providers {
-                        if provider.hasItemConformingToTypeIdentifier(fileURLType) {
-                            _ = provider.loadObject(ofClass: URL.self) { url, error in
-                                if let url = url {
-                                    DispatchQueue.main.async {
-                                        dropzoneManager.shelfFiles([url])
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    return true
+                group.notify(queue: .main) {
+                    if !urls.isEmpty { dropzoneManager.shelfFiles(urls) }
                 }
-                
-                // Active grid - in idle/normal mode, we set isDraggingMode = false
-                ScrollView {
-                    DropzoneGrid(isDraggingMode: false, windowHeight: 460)
-                }
+                return true
+            }
+            
+            // Scrollable grid — always shows shelf + folders + ACTIONS
+            ScrollView {
+                DropzoneGrid(isDraggingMode: false)
             }
         }
     }

@@ -55,6 +55,10 @@ class TimerManager: ObservableObject {
     
     private var masterTimer: Timer?
     
+    deinit {
+        masterTimer?.invalidate()
+    }
+    
     private init() {
         requestNotificationPermission()
         startMasterTimer()

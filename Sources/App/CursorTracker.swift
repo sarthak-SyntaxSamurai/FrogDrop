@@ -9,6 +9,10 @@ class CursorTracker: ObservableObject {
     
     private var timer: Timer?
     
+    deinit {
+        timer?.invalidate()
+    }
+    
     private init() {
         startTracking()
     }

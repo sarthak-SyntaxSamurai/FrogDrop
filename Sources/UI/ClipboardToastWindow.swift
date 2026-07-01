@@ -135,7 +135,7 @@ class ClipboardToastPanelWindow: NSWindow {
         }
     }
     
-    private func hide() {
+func hide() {
         let width = self.frame.width
         let height = self.frame.height
         let targetRect = NSRect(

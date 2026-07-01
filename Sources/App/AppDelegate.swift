@@ -146,6 +146,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
+    func closeAllPanels() {
+        dropzonePanel?.slideOut(force: true)
+        if let active = PopupWindow.activeInstance {
+            active.orderOut(nil)
+            PopupWindow.activeInstance = nil
+        }
+    }
+    
     // MARK: - Tongue Drag-Down Timer Setup
     
     private var tongueAnchorPoint: NSPoint = .zero
@@ -164,8 +172,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         
         lastSelectedDuration = .cancel
-        let screen = window.screen ?? NSScreen.main ?? NSScreen.screens[0]
-        tongueWindow = TongueOverlayWindow(screenFrame: screen.frame, startPoint: tongueAnchorPoint, initialCurrentPoint: mouseLocation)
+        let screen = window.screen ?? NSScreen.main ?? NSScreen.screens.first
+        let screenFrame = screen?.frame ?? NSRect(x: 0, y: 0, width: 1440, height: 900)
+        tongueWindow = TongueOverlayWindow(screenFrame: screenFrame, startPoint: tongueAnchorPoint, initialCurrentPoint: mouseLocation)
         tongueWindow?.orderFrontRegardless()
         
         HapticManager.shared.tick()
@@ -265,6 +274,7 @@ class InteractiveFrogView: NSHostingView<MenuBarFrogView> {
     
     override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
         print("[InteractiveFrogView] draggingEntered status bar button")
+        AppDelegate.shared.dropzonePanel?.isDraggingActive = true
         AppDelegate.shared.dropzonePanel?.slideIn()
         return .copy
     }
@@ -280,23 +290,46 @@ class InteractiveFrogView: NSHostingView<MenuBarFrogView> {
     
     override func draggingEnded(_ sender: NSDraggingInfo) {
         print("[InteractiveFrogView] draggingEnded")
-        AppDelegate.shared.dropzonePanel?.slideOut()
+        AppDelegate.shared.dropzonePanel?.isDraggingActive = false
+        AppDelegate.shared.dropzonePanel?.slideOut(force: true)
     }
     
     private func checkAndSlideOut() {
-        guard let panel = AppDelegate.shared.dropzonePanel else { return }
-        let mouseLoc = NSEvent.mouseLocation
-        if panel.frame.contains(mouseLoc) {
-            print("[InteractiveFrogView] Cursor is inside panel, skipping slideOut")
-            return
+        // Delay checking to allow the cursor to move from status item to panel
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+            guard let self = self else { return }
+            guard let panel = AppDelegate.shared.dropzonePanel else { return }
+            
+            // If the drag is over the panel, don't slide out
+            if panel.isDragOverPanel {
+                print("[InteractiveFrogView] Drag is over panel, skipping slideOut")
+                return
+            }
+            
+            let mouseLoc = NSEvent.mouseLocation
+            if panel.frame.contains(mouseLoc) {
+                print("[InteractiveFrogView] Cursor is inside panel frame, skipping slideOut")
+                return
+            }
+            if let window = self.window, window.frame.contains(mouseLoc) {
+                print("[InteractiveFrogView] Cursor is inside status bar button window, skipping slideOut")
+                return
+            }
+            
+            print("[InteractiveFrogView] Cursor is outside, sliding out")
+            panel.slideOut(force: false)
         }
-        print("[InteractiveFrogView] Cursor is outside panel, sliding out")
-        panel.slideOut()
     }
     
     override func mouseDown(with event: NSEvent) {
         startPoint = event.locationInWindow
         isDragging = false
+    }
+    
+    override func rightMouseDown(with event: NSEvent) {
+        let menu = NSMenu()
+        menu.addItem(NSMenuItem(title: "Quit FrogDrop", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+        NSMenu.popUpContextMenu(menu, with: event, for: self)
     }
     
     override func mouseDragged(with event: NSEvent) {

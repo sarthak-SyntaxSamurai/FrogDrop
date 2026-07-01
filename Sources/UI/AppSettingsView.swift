@@ -94,6 +94,7 @@ struct AppSettingsView: View {
                         .padding(.horizontal, 24)
                         .padding(.vertical, 20)
                     }
+                    .id("general")
                     .transition(slideTransition(for: 0))
                 } else if selectedSection == 1 {
                     ScrollView {
@@ -101,6 +102,7 @@ struct AppSettingsView: View {
                             .padding(.horizontal, 24)
                             .padding(.vertical, 20)
                     }
+                    .id("grid")
                     .transition(slideTransition(for: 1))
                 } else {
                     ScrollView {
@@ -116,6 +118,7 @@ struct AppSettingsView: View {
                         .padding(.horizontal, 24)
                         .padding(.vertical, 20)
                     }
+                    .id("rules")
                     .transition(slideTransition(for: 2))
                 }
             }
@@ -461,8 +464,9 @@ private struct RulesSettingsContent: View {
                             let app = isManualAppEntry 
                                 ? newRuleAppName.trimmingCharacters(in: .whitespacesAndNewlines)
                                 : selectedRunningApp
-                            guard !app.isEmpty else { return }
-                            clipboardManager.addRule(appName: app, ruleType: newRuleType)
+                            let finalApp = app.isEmpty && !isManualAppEntry ? runningApps.first ?? "" : app
+                            guard !finalApp.isEmpty else { return }
+                            clipboardManager.addRule(appName: finalApp, ruleType: newRuleType)
                             newRuleAppName = ""
                             HapticManager.shared.success()
                         }) {

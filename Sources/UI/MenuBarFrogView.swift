@@ -134,11 +134,19 @@ struct MenuBarFrogView: View {
                 }
                 .stroke(Color.black, lineWidth: 1.2)
                 
-                // Dangling pink tongue hanging straight down from mouth
-                Capsule()
-                    .fill(tonguePink)
-                    .frame(width: 5.5, height: 8.0)
-                    .position(x: 12, y: 12 + 6.5)
+                // Pink tongue sticking out a tiny bit (Chibi cleft style)
+                ZStack {
+                    Capsule()
+                        .fill(tonguePink)
+                        .frame(width: 1.2, height: 3.2)
+                        .offset(x: -0.5)
+                    Capsule()
+                        .fill(tonguePink)
+                        .frame(width: 1.2, height: 3.2)
+                        .offset(x: 0.5)
+                }
+                .frame(width: 3.0, height: 3.0)
+                .position(x: 12, y: 12 + 4.2)
             }
             .frame(width: 24, height: 24)
             

@@ -61,11 +61,15 @@ class ClipboardManager: ObservableObject {
     private var lastChangeCount = 0
     private var timer: Timer?
     
+    deinit {
+        timer?.invalidate()
+    }
+    
     private let rulesKey = "frogdrop.clipboardRules"
     private let durationKey = "frogdrop.tempDuration"
     
     private var storageURL: URL {
-        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first ?? FileManager.default.temporaryDirectory
         let appDir = appSupport.appendingPathComponent("FrogDrop")
         try? FileManager.default.createDirectory(at: appDir, withIntermediateDirectories: true)
         return appDir.appendingPathComponent("clipboard_history.json")

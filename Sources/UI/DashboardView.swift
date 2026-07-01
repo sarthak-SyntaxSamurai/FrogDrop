@@ -253,6 +253,7 @@ struct TaskRowItem: View {
 struct DashboardFrogView: View {
     @ObservedObject var tracker = CursorTracker.shared
     @State private var isBlinking = false
+    @State private var isTongueOut = false
     
     private let frogGreen = Color(red: 14/255, green: 127/255, blue: 69/255)
     private let eyebrowColor = Color(red: 10/255, green: 90/255, blue: 45/255)
@@ -309,10 +310,26 @@ struct DashboardFrogView: View {
             .stroke(Color.black, lineWidth: 4.2)
             
             // Tongue — starts from the bottom center of the mouth arc
-            TonguePath(cx: 100, mouthBottomY: 100 + 28, width: 20, height: 30)
-                .fill(tonguePink)
+            if isTongueOut {
+                TonguePath(cx: 100, mouthBottomY: 100 + 28, width: 22, height: 26)
+                    .fill(tonguePink)
+                    .transition(.scale(scale: 0.1, anchor: .top).combined(with: .opacity))
+            }
         }
         .frame(width: 200, height: 200)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            withAnimation(.spring(response: 0.28, dampingFraction: 0.58)) {
+                isTongueOut = true
+            }
+            HapticManager.shared.success()
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                withAnimation(.spring(response: 0.32, dampingFraction: 0.72)) {
+                    isTongueOut = false
+                }
+            }
+        }
         .onAppear {
             scheduleBlink()
         }

@@ -8,6 +8,7 @@ struct HistorySession: Codable, Identifiable {
     let isPomodoro: Bool
 }
 
+@MainActor
 class HistoryStore: ObservableObject {
     static let shared = HistoryStore()
     
@@ -15,7 +16,7 @@ class HistoryStore: ObservableObject {
     
     private let fileURL: URL = {
         let paths = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)
-        let dir = paths[0].appendingPathComponent("FrogDrop", isDirectory: true)
+        let dir = (paths.first ?? FileManager.default.temporaryDirectory).appendingPathComponent("FrogDrop", isDirectory: true)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         return dir.appendingPathComponent("history.json")
     }()
