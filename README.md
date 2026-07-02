@@ -13,7 +13,8 @@
   <img src="https://img.shields.io/badge/Swift-5.9-orange?style=flat-square&logo=swift" alt="Swift">
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT">
   <img src="https://img.shields.io/badge/Price-Free-brightgreen?style=flat-square" alt="Free">
-  <a href="https://www.buymeacoffee.com/sarthakanand"><img src="https://img.shields.io/badge/☕-Buy%20me%20a%20coffee-FFDD00?style=flat-square" alt="Donate"></a>
+  <a href="https://github.com/sponsors/sarthak-SyntaxSamurai">
+  <img src="https://img.shields.io/badge/GitHub%20Sponsors-♥%20Sponsor-EA4AAA?style=for-the-badge&logo=github-sponsors&logoColor=white" alt="GitHub Sponsors"></a>
 </p>
 
 ---
