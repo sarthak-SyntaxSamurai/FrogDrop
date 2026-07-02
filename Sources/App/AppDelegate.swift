@@ -18,11 +18,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         setupStatusItem()
         
-        // Initialize and show Main Window
+        // Initialize Main Window (do not show on startup)
         let mainWindow = MainWindow()
         MainWindow.shared = mainWindow
-        mainWindow.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
         
         // Initialize the DropzonePanel immediately on launch (Zero-Permission!)
         let statusItemFrame = statusItem?.button?.window?.frame ?? .zero
@@ -152,6 +150,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             active.orderOut(nil)
             PopupWindow.activeInstance = nil
         }
+    }
+    
+    @objc func openDashboard() {
+        MainWindow.shared?.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
     }
     
     // MARK: - Tongue Drag-Down Timer Setup
@@ -328,6 +331,7 @@ class InteractiveFrogView: NSHostingView<MenuBarFrogView> {
     
     override func rightMouseDown(with event: NSEvent) {
         let menu = NSMenu()
+        menu.addItem(NSMenuItem(title: "Open Dashboard", action: #selector(AppDelegate.openDashboard), keyEquivalent: "d"))
         menu.addItem(NSMenuItem(title: "Quit FrogDrop", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
         NSMenu.popUpContextMenu(menu, with: event, for: self)
     }

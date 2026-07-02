@@ -2,6 +2,7 @@ import AppKit
 import SwiftUI
 import UniformTypeIdentifiers
 import UserNotifications
+import ServiceManagement
 
 enum TaskProgressState: Equatable {
     case idle
@@ -2052,6 +2053,7 @@ struct DropzoneSettingsView: View {
     
     // Haptic level state
     @State private var hapticLevel: HapticManager.HapticLevel = HapticManager.shared.level
+    @State private var isLaunchAtLoginEnabled = false
     
     var body: some View {
         VStack(spacing: 0) {
@@ -2136,6 +2138,28 @@ struct DropzoneSettingsView: View {
                             Text("Auto-delete items copied from temporary applications.")
                                 .font(.system(size: 9))
                                 .foregroundColor(.secondary)
+                        }
+                        
+                        Divider()
+                            .background(Color.white.opacity(0.06))
+                        
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("STARTUP")
+                                .font(.system(size: 9, weight: .bold))
+                                .foregroundColor(.secondary)
+                                .tracking(1.0)
+                            
+                            Toggle(isOn: Binding(
+                                get: { isLaunchAtLoginEnabled },
+                                set: { newValue in
+                                    toggleLaunchAtLogin(newValue)
+                                }
+                            )) {
+                                Text("Launch automatically at login")
+                                    .font(.system(size: 10, weight: .medium, design: .rounded))
+                                    .foregroundColor(.primary)
+                            }
+                            .toggleStyle(.checkbox)
                         }
                         
                         Spacer()
@@ -2349,6 +2373,27 @@ struct DropzoneSettingsView: View {
             self.runningApps = uniqueApps
             if let first = uniqueApps.first {
                 self.selectedRunningApp = first
+            }
+            isLaunchAtLoginEnabled = (SMAppService.mainApp.status == .enabled)
+        }
+    }
+    
+    private func toggleLaunchAtLogin(_ enabled: Bool) {
+        if enabled {
+            do {
+                try SMAppService.mainApp.register()
+                isLaunchAtLoginEnabled = true
+            } catch {
+                print("Failed to register Launch at Login: \(error)")
+                isLaunchAtLoginEnabled = false
+            }
+        } else {
+            do {
+                try SMAppService.mainApp.unregister()
+                isLaunchAtLoginEnabled = false
+            } catch {
+                print("Failed to unregister Launch at Login: \(error)")
+                isLaunchAtLoginEnabled = (SMAppService.mainApp.status == .enabled)
             }
         }
     }
