@@ -2363,7 +2363,7 @@ struct DropzoneSettingsView: View {
             .padding(.vertical, 8)
         }
         .frame(width: 260, height: 330)
-        .background(Color.black.opacity(0.85))
+        .background(Color.clear)
         .onAppear {
             let apps = NSWorkspace.shared.runningApplications
                 .filter { $0.activationPolicy == .regular }

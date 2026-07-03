@@ -65,7 +65,7 @@ class ClipboardPreviewWindow: NSWindow {
         nsView.layer?.masksToBounds = true
         
         let effectView = NSVisualEffectView()
-        effectView.material = .menu
+        effectView.material = .hudWindow
         effectView.blendingMode = .behindWindow
         effectView.state = .active
         effectView.wantsLayer = true
@@ -137,7 +137,7 @@ class PopupWindow: NSWindow, NSWindowDelegate {
         nsView.layer?.masksToBounds = true
         
         let effectView = NSVisualEffectView()
-        effectView.material = .menu
+        effectView.material = .hudWindow
         effectView.blendingMode = .behindWindow
         effectView.state = .active
         effectView.wantsLayer = true
@@ -213,6 +213,16 @@ class PopupWindow: NSWindow, NSWindowDelegate {
         
         // Check if click was inside the menu bar status item frame (to prevent double-toggling)
         if statusItemFrame.contains(mouseLoc) { return }
+        
+        // Check if click is inside any child window (e.g. settings popover, tooltips)
+        for childWin in self.childWindows ?? [] {
+            if childWin.frame.contains(mouseLoc) { return }
+        }
+        
+        // If a popover/sheet is the key window, don't dismiss
+        if let keyWin = NSApp.keyWindow, keyWin !== self {
+            if keyWin.frame.contains(mouseLoc) { return }
+        }
         
         // Click was outside everything: dismiss!
         DispatchQueue.main.async { [weak self] in
@@ -427,27 +437,13 @@ struct PopupView: View {
                     QuitButton()
                 }
                 .padding(12)
-                .background(Color.black.opacity(0.12))
+                .background(Color.clear)
             }
             .frame(width: 340, height: 460)
-            .background(
-                ZStack {
-                    RadialGradient(
-                        gradient: Gradient(colors: [Color(red: 0.15, green: 0.85, blue: 0.45).opacity(0.12), Color.clear]),
-                        center: .topLeading,
-                        startRadius: 0,
-                        endRadius: 280
-                    )
-                    LinearGradient(
-                        colors: [Color.white.opacity(0.04), Color.clear],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                }
-            )
+            .background(Color.clear)
             .overlay(
                 RoundedRectangle(cornerRadius: 18)
-                    .stroke(Color.white.opacity(0.12), lineWidth: 1)
+                    .stroke(Color.white.opacity(0.18), lineWidth: 1)
             )
             
             if dropzoneManager.isShowingCombinePopover {

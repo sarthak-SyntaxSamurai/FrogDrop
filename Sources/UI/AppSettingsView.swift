@@ -31,7 +31,7 @@ struct AppSettingsView: View {
                         .foregroundColor(.secondary)
                 }
                 Spacer()
-                Text("v1.0")
+                Text("v1.2.0")
                     .font(.system(size: 10, weight: .medium, design: .monospaced))
                     .foregroundColor(.secondary.opacity(0.5))
                     .padding(.horizontal, 8)
@@ -239,7 +239,7 @@ private struct GeneralSettingsContent: View {
 
             SettingsSection(title: "About", icon: "info.circle") {
                 VStack(alignment: .leading, spacing: 8) {
-                    SettingsInfoRow(label: "Version", value: "1.0.0")
+                    SettingsInfoRow(label: "Version", value: "1.2.0")
                     SettingsInfoRow(label: "Build", value: "Release")
                     SettingsInfoRow(label: "Platform", value: "macOS 14+")
                 }
