@@ -114,10 +114,6 @@ struct ShelfGroup: Identifiable {
         registeredFrames[key] = rect
     }
     
-    func clearFrames() {
-        registeredFrames.removeAll()
-    }
-    
     func shelfFiles(_ urls: [URL]) {
         // Files dropped together form one group
         var group = ShelfGroup(files: urls)
@@ -1064,7 +1060,6 @@ struct DropzonePanelView: View {
 struct DropzoneGrid: View {
     let isDraggingMode: Bool
     @ObservedObject var manager = DropzoneManager.shared
-    @State private var isShowingSettings = false
     
     let columns = [
         GridItem(.flexible(), spacing: 10),
@@ -1582,17 +1577,6 @@ struct DropzoneGrid: View {
         }
     }
 
-    private func thumbnailImage(for url: URL) -> NSImage? {
-        let imageExts = ["jpg","jpeg","png","gif","heic","heif","tiff","tif","bmp","webp"]
-        guard imageExts.contains(url.pathExtension.lowercased()) else { return nil }
-        guard let src = CGImageSourceCreateWithURL(url as CFURL, nil),
-              let cgImg = CGImageSourceCreateThumbnailAtIndex(src, 0, [
-                kCGImageSourceCreateThumbnailFromImageAlways: true,
-                kCGImageSourceThumbnailMaxPixelSize: 80
-              ] as CFDictionary) else { return nil }
-        return NSImage(cgImage: cgImg, size: NSSize(width: 40, height: 40))
-    }
-    
     private func selectFilesAndRun(actionKey: String) {
         let panel = NSOpenPanel()
         panel.allowsMultipleSelection = true

@@ -413,20 +413,5 @@ class GlobalDragMonitor {
             }
         }
     }
-    
-    func stop() {
-        if let downMonitor = downMonitor {
-            NSEvent.removeMonitor(downMonitor)
-            self.downMonitor = nil
-        }
-        if let dragMonitor = dragMonitor {
-            NSEvent.removeMonitor(dragMonitor)
-            self.dragMonitor = nil
-        }
-        if let upMonitor = upMonitor {
-            NSEvent.removeMonitor(upMonitor)
-            self.upMonitor = nil
-        }
-    }
 }
 

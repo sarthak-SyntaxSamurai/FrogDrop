@@ -50,8 +50,6 @@ class TimerManager: ObservableObject {
     @Published var setupTaskName: String = ""
     @Published var setupTodoId: UUID? = nil
     @Published var setupIsPomodoro: Bool = false
-    @Published var setupBreakMinutes: Int = 5
-    @Published var setupCycles: Int = 4
     
     private var masterTimer: Timer?
     

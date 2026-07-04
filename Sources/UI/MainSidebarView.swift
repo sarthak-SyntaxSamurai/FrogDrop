@@ -25,7 +25,6 @@ struct MainSidebarView: View {
     @State private var isSidebarVisible: Bool = true
     @ObservedObject var timerManager = TimerManager.shared
     @ObservedObject var clipboardManager = ClipboardManager.shared
-    @ObservedObject var dropzoneManager = DropzoneManager.shared
     
     @State private var clipboardSearchQuery = ""
     @Namespace private var sidebarNamespace

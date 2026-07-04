@@ -4,7 +4,6 @@ struct DashboardView: View {
     @AppStorage("dailyFocusGoal") var dailyFocusGoal: Int = 120
     @Binding var activeTab: MainSidebarView.Tab
     @ObservedObject var timerManager = TimerManager.shared
-    @ObservedObject var clipboardManager = ClipboardManager.shared
     @ObservedObject var todoManager = TodoManager.shared
     @ObservedObject var historyStore = HistoryStore.shared
     

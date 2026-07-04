@@ -5,7 +5,6 @@ class ToastModel: ObservableObject {
     @Published var text: String = ""
     @Published var appName: String = ""
     @Published var isTemporary: Bool = false
-    @Published var itemId: UUID? = nil
 }
 
 struct ClipboardToastView: View {

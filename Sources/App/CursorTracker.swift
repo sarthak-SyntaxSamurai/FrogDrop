@@ -24,9 +24,4 @@ class CursorTracker: ObservableObject {
             }
         }
     }
-    
-    func stopTracking() {
-        timer?.invalidate()
-        timer = nil
-    }
 }
