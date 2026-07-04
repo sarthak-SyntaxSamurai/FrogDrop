@@ -16,7 +16,7 @@ struct AppSettingsView: View {
     @State private var selectedRunningApp = ""
     @State private var isManualAppEntry = false
 
-    private let accent = Color(red: 0.15, green: 0.85, blue: 0.45)
+    private let accent = Color(red: 0.22, green: 0.72, blue: 0.42)
     private let sections = ["General", "Grid", "Rules"]
 
     var body: some View {
@@ -158,6 +158,7 @@ struct AppSettingsView: View {
 // MARK: - General Tab Content
 private struct GeneralSettingsContent: View {
     @AppStorage("dailyFocusGoal") var dailyFocusGoal: Int = 120
+    @AppStorage("uiDimOpacity") var uiDimOpacity: Double = 0.0
     @Binding var hapticLevel: HapticManager.HapticLevel
     @ObservedObject var clipboardManager: ClipboardManager
     let accent: Color
@@ -234,6 +235,29 @@ private struct GeneralSettingsContent: View {
                             .foregroundColor(.orange)
                             .frame(width: 48, alignment: .trailing)
                     }
+                }
+            }
+
+            SettingsSection(title: "Appearance", icon: "slider.horizontal.3") {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Adjust the darkness of the menu bar popup window.")
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary)
+
+                    HStack(spacing: 10) {
+                        Image(systemName: "sun.max")
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                        Slider(value: $uiDimOpacity, in: 0.0...1.0, step: 0.05)
+                            .accentColor(accent)
+                        Image(systemName: "moon")
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                    }
+
+                    Text(uiDimOpacity < 0.15 ? "Fully Transparent" : uiDimOpacity < 0.45 ? "Light" : uiDimOpacity < 0.75 ? "Medium" : "Dark")
+                        .font(.system(size: 10, weight: .medium, design: .rounded))
+                        .foregroundColor(.secondary)
                 }
             }
 
@@ -505,7 +529,7 @@ struct SettingsSection<Content: View>: View {
             HStack(spacing: 6) {
                 Image(systemName: icon)
                     .font(.system(size: 11, weight: .semibold))
-                    .foregroundColor(Color(red: 0.15, green: 0.85, blue: 0.45))
+                    .foregroundColor(Color(red: 0.22, green: 0.72, blue: 0.42))
                 Text(title)
                     .font(.system(size: 12, weight: .bold, design: .rounded))
                     .foregroundColor(.primary.opacity(0.85))

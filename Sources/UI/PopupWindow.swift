@@ -33,7 +33,7 @@ struct ClipboardPreviewView: View {
         .background(Color.clear)
         .overlay(
             RoundedRectangle(cornerRadius: 14)
-                .stroke(Color.white.opacity(0.12), lineWidth: 1)
+                .stroke(Color.white.opacity(0.1), lineWidth: 0.5)
         )
     }
 }
@@ -137,7 +137,7 @@ class PopupWindow: NSWindow, NSWindowDelegate {
         nsView.layer?.masksToBounds = true
         
         let effectView = NSVisualEffectView()
-        effectView.material = .hudWindow
+        effectView.material = .popover
         effectView.blendingMode = .behindWindow
         effectView.state = .active
         effectView.wantsLayer = true
@@ -298,6 +298,8 @@ struct PopupView: View {
         case dropzone
     }
     
+    @AppStorage("uiDimOpacity") private var uiDimOpacity: Double = 0.0
+    
     @State private var activeTab: Tab = {
         if TimerManager.shared.state != .idle {
             return .timer
@@ -443,7 +445,7 @@ struct PopupView: View {
             .background(Color.clear)
             .overlay(
                 RoundedRectangle(cornerRadius: 18)
-                    .stroke(Color.white.opacity(0.18), lineWidth: 1)
+                    .stroke(Color.white.opacity(0.1), lineWidth: 0.5)
             )
             
             if dropzoneManager.isShowingCombinePopover {
@@ -472,12 +474,12 @@ struct PopupView: View {
                 )
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(red: 0.1, green: 0.1, blue: 0.1))
-                        .shadow(color: .black.opacity(0.5), radius: 10, x: 0, y: 5)
+                        .fill(Color.white.opacity(0.04))
+                        .shadow(color: .black.opacity(0.3), radius: 10, x: 0, y: 5)
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.white.opacity(0.12), lineWidth: 1)
+                        .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
                 )
                 .transition(.scale.combined(with: .opacity))
             }
@@ -533,7 +535,7 @@ struct TabButton: View {
             Text(title)
                 .font(.system(size: 9, weight: .bold, design: .rounded))
         }
-        .foregroundColor(isActive ? Color(red: 0.15, green: 0.85, blue: 0.45) : (isHovered ? .primary : .secondary))
+        .foregroundColor(isActive ? Color(red: 0.22, green: 0.72, blue: 0.42) : (isHovered ? .primary : .secondary))
         .frame(maxWidth: .infinity)
         .padding(.vertical, 6)
         .background(
@@ -1977,12 +1979,12 @@ struct DropzoneTabView: View {
             ZStack {
                 RoundedRectangle(cornerRadius: 10)
                     .stroke(
-                        isTargeted ? Color.green : Color.white.opacity(0.1),
-                        style: StrokeStyle(lineWidth: isTargeted ? 1.5 : 1, dash: [4, 4])
+                        isTargeted ? Color.green : Color.white.opacity(0.08),
+                        style: StrokeStyle(lineWidth: isTargeted ? 1.5 : 0.5, dash: [4, 4])
                     )
                     .background(
                         RoundedRectangle(cornerRadius: 10)
-                            .fill(isTargeted ? Color.green.opacity(0.04) : Color.black.opacity(0.05))
+                            .fill(isTargeted ? Color.green.opacity(0.06) : Color.clear)
                     )
                 HStack(spacing: 6) {
                     Image(systemName: "arrow.down.doc")

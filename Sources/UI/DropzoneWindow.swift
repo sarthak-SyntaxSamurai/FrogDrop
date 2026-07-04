@@ -834,7 +834,7 @@ class DropzonePanelWindow: NSWindow {
         expandedContainer.layer?.masksToBounds = true
         
         let effectView = NSVisualEffectView()
-        effectView.material = .hudWindow
+        effectView.material = .popover
         effectView.blendingMode = .behindWindow
         effectView.state = .active
         effectView.frame = expandedContainer.bounds
@@ -954,13 +954,13 @@ struct CollapsedPanelView: View {
         .frame(width: 70, height: 20)
         .background(
             Capsule()
-                .fill(Color.black.opacity(0.7))
+                .fill(Color.white.opacity(0.08))
         )
         .overlay(
             Capsule()
-                .stroke(Color.green.opacity(0.6), lineWidth: 1.0)
+                .stroke(Color(red: 0.22, green: 0.72, blue: 0.42).opacity(0.5), lineWidth: 0.5)
         )
-        .shadow(color: Color.green.opacity(0.3), radius: 3)
+        .shadow(color: Color(red: 0.22, green: 0.72, blue: 0.42).opacity(0.2), radius: 3)
         .frame(width: 80, height: 28)
     }
 }
@@ -1048,12 +1048,12 @@ struct DropzonePanelView: View {
                 )
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(red: 0.1, green: 0.1, blue: 0.1))
-                        .shadow(color: .black.opacity(0.5), radius: 10, x: 0, y: 5)
+                        .fill(Color.white.opacity(0.04))
+                        .shadow(color: .black.opacity(0.3), radius: 10, x: 0, y: 5)
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.white.opacity(0.12), lineWidth: 1)
+                        .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
                 )
                 .transition(.scale.combined(with: .opacity))
             }
@@ -2054,6 +2054,7 @@ struct DropzoneSettingsView: View {
     // Haptic level state
     @State private var hapticLevel: HapticManager.HapticLevel = HapticManager.shared.level
     @State private var isLaunchAtLoginEnabled = false
+    @AppStorage("uiDimOpacity") private var uiDimOpacity: Double = 0.0
     
     var body: some View {
         VStack(spacing: 0) {
@@ -2085,7 +2086,7 @@ struct DropzoneSettingsView: View {
             // Tab Contents
             ZStack {
                 if selectedTab == 0 {
-                    // General Options
+                ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 14) {
                         VStack(alignment: .leading, spacing: 6) {
                             Text("HAPTICS")
@@ -2106,7 +2107,7 @@ struct DropzoneSettingsView: View {
                                             .padding(.horizontal, 8)
                                             .padding(.vertical, 4)
                                             .frame(maxWidth: .infinity)
-                                            .background(hapticLevel == val ? Color(red: 0.15, green: 0.85, blue: 0.45) : Color.white.opacity(0.04))
+                                            .background(hapticLevel == val ? Color(red: 0.22, green: 0.72, blue: 0.42) : Color.white.opacity(0.04))
                                             .cornerRadius(6)
                                     }
                                     .buttonStyle(.plain)
@@ -2130,7 +2131,7 @@ struct DropzoneSettingsView: View {
                             }
                             
                             Slider(value: $clipboardManager.tempDuration, in: 15...120, step: 5)
-                                .accentColor(Color(red: 0.15, green: 0.85, blue: 0.45))
+                                .accentColor(Color(red: 0.22, green: 0.72, blue: 0.42))
                                 .onChange(of: clipboardManager.tempDuration) { _, _ in
                                     clipboardManager.saveSettings()
                                 }
@@ -2162,10 +2163,39 @@ struct DropzoneSettingsView: View {
                             .toggleStyle(.checkbox)
                         }
                         
-                        Spacer()
+                        Divider()
+                            .background(Color.white.opacity(0.06))
+                        
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("APPEARANCE")
+                                .font(.system(size: 9, weight: .bold))
+                                .foregroundColor(.secondary)
+                                .tracking(1.0)
+                            
+                            Text("Popup darkness")
+                                .font(.system(size: 9))
+                                .foregroundColor(.secondary)
+                            
+                            HStack(spacing: 8) {
+                                Image(systemName: "sun.max")
+                                    .font(.system(size: 10))
+                                    .foregroundColor(.secondary)
+                                Slider(value: $uiDimOpacity, in: 0.0...1.0, step: 0.05)
+                                    .accentColor(Color(red: 0.22, green: 0.72, blue: 0.42))
+                                Image(systemName: "moon")
+                                    .font(.system(size: 10))
+                                    .foregroundColor(.secondary)
+                            }
+                            
+                            Text(uiDimOpacity < 0.15 ? "Glass (Fully Transparent)" : uiDimOpacity < 0.45 ? "Light" : uiDimOpacity < 0.75 ? "Medium" : "Dark")
+                                .font(.system(size: 9, weight: .semibold, design: .rounded))
+                                .foregroundColor(Color(red: 0.22, green: 0.72, blue: 0.42))
+                        }
                     }
                     .padding(16)
-                    .transition(.opacity)
+                }
+                .transition(.opacity)
+
                 } else if selectedTab == 1 {
                     // Grid Folders & Actions
                     ScrollView {
