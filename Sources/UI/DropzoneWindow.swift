@@ -2469,7 +2469,7 @@ struct MenuBarSettingsView: View {
             .padding(.vertical, 8)
         }
         .frame(width: 260, height: 330)
-        .background(Color.clear)
+        .background(Color.black.opacity(uiDimOpacity))
         .onAppear {
             let apps = NSWorkspace.shared.runningApplications
                 .filter { $0.activationPolicy == .regular }

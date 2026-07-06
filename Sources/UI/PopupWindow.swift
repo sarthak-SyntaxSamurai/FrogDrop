@@ -8,6 +8,7 @@ class PreviewModel: ObservableObject {
 
 struct ClipboardPreviewView: View {
     @ObservedObject var model: PreviewModel
+    @AppStorage("uiDimOpacity") private var uiDimOpacity: Double = 0.0
     
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -30,7 +31,7 @@ struct ClipboardPreviewView: View {
         }
         .padding(14)
         .frame(width: 280, height: 200)
-        .background(Color.clear)
+        .background(Color.black.opacity(uiDimOpacity))
         .overlay(
             RoundedRectangle(cornerRadius: 14)
                 .stroke(Color.white.opacity(0.1), lineWidth: 0.5)
@@ -442,7 +443,7 @@ struct PopupView: View {
                 .background(Color.clear)
             }
             .frame(width: 340, height: 460)
-            .background(Color.clear)
+            .background(Color.black.opacity(uiDimOpacity))
             .overlay(
                 RoundedRectangle(cornerRadius: 18)
                     .stroke(Color.white.opacity(0.1), lineWidth: 0.5)

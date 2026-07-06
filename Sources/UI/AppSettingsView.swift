@@ -8,6 +8,7 @@ struct AppSettingsView: View {
     @Namespace private var settingsNamespace
     
     @State private var selectedSection = 0
+    @AppStorage("uiDimOpacity") private var uiDimOpacity: Double = 0.0
     @State private var previousSection = 0
     
     @State private var hapticLevel: HapticManager.HapticLevel = HapticManager.shared.level
@@ -126,6 +127,7 @@ struct AppSettingsView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.black.opacity(uiDimOpacity))
         .onAppear {
             hapticLevel = HapticManager.shared.level
             let apps = NSWorkspace.shared.runningApplications
