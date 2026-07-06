@@ -168,12 +168,14 @@ Found a bug? Have a feature idea? Just want to say hi?
 
 ---
 
-## Support
+## 💖 Support FrogDrop
 
-FrogDrop is free, open-source, and built solo. If it saves you time:
+FrogDrop is proudly **100% free, open-source, and strictly local** (no tracking, no hidden network calls). Building and maintaining native macOS apps takes significant time. 
+
+If FrogDrop helps your daily workflow, consider dropping a small tip to keep the updates coming:
 
 <a href="https://github.com/sponsors/sarthak-SyntaxSamurai">
-  <img src="https://img.shields.io/badge/GitHub%20Sponsors-♥%20Sponsor-EA4AAA?style=for-the-badge&logo=github-sponsors&logoColor=white" alt="GitHub Sponsors">
+  <img src="https://img.shields.io/badge/Sponsor-💖-FF69B4?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="GitHub Sponsors">
 </a>
 
 No pressure. A ⭐ star on this repo means just as much.
