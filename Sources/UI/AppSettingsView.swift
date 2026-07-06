@@ -346,7 +346,7 @@ private struct GeneralSettingsContent: View {
 
             SettingsSection(title: "About", icon: "info.circle") {
                 VStack(alignment: .leading, spacing: 8) {
-                    SettingsInfoRow(label: "Version", value: "1.2.0")
+                    SettingsInfoRow(label: "Version", value: "1.3.0")
                     SettingsInfoRow(label: "Build", value: "Release")
                     SettingsInfoRow(label: "Platform", value: "macOS 14+")
                 }
