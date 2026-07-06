@@ -15,7 +15,7 @@ struct ClipboardPreferenceRule: Identifiable, Codable, Equatable {
 
 struct ClipboardItem: Identifiable, Codable, Equatable, Sendable {
     var id: UUID
-    let text: String
+    var text: String
     let timestamp: Date
     let sourceApp: String?
     var isTemporary: Bool
@@ -58,6 +58,9 @@ class ClipboardManager: ObservableObject {
     
     private let maxItems = 100
     private let pasteboard = NSPasteboard.general
+    private var clipboardRetentionDays: Int {
+        UserDefaults.standard.integer(forKey: "clipboardRetentionDays")
+    }
     private var lastChangeCount = 0
     private var timer: Timer?
     
@@ -152,54 +155,87 @@ class ClipboardManager: ObservableObject {
         }
     }
     
+    private func checkRetention() {
+        guard clipboardRetentionDays > 0 else { return }
+        let cutoffDate = Calendar.current.date(byAdding: .day, value: -clipboardRetentionDays, to: Date()) ?? Date()
+        
+        let originalCount = items.count
+        items.removeAll { item in
+            if item.isPinned { return false }
+            return item.timestamp < cutoffDate
+        }
+        
+        if items.count != originalCount {
+            saveHistory()
+        }
+    }
+    
     private func checkPasteboard() {
         checkExpiration()
-        
+        checkRetention()
         guard pasteboard.changeCount != lastChangeCount else { return }
         lastChangeCount = pasteboard.changeCount
         
         if let newText = pasteboard.string(forType: .string), !newText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            if items.first?.text != newText {
-                let activeApp = NSWorkspace.shared.frontmostApplication
-                let appName = activeApp?.localizedName ?? "Unknown"
-                
-                let rule = customRules.first(where: { $0.appName.lowercased() == appName.lowercased() })?.ruleType ?? .save
-                
-                switch rule {
-                case .ignore:
-                    print("[ClipboardManager] Ignored copy from \(appName)")
-                    return
-                case .temporary:
-                    let expires = Date().addingTimeInterval(tempDuration)
-                    let newItem = ClipboardItem(
-                        text: newText,
-                        sourceApp: appName,
-                        isTemporary: true,
-                        expiresAt: expires
-                    )
-                    items.insert(newItem, at: 0)
-                    if items.count > maxItems {
-                        items = Array(items.prefix(maxItems))
-                    }
-                    saveHistory()
-                    NotificationCenter.default.post(name: NSNotification.Name("ShowClipboardToast"), object: newItem)
-                    
-                case .save:
-                    let newItem = ClipboardItem(
-                        text: newText,
-                        sourceApp: appName,
-                        isTemporary: false,
-                        expiresAt: nil
-                    )
-                    items.insert(newItem, at: 0)
-                    if items.count > maxItems {
-                        items = Array(items.prefix(maxItems))
-                    }
-                    saveHistory()
-                    NotificationCenter.default.post(name: NSNotification.Name("ShowClipboardToast"), object: newItem)
-                }
+            let activeApp = NSWorkspace.shared.frontmostApplication
+            let appName = activeApp?.localizedName ?? "Unknown"
+            
+            let rule = customRules.first(where: { $0.appName.lowercased() == appName.lowercased() })?.ruleType ?? .save
+            
+            if rule == .ignore {
+                print("[ClipboardManager] Ignored copy from \(appName)")
+                return
+            }
+            
+            let normalizedNewText = newText.trimmingCharacters(in: .whitespacesAndNewlines)
+            let wasPinned = items.contains(where: { $0.text.trimmingCharacters(in: .whitespacesAndNewlines) == normalizedNewText && $0.isPinned })
+            items.removeAll(where: { $0.text.trimmingCharacters(in: .whitespacesAndNewlines) == normalizedNewText })
+            
+            let isTemp = (rule == .temporary)
+            let expires = isTemp ? Date().addingTimeInterval(tempDuration) : nil
+            
+            let newItem = ClipboardItem(
+                text: newText,
+                sourceApp: appName,
+                isTemporary: isTemp,
+                expiresAt: expires,
+                isPinned: wasPinned
+            )
+            
+            items.insert(newItem, at: 0)
+            if items.count > maxItems {
+                items = Array(items.prefix(maxItems))
+            }
+            saveHistory()
+            NotificationCenter.default.post(name: NSNotification.Name("ShowClipboardToast"), object: newItem)
+        }
+    }
+    
+    func updateText(_ item: ClipboardItem, newText: String) {
+        guard let originalIndex = items.firstIndex(where: { $0.id == item.id }) else { return }
+        
+        let normalizedNewText = newText.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        if normalizedNewText.isEmpty {
+            return
+        }
+        
+        items[originalIndex].text = newText
+        
+        let matchingIndices = items.indices.filter { items[$0].text.trimmingCharacters(in: .whitespacesAndNewlines) == normalizedNewText }
+        
+        if matchingIndices.count > 1 {
+            let anyPinned = matchingIndices.contains { items[$0].isPinned }
+            let firstMatchIndex = matchingIndices.first!
+            
+            items[firstMatchIndex].isPinned = anyPinned
+            
+            for index in matchingIndices.dropFirst().reversed() {
+                items.remove(at: index)
             }
         }
+        
+        saveHistory()
     }
     
     func makePermanent(_ item: ClipboardItem) {

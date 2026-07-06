@@ -1727,6 +1727,9 @@ struct ClipboardRow: View {
     
     @State private var isHovering = false
     @State private var hoverWorkItem: DispatchWorkItem? = nil
+    @State private var isEditing = false
+    @State private var editText = ""
+    @FocusState private var isTextFieldFocused: Bool
     // No timer properties - kept static for minimal CPU footprint
     
     private var isTruncated: Bool {
@@ -1786,12 +1789,30 @@ struct ClipboardRow: View {
                             .padding(.trailing, 2)
                     }
                     
-                    highlightedText(displayPreviewText, query: searchQuery)
+                    if isEditing {
+                        TextField("", text: $editText, onCommit: {
+                            ClipboardManager.shared.updateText(item, newText: editText)
+                            isEditing = false
+                        })
+                        .focused($isTextFieldFocused)
                         .font(.system(.subheadline, design: .rounded))
                         .fontWeight(.medium)
-                        .foregroundColor(.primary)
-                        .lineLimit(1)
-                        .multilineTextAlignment(.leading)
+                        .textFieldStyle(.plain)
+                        .padding(2)
+                        .background(Color.white.opacity(0.1))
+                        .cornerRadius(4)
+                        .onAppear {
+                            editText = item.text
+                            isTextFieldFocused = true
+                        }
+                    } else {
+                        highlightedText(displayPreviewText, query: searchQuery)
+                            .font(.system(.subheadline, design: .rounded))
+                            .fontWeight(.medium)
+                            .foregroundColor(.primary)
+                            .lineLimit(1)
+                            .multilineTextAlignment(.leading)
+                    }
                 }
                 
                 Spacer()
@@ -1828,6 +1849,20 @@ struct ClipboardRow: View {
                             .buttonStyle(.plain)
                             .help("Shorten Link")
                         }
+                        
+                        Button(action: {
+                            editText = item.text
+                            isEditing = true
+                        }) {
+                            Image(systemName: "pencil")
+                                .font(.system(size: 10))
+                                .foregroundColor(.blue)
+                                .padding(5)
+                                .background(Color.blue.opacity(0.12))
+                                .cornerRadius(5)
+                        }
+                        .buttonStyle(.plain)
+                        .help("Edit Item")
                         
                         Button(action: {
                             ClipboardManager.shared.togglePin(item)
@@ -1909,6 +1944,7 @@ struct ClipboardRow: View {
                 }
             }
             .onTapGesture {
+                guard !isEditing else { return }
                 onCopy()
                 hoverWorkItem?.cancel()
                 hoverWorkItem = nil

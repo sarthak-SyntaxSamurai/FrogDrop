@@ -2039,6 +2039,7 @@ struct MenuBarSettingsView: View {
     @State private var hapticLevel: HapticManager.HapticLevel = HapticManager.shared.level
     @State private var isLaunchAtLoginEnabled = false
     @AppStorage("uiDimOpacity") private var uiDimOpacity: Double = 0.0
+    @AppStorage("clipboardRetentionDays") var clipboardRetentionDays: Int = 0
     
     // Icon Style state
     @AppStorage("menuBarIconStyle") var menuBarIconStyle: String = "frog"
@@ -2189,6 +2190,30 @@ struct MenuBarSettingsView: View {
                                     .buttonStyle(.plain)
                                 }
                             }
+                        }
+                        
+                        Divider()
+                            .background(Color.white.opacity(0.06))
+                        
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("CLIPBOARD RETENTION")
+                                .font(.system(size: 9, weight: .bold))
+                                .foregroundColor(.secondary)
+                                .tracking(1.0)
+                            
+                            Picker("", selection: $clipboardRetentionDays) {
+                                Text("Never Delete").tag(0)
+                                Text("7 Days").tag(7)
+                                Text("14 Days").tag(14)
+                                Text("30 Days").tag(30)
+                            }
+                            .pickerStyle(.menu)
+                            .labelsHidden()
+                            .font(.system(size: 11, design: .rounded))
+                            
+                            Text("Auto-delete old unpinned clipboard items.")
+                                .font(.system(size: 9))
+                                .foregroundColor(.secondary)
                         }
                         
                         Divider()

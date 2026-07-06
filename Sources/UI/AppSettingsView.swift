@@ -162,6 +162,7 @@ struct AppSettingsView: View {
 private struct GeneralSettingsContent: View {
     @AppStorage("dailyFocusGoal") var dailyFocusGoal: Int = 120
     @AppStorage("uiDimOpacity") var uiDimOpacity: Double = 0.0
+    @AppStorage("clipboardRetentionDays") var clipboardRetentionDays: Int = 0
     @AppStorage("menuBarIconStyle") var menuBarIconStyle: String = "frog"
     @AppStorage("menuBarCustomImagePath") var menuBarCustomImagePath: String = ""
     @Binding var hapticLevel: HapticManager.HapticLevel
@@ -256,6 +257,23 @@ private struct GeneralSettingsContent: View {
                             .buttonStyle(.plain)
                         }
                     }
+                }
+            }
+
+            SettingsSection(title: "Clipboard Retention", icon: "clock.arrow.circlepath") {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Auto-delete old unpinned clipboard items.")
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary)
+
+                    Picker("", selection: $clipboardRetentionDays) {
+                        Text("Never Delete").tag(0)
+                        Text("7 Days").tag(7)
+                        Text("14 Days").tag(14)
+                        Text("30 Days").tag(30)
+                    }
+                    .pickerStyle(.menu)
+                    .labelsHidden()
                 }
             }
 
