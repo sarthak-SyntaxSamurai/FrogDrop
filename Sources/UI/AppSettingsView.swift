@@ -1,5 +1,6 @@
 import SwiftUI
-
+import AppKit
+import UniformTypeIdentifiers
 struct AppSettingsView: View {
     @ObservedObject var manager = DropzoneManager.shared
     @ObservedObject var clipboardManager = ClipboardManager.shared
@@ -159,12 +160,74 @@ struct AppSettingsView: View {
 private struct GeneralSettingsContent: View {
     @AppStorage("dailyFocusGoal") var dailyFocusGoal: Int = 120
     @AppStorage("uiDimOpacity") var uiDimOpacity: Double = 0.0
+    @AppStorage("menuBarIconStyle") var menuBarIconStyle: String = "frog"
+    @AppStorage("menuBarCustomImagePath") var menuBarCustomImagePath: String = ""
     @Binding var hapticLevel: HapticManager.HapticLevel
     @ObservedObject var clipboardManager: ClipboardManager
     let accent: Color
 
+    private func selectCustomImage() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.png, .jpeg, .heic]
+        if panel.runModal() == .OK, let url = panel.url {
+            if let image = NSImage(contentsOf: url) {
+                let targetSize = NSSize(width: 48, height: 48)
+                let newImage = NSImage(size: targetSize)
+                newImage.lockFocus()
+                image.draw(in: NSRect(origin: .zero, size: targetSize))
+                newImage.unlockFocus()
+                
+                if let tiff = newImage.tiffRepresentation,
+                   let rep = NSBitmapImageRep(data: tiff),
+                   let png = rep.representation(using: .png, properties: [:]) {
+                    
+                    let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?.appendingPathComponent("FrogDrop") ?? FileManager.default.temporaryDirectory
+                    try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+                    let path = dir.appendingPathComponent("custom_icon.png")
+                    
+                    try? png.write(to: path)
+                    menuBarCustomImagePath = path.path
+                    menuBarIconStyle = "custom"
+                    HapticManager.shared.success()
+                }
+            }
+        }
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
+            SettingsSection(title: "Menu Bar Icon", icon: "face.smiling.fill") {
+                VStack(alignment: .leading, spacing: 12) {
+                    Picker("Icon Style", selection: $menuBarIconStyle) {
+                        Text("Default Frog").tag("frog")
+                        Text("Minimal White").tag("minimal")
+                        Text("Custom Image").tag("custom")
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    .onChange(of: menuBarIconStyle) { _, _ in HapticManager.shared.click() }
+                    
+                    if menuBarIconStyle == "custom" {
+                        HStack {
+                            Button("Choose Image...", action: selectCustomImage)
+                                .font(.system(size: 11, weight: .medium))
+                                .padding(.horizontal, 10).padding(.vertical, 5)
+                                .background(Color.white.opacity(0.08)).cornerRadius(5)
+                                .buttonStyle(.plain)
+                            
+                            if !menuBarCustomImagePath.isEmpty {
+                                Button(action: {
+                                    menuBarCustomImagePath = ""
+                                    UserDefaults.standard.removeObject(forKey: "menuBarCustomImagePath")
+                                    HapticManager.shared.click()
+                                }) { Image(systemName: "trash").foregroundColor(.red) }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                    }
+                }
+            }
+            
             SettingsSection(title: "Haptics", icon: "hand.tap.fill") {
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Feedback intensity when interacting with FrogDrop.")

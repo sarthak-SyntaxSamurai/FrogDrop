@@ -6,6 +6,9 @@ struct MenuBarFrogView: View {
     @ObservedObject var timerManager = TimerManager.shared
     @State private var isBlinking = false
     
+    @AppStorage("menuBarIconStyle") var menuBarIconStyle: String = "frog"
+    @AppStorage("menuBarCustomImagePath") var menuBarCustomImagePath: String = ""
+    
     // Tug Brand Colors
     private let frogGreen = Color(red: 14/255, green: 127/255, blue: 69/255) // #0E7F45
     private let tonguePink = Color(red: 250/255, green: 103/255, blue: 146/255) // #FA6792
@@ -28,13 +31,29 @@ struct MenuBarFrogView: View {
     var body: some View {
         HStack(spacing: 4) {
             ZStack {
-                // Wide Head Body (Ellipse for perfect Tug style round/chubby head)
-                Ellipse()
-                    .fill(frogGreen)
-                    .frame(width: 19, height: 15)
-                    .position(x: 12, y: 12 + 2.0)
-                
-                // Left Eyebrow
+                if menuBarIconStyle == "minimal" {
+                    Image(systemName: "square.and.arrow.down.fill")
+                        .font(.system(size: 14))
+                        .foregroundColor(.primary)
+                } else if menuBarIconStyle == "custom" {
+                    if !menuBarCustomImagePath.isEmpty, let nsImage = NSImage(contentsOfFile: menuBarCustomImagePath) {
+                        Image(nsImage: nsImage)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 20, height: 20)
+                    } else {
+                        Image(systemName: "photo")
+                            .font(.system(size: 14))
+                            .foregroundColor(.primary)
+                    }
+                } else {
+                    // Wide Head Body (Ellipse for perfect Tug style round/chubby head)
+                    Ellipse()
+                        .fill(frogGreen)
+                        .frame(width: 19, height: 15)
+                        .position(x: 12, y: 12 + 2.0)
+                    
+                    // Left Eyebrow
                 Path { path in
                     if isFocusMode {
                         path.move(to: CGPoint(x: 12 - 6.0, y: 12 - 9.8))
@@ -134,19 +153,20 @@ struct MenuBarFrogView: View {
                 }
                 .stroke(Color.black, lineWidth: 1.2)
                 
-                // Pink tongue sticking out a tiny bit (Chibi cleft style)
-                ZStack {
-                    Capsule()
-                        .fill(tonguePink)
-                        .frame(width: 1.2, height: 3.2)
-                        .offset(x: -0.5)
-                    Capsule()
-                        .fill(tonguePink)
-                        .frame(width: 1.2, height: 3.2)
-                        .offset(x: 0.5)
+                    // Pink tongue sticking out a tiny bit (Chibi cleft style)
+                    ZStack {
+                        Capsule()
+                            .fill(tonguePink)
+                            .frame(width: 1.2, height: 3.2)
+                            .offset(x: -0.5)
+                        Capsule()
+                            .fill(tonguePink)
+                            .frame(width: 1.2, height: 3.2)
+                            .offset(x: 0.5)
+                    }
+                    .frame(width: 3.0, height: 3.0)
+                    .position(x: 12, y: 12 + 4.2)
                 }
-                .frame(width: 3.0, height: 3.0)
-                .position(x: 12, y: 12 + 4.2)
             }
             .frame(width: 24, height: 24)
             
@@ -160,7 +180,10 @@ struct MenuBarFrogView: View {
         }
         .padding(.horizontal, 2)
         .onAppear {
-            scheduleBlink()
+            if menuBarIconStyle == "frog" { scheduleBlink() }
+        }
+        .onChange(of: menuBarIconStyle) { _, newStyle in
+            if newStyle == "frog" { scheduleBlink() }
         }
     }
     

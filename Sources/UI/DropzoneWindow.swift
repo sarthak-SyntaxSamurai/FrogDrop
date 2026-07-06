@@ -980,7 +980,7 @@ struct DropzonePanelView: View {
                     }
                     .buttonStyle(.plain)
                     .popover(isPresented: $isShowingSettings, arrowEdge: .top) {
-                        DropzoneSettingsView()
+                        MenuBarSettingsView()
                     }
                     
                     Spacer()
@@ -2024,7 +2024,7 @@ struct FrameRegistrationHelper: View {
     }
 }
 
-struct DropzoneSettingsView: View {
+struct MenuBarSettingsView: View {
     @ObservedObject var manager = DropzoneManager.shared
     @ObservedObject var clipboardManager = ClipboardManager.shared
     @Environment(\.presentationMode) var presentationMode
@@ -2039,6 +2039,38 @@ struct DropzoneSettingsView: View {
     @State private var hapticLevel: HapticManager.HapticLevel = HapticManager.shared.level
     @State private var isLaunchAtLoginEnabled = false
     @AppStorage("uiDimOpacity") private var uiDimOpacity: Double = 0.0
+    
+    // Icon Style state
+    @AppStorage("menuBarIconStyle") var menuBarIconStyle: String = "frog"
+    @AppStorage("menuBarCustomImagePath") var menuBarCustomImagePath: String = ""
+    
+    private func selectCustomImage() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.png, .jpeg, .heic]
+        if panel.runModal() == .OK, let url = panel.url {
+            if let image = NSImage(contentsOf: url) {
+                let targetSize = NSSize(width: 48, height: 48)
+                let newImage = NSImage(size: targetSize)
+                newImage.lockFocus()
+                image.draw(in: NSRect(origin: .zero, size: targetSize))
+                newImage.unlockFocus()
+                
+                if let tiff = newImage.tiffRepresentation,
+                   let rep = NSBitmapImageRep(data: tiff),
+                   let png = rep.representation(using: .png, properties: [:]) {
+                    
+                    let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?.appendingPathComponent("FrogDrop") ?? FileManager.default.temporaryDirectory
+                    try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+                    let path = dir.appendingPathComponent("custom_icon.png")
+                    
+                    try? png.write(to: path)
+                    menuBarCustomImagePath = path.path
+                    menuBarIconStyle = "custom"
+                    HapticManager.shared.success()
+                }
+            }
+        }
+    }
     
     var body: some View {
         VStack(spacing: 0) {
@@ -2072,6 +2104,66 @@ struct DropzoneSettingsView: View {
                 if selectedTab == 0 {
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 14) {
+                        
+                        // Menu Bar Icon Section
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("MENU BAR ICON")
+                                .font(.system(size: 9, weight: .bold))
+                                .foregroundColor(.secondary)
+                                .tracking(1.0)
+                            
+                            HStack(spacing: 4) {
+                                let options = [
+                                    ("frog", "Frog", "face.smiling"),
+                                    ("minimal", "Minimal", "square.and.arrow.down.fill"),
+                                    ("custom", "Custom", "photo")
+                                ]
+                                ForEach(options, id: \.0) { opt in
+                                    Button(action: {
+                                        menuBarIconStyle = opt.0
+                                        HapticManager.shared.click()
+                                    }) {
+                                        VStack(spacing: 4) {
+                                            Image(systemName: opt.2)
+                                                .font(.system(size: 14))
+                                            Text(opt.1)
+                                                .font(.system(size: 10, weight: menuBarIconStyle == opt.0 ? .bold : .medium, design: .rounded))
+                                        }
+                                        .foregroundColor(menuBarIconStyle == opt.0 ? .black : .primary)
+                                        .padding(.vertical, 8)
+                                        .frame(maxWidth: .infinity)
+                                        .background(menuBarIconStyle == opt.0 ? Color(red: 0.22, green: 0.72, blue: 0.42) : Color.white.opacity(0.04))
+                                        .cornerRadius(6)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                            if menuBarIconStyle == "custom" {
+                                HStack {
+                                    Button("Choose Image...", action: selectCustomImage)
+                                        .font(.system(size: 10, weight: .medium))
+                                        .padding(.horizontal, 8).padding(.vertical, 4)
+                                        .background(Color.white.opacity(0.08)).cornerRadius(5)
+                                        .buttonStyle(.plain)
+                                    
+                                    if !menuBarCustomImagePath.isEmpty {
+                                        Button(action: {
+                                            menuBarCustomImagePath = ""
+                                            UserDefaults.standard.removeObject(forKey: "menuBarCustomImagePath")
+                                            HapticManager.shared.click()
+                                        }) {
+                                            Image(systemName: "trash").foregroundColor(.red)
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                                .padding(.top, 4)
+                            }
+                        }
+                        
+                        Divider()
+                            .background(Color.white.opacity(0.06))
+                        
                         VStack(alignment: .leading, spacing: 6) {
                             Text("HAPTICS")
                                 .font(.system(size: 9, weight: .bold))

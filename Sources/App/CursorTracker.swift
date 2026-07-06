@@ -8,13 +8,34 @@ class CursorTracker: ObservableObject {
     @Published var mouseLocation: NSPoint = .zero
     
     private var timer: Timer?
+    private var observer: NSObjectProtocol?
     
     deinit {
         timer?.invalidate()
+        if let observer = observer {
+            NotificationCenter.default.removeObserver(observer)
+        }
     }
     
     private init() {
-        startTracking()
+        updateTrackingState()
+        observer = NotificationCenter.default.addObserver(
+            forName: UserDefaults.didChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in self?.updateTrackingState() }
+        }
+    }
+    
+    private func updateTrackingState() {
+        let style = UserDefaults.standard.string(forKey: "menuBarIconStyle") ?? "frog"
+        if style == "frog" {
+            if timer == nil { startTracking() }
+        } else {
+            timer?.invalidate()
+            timer = nil
+        }
     }
     
     func startTracking() {

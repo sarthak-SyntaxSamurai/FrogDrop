@@ -428,7 +428,7 @@ struct PopupView: View {
                         }
                         .buttonStyle(.plain)
                         .popover(isPresented: $isShowingSettings, arrowEdge: .top) {
-                            DropzoneSettingsView()
+                            MenuBarSettingsView()
                         }
                         
                         Text("FrogDrop • Premium 3-in-1")

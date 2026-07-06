@@ -105,6 +105,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             
             // Initial layout calculation
             updateMenuBarTitle()
+            
+            NotificationCenter.default.addObserver(
+                forName: UserDefaults.didChangeNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                Task { @MainActor in
+                    self?.updateMenuBarTitle()
+                }
+            }
         }
     }
 
@@ -155,6 +165,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func openDashboard() {
         MainWindow.shared?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
+    }
+    
+    @objc func setIconStyleFrog() {
+        UserDefaults.standard.set("frog", forKey: "menuBarIconStyle")
+    }
+    
+    @objc func setIconStyleMinimal() {
+        UserDefaults.standard.set("minimal", forKey: "menuBarIconStyle")
+    }
+    
+    @objc func setIconStyleCustom() {
+        UserDefaults.standard.set("custom", forKey: "menuBarIconStyle")
     }
     
     // MARK: - Tongue Drag-Down Timer Setup
@@ -331,6 +353,29 @@ class InteractiveFrogView: NSHostingView<MenuBarFrogView> {
     
     override func rightMouseDown(with event: NSEvent) {
         let menu = NSMenu()
+        
+        let iconStyleItem = NSMenuItem(title: "Icon Style", action: nil, keyEquivalent: "")
+        let iconStyleMenu = NSMenu()
+        
+        let currentStyle = UserDefaults.standard.string(forKey: "menuBarIconStyle") ?? "frog"
+        
+        let frogItem = NSMenuItem(title: "Default Frog", action: #selector(AppDelegate.setIconStyleFrog), keyEquivalent: "")
+        frogItem.state = currentStyle == "frog" ? .on : .off
+        
+        let minimalItem = NSMenuItem(title: "Minimal White", action: #selector(AppDelegate.setIconStyleMinimal), keyEquivalent: "")
+        minimalItem.state = currentStyle == "minimal" ? .on : .off
+        
+        let customItem = NSMenuItem(title: "Custom Image", action: #selector(AppDelegate.setIconStyleCustom), keyEquivalent: "")
+        customItem.state = currentStyle == "custom" ? .on : .off
+        
+        iconStyleMenu.addItem(frogItem)
+        iconStyleMenu.addItem(minimalItem)
+        iconStyleMenu.addItem(customItem)
+        iconStyleItem.submenu = iconStyleMenu
+        
+        menu.addItem(iconStyleItem)
+        menu.addItem(NSMenuItem.separator())
+        
         menu.addItem(NSMenuItem(title: "Open Dashboard", action: #selector(AppDelegate.openDashboard), keyEquivalent: "d"))
         menu.addItem(NSMenuItem(title: "Quit FrogDrop", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
         NSMenu.popUpContextMenu(menu, with: event, for: self)
