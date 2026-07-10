@@ -3,6 +3,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 import UserNotifications
 import ServiceManagement
+import QuickLookThumbnailing
 
 enum TaskProgressState: Equatable {
     case idle
@@ -25,15 +26,23 @@ struct ShelfGroup: Identifiable {
     var files: [URL]
     var thumbnails: [URL: NSImage] = [:]
     
-    static func generateThumb(for url: URL) -> NSImage? {
-        let exts = ["jpg","jpeg","png","gif","heic","heif","tiff","bmp","webp","pdf"]
-        guard exts.contains(url.pathExtension.lowercased()),
-              let src = CGImageSourceCreateWithURL(url as CFURL, nil),
-              let cg = CGImageSourceCreateThumbnailAtIndex(src, 0, [
-                kCGImageSourceCreateThumbnailFromImageAlways: true,
-                kCGImageSourceThumbnailMaxPixelSize: 80] as CFDictionary)
-        else { return nil }
-        return NSImage(cgImage: cg, size: NSSize(width: 40, height: 40))
+    static func generateThumb(for url: URL) async -> NSImage? {
+        let size = CGSize(width: 80, height: 80)
+        let request = QLThumbnailGenerator.Request(fileAt: url, size: size, scale: NSScreen.main?.backingScaleFactor ?? 2.0, representationTypes: .thumbnail)
+        
+        do {
+            let representation = try await QLThumbnailGenerator.shared.generateBestRepresentation(for: request)
+            return representation.nsImage
+        } catch {
+            let exts = ["jpg","jpeg","png","gif","heic","heif","tiff","bmp","webp","pdf"]
+            guard exts.contains(url.pathExtension.lowercased()),
+                  let src = CGImageSourceCreateWithURL(url as CFURL, nil),
+                  let cg = CGImageSourceCreateThumbnailAtIndex(src, 0, [
+                    kCGImageSourceCreateThumbnailFromImageAlways: true,
+                    kCGImageSourceThumbnailMaxPixelSize: 80] as CFDictionary)
+            else { return nil }
+            return NSImage(cgImage: cg, size: NSSize(width: 40, height: 40))
+        }
     }
 }
 
@@ -116,15 +125,23 @@ struct ShelfGroup: Identifiable {
     
     func shelfFiles(_ urls: [URL]) {
         // Files dropped together form one group
-        var group = ShelfGroup(files: urls)
-        for url in urls {
-            if let thumb = ShelfGroup.generateThumb(for: url) {
-                group.thumbnails[url] = thumb
-            }
-        }
+        let group = ShelfGroup(files: urls)
         shelvedGroups.append(group)
         lastDropTime = Date()
         HapticManager.shared.success()
+        
+        let groupID = group.id
+        for url in urls {
+            Task {
+                if let thumb = await ShelfGroup.generateThumb(for: url) {
+                    await MainActor.run {
+                        if let index = self.shelvedGroups.firstIndex(where: { $0.id == groupID }) {
+                            self.shelvedGroups[index].thumbnails[url] = thumb
+                        }
+                    }
+                }
+            }
+        }
     }
     
     func clearShelf() {
@@ -139,13 +156,21 @@ struct ShelfGroup: Identifiable {
         let newFiles = urls.filter { !existingPaths.contains($0.path) }
         guard !newFiles.isEmpty else { return }
         group.files.append(contentsOf: newFiles)
-        for url in newFiles {
-            if let thumb = ShelfGroup.generateThumb(for: url) {
-                group.thumbnails[url] = thumb
-            }
-        }
         shelvedGroups[index] = group
         HapticManager.shared.success()
+        
+        let groupID = group.id
+        for url in newFiles {
+            Task {
+                if let thumb = await ShelfGroup.generateThumb(for: url) {
+                    await MainActor.run {
+                        if let idx = self.shelvedGroups.firstIndex(where: { $0.id == groupID }) {
+                            self.shelvedGroups[idx].thumbnails[url] = thumb
+                        }
+                    }
+                }
+            }
+        }
     }
     
     func deleteShelfGroup(at index: Int) {
@@ -175,14 +200,24 @@ struct ShelfGroup: Identifiable {
                 combinedGroup.thumbnails[url] = thumb
             }
         }
-        for url in uniqueFiles {
-            if combinedGroup.thumbnails[url] == nil, let thumb = ShelfGroup.generateThumb(for: url) {
-                combinedGroup.thumbnails[url] = thumb
-            }
-        }
         
         shelvedGroups = [combinedGroup]
         HapticManager.shared.success()
+        
+        let groupID = combinedGroup.id
+        for url in uniqueFiles {
+            if combinedGroup.thumbnails[url] == nil {
+                Task {
+                    if let thumb = await ShelfGroup.generateThumb(for: url) {
+                        await MainActor.run {
+                            if let idx = self.shelvedGroups.firstIndex(where: { $0.id == groupID }) {
+                                self.shelvedGroups[idx].thumbnails[url] = thumb
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
     
     func combineGroups(withIDs ids: Set<UUID>) {
@@ -208,15 +243,24 @@ struct ShelfGroup: Identifiable {
         let uniqueFiles = filesToCombine.filter { seenPaths.insert($0.path).inserted }
         combinedGroup.files = uniqueFiles
         
-        for url in uniqueFiles {
-            if combinedGroup.thumbnails[url] == nil, let thumb = ShelfGroup.generateThumb(for: url) {
-                combinedGroup.thumbnails[url] = thumb
-            }
-        }
-        
         remainingGroups.append(combinedGroup)
         self.shelvedGroups = remainingGroups
         HapticManager.shared.success()
+        
+        let groupID = combinedGroup.id
+        for url in uniqueFiles {
+            if combinedGroup.thumbnails[url] == nil {
+                Task {
+                    if let thumb = await ShelfGroup.generateThumb(for: url) {
+                        await MainActor.run {
+                            if let idx = self.shelvedGroups.firstIndex(where: { $0.id == groupID }) {
+                                self.shelvedGroups[idx].thumbnails[url] = thumb
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
     
     func setProgress(_ state: TaskProgressState, for actionKey: String) {
