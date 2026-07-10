@@ -32,9 +32,71 @@ struct MenuBarFrogView: View {
         HStack(spacing: 4) {
             ZStack {
                 if menuBarIconStyle == "minimal" {
-                    Image(systemName: "square.and.arrow.down.fill")
-                        .font(.system(size: 14))
-                        .foregroundColor(.primary)
+                    // Minimal B&W/Monochrome Frog looking left (matching default geometry)
+                    ZStack {
+                        // Head Outline (with eyes cut out to prevent line overlap)
+                        Ellipse()
+                            .stroke(Color.primary, lineWidth: 1.2)
+                            .frame(width: 19, height: 15)
+                            .position(x: 12, y: 12 + 2.0)
+                            .mask(
+                                ZStack {
+                                    Color.white
+                                    
+                                    Circle()
+                                        .frame(width: 8.5, height: 8.5)
+                                        .position(x: 12 - 3.4, y: 12 - 4.5)
+                                        .blendMode(.destinationOut)
+                                    
+                                    Circle()
+                                        .frame(width: 8.5, height: 8.5)
+                                        .position(x: 12 + 3.4, y: 12 - 4.5)
+                                        .blendMode(.destinationOut)
+                                }
+                                .compositingGroup()
+                            )
+                        
+                        // Left Eye
+                        ZStack {
+                            // Eye outline (size 8.5, transparent background)
+                            Circle()
+                                .stroke(Color.primary, lineWidth: 1.0)
+                            
+                            // Pupil (centered, size 3.5)
+                            Circle()
+                                .fill(Color.primary)
+                                .frame(width: 3.5, height: 3.5)
+                                .position(x: 4.25, y: 4.25)
+                        }
+                        .frame(width: 8.5, height: 8.5)
+                        .position(x: 12 - 3.4, y: 12 - 4.5)
+                        
+                        // Right Eye
+                        ZStack {
+                            // Eye outline (size 8.5, transparent background)
+                            Circle()
+                                .stroke(Color.primary, lineWidth: 1.0)
+                            
+                            // Pupil (centered, size 3.5)
+                            Circle()
+                                .fill(Color.primary)
+                                .frame(width: 3.5, height: 3.5)
+                                .position(x: 4.25, y: 4.25)
+                        }
+                        .frame(width: 8.5, height: 8.5)
+                        .position(x: 12 + 3.4, y: 12 - 4.5)
+                        
+                        // Smile Mouth
+                        Path { path in
+                            path.move(to: CGPoint(x: 12 - 5.0, y: 12 + 2.5))
+                            path.addQuadCurve(
+                                to: CGPoint(x: 12 + 5.0, y: 12 + 2.5),
+                                control: CGPoint(x: 12, y: 12 + 5.2)
+                            )
+                        }
+                        .stroke(Color.primary, lineWidth: 1.2)
+                    }
+                    .scaleEffect(0.8)
                 } else if menuBarIconStyle == "custom" {
                     if !menuBarCustomImagePath.isEmpty, let nsImage = NSImage(contentsOfFile: menuBarCustomImagePath) {
                         Image(nsImage: nsImage)
