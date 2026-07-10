@@ -300,7 +300,9 @@ class TimerManager: ObservableObject {
             content: content,
             trigger: nil
         )
-        UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+        if Bundle.main.bundleIdentifier != nil {
+            UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+        }
     }
     
     private func sendSessionCompleteNotification(title: String, body: String) {
@@ -315,6 +317,8 @@ class TimerManager: ObservableObject {
             content: content,
             trigger: nil
         )
-        UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+        if Bundle.main.bundleIdentifier != nil {
+            UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+        }
     }
 }

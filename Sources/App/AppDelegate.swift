@@ -1,5 +1,11 @@
 import AppKit
 import SwiftUI
+import Foundation
+import Combine
+
+extension Notification.Name {
+    static let popupWillOpen = Notification.Name("popupWillOpen")
+}
 
 @MainActor
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -136,30 +142,35 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     // MARK: - Popup Window Management
     
+    var popupPopover: NSPopover?
+    
     func togglePopupWindow() {
-        guard let button = statusItem?.button, let window = button.window else { return }
-        let statusItemFrame = window.frame
+        guard let button = statusItem?.button else { return }
         
-        if let active = PopupWindow.activeInstance {
-            active.orderOut(nil)
-            PopupWindow.activeInstance = nil
-            HapticManager.shared.click()
-        } else {
-            let popup = PopupWindow(statusItemFrame: statusItemFrame)
-            PopupWindow.activeInstance = popup
-            popup.makeKeyAndOrderFront(nil)
-            popup.animateIn()
-            NSApp.activate(ignoringOtherApps: true)
-            HapticManager.shared.click()
+        if popupPopover == nil {
+            let popover = NSPopover()
+            popover.contentSize = NSSize(width: 340, height: 460)
+            popover.behavior = .transient
+            popover.contentViewController = NSHostingController(rootView: PopupView())
+            self.popupPopover = popover
+        }
+        
+        if let popover = popupPopover {
+            if popover.isShown {
+                popover.performClose(nil)
+                HapticManager.shared.click()
+            } else {
+                NotificationCenter.default.post(name: .popupWillOpen, object: nil)
+                NSApp.activate(ignoringOtherApps: true)
+                popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+                HapticManager.shared.click()
+            }
         }
     }
     
     func closeAllPanels() {
         dropzonePanel?.slideOut(force: true)
-        if let active = PopupWindow.activeInstance {
-            active.orderOut(nil)
-            PopupWindow.activeInstance = nil
-        }
+        popupPopover?.performClose(nil)
     }
     
     @objc func openDashboard() {
@@ -191,10 +202,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         tongueAnchorPoint = NSPoint(x: statusItemFrame.midX, y: statusItemFrame.minY + 2)
         
         // Hide popup window if active
-        if let active = PopupWindow.activeInstance {
-            active.orderOut(nil)
-            PopupWindow.activeInstance = nil
-        }
+        popupPopover?.performClose(nil)
         
         lastSelectedDuration = .cancel
         let screen = window.screen ?? NSScreen.main ?? NSScreen.screens.first
@@ -444,6 +452,7 @@ class GlobalDragMonitor {
                 // This prevents clicks & double-clicks from triggering it
                 if dist > 15 && !self.isDragTriggered {
                     self.isDragTriggered = true
+                    AppDelegate.shared.popupPopover?.performClose(nil)
                     AppDelegate.shared.dropzonePanel?.showCollapsedIndicator()
                 }
             }

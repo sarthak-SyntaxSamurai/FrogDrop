@@ -330,7 +330,9 @@ struct ShelfGroup: Identifiable {
             content.body = "\(count) file(s) moved to \(destFolder.lastPathComponent)."
             content.sound = .default
             let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
-            Task { try? await UNUserNotificationCenter.current().add(request) }
+            if Bundle.main.bundleIdentifier != nil {
+                Task { try? await UNUserNotificationCenter.current().add(request) }
+            }
         } else {
             setProgress(.failure("Error"), for: actionKey)
         }
@@ -407,7 +409,9 @@ struct ShelfGroup: Identifiable {
                         content.body = "Link copied to clipboard!"
                         content.sound = .default
                         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
-                        Task { try? await UNUserNotificationCenter.current().add(request) }
+                        if Bundle.main.bundleIdentifier != nil {
+                            Task { try? await UNUserNotificationCenter.current().add(request) }
+                        }
                     }
                 } else {
                     await MainActor.run {
@@ -456,7 +460,9 @@ struct ShelfGroup: Identifiable {
                     content.body = "Shortened URL copied to clipboard!"
                     content.sound = .default
                     let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
-                    Task { try? await UNUserNotificationCenter.current().add(request) }
+                    if Bundle.main.bundleIdentifier != nil {
+                        Task { try? await UNUserNotificationCenter.current().add(request) }
+                    }
                 } else {
                     setProgress(.failure("Error"), for: actionKey)
                 }

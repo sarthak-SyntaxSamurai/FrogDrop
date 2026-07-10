@@ -95,150 +95,21 @@ class ClipboardPreviewWindow: NSWindow {
     }
 }
 
-class PopupWindow: NSWindow, NSWindowDelegate {
-    static var activeInstance: PopupWindow?
+
+@MainActor
+class ClipboardPreviewManager {
+    static let shared = ClipboardPreviewManager()
+    
     private var previewWindow: ClipboardPreviewWindow?
     
-    private let statusItemFrame: NSRect
-    private var localClickMonitor: Any?
-    private var globalClickMonitor: Any?
-    
-    init(statusItemFrame: NSRect) {
-        self.statusItemFrame = statusItemFrame
-        let width: CGFloat = 340
-        let height: CGFloat = 460
-        
-        let rect = NSRect(
-            x: statusItemFrame.midX - (width / 2),
-            y: statusItemFrame.minY - height - 8,
-            width: width,
-            height: height
-        )
-        
-        super.init(
-            contentRect: rect,
-            styleMask: [.borderless, .nonactivatingPanel],
-            backing: .buffered,
-            defer: false
-        )
-        
-        self.isOpaque = false
-        self.backgroundColor = .clear
-        self.level = .statusBar
-        self.hasShadow = true
-        self.delegate = self
-        self.appearance = NSAppearance(named: .vibrantDark)
-
-        let hostingView = DropzoneHostingView(rootView: PopupView())
-        hostingView.translatesAutoresizingMaskIntoConstraints = false
-        
-        let nsView = NSView()
-        nsView.wantsLayer = true
-        nsView.layer?.cornerRadius = 18
-        nsView.layer?.masksToBounds = true
-        
-        let effectView = NSVisualEffectView()
-        effectView.material = .popover
-        effectView.blendingMode = .behindWindow
-        effectView.state = .active
-        effectView.wantsLayer = true
-        effectView.layer?.cornerRadius = 18
-        
-        self.contentView = nsView
-        nsView.addSubview(effectView)
-        nsView.addSubview(hostingView)
-        
-        effectView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            effectView.leadingAnchor.constraint(equalTo: nsView.leadingAnchor),
-            effectView.trailingAnchor.constraint(equalTo: nsView.trailingAnchor),
-            effectView.topAnchor.constraint(equalTo: nsView.topAnchor),
-            effectView.bottomAnchor.constraint(equalTo: nsView.bottomAnchor),
-            
-            hostingView.leadingAnchor.constraint(equalTo: nsView.leadingAnchor),
-            hostingView.trailingAnchor.constraint(equalTo: nsView.trailingAnchor),
-            hostingView.topAnchor.constraint(equalTo: nsView.topAnchor),
-            hostingView.bottomAnchor.constraint(equalTo: nsView.bottomAnchor)
-        ])
-    }
-    
-    override var canBecomeKey: Bool {
-        return true
-    }
-    
-    deinit {
-        removeClickMonitors()
-    }
-    
-    func windowDidResignKey(_ notification: Notification) {
-        hidePreview()
-        self.orderOut(nil)
-        self.removeClickMonitors()
-        if PopupWindow.activeInstance == self {
-            PopupWindow.activeInstance = nil
-        }
-    }
-    
-    private func setupClickMonitors() {
-        // Monitor clicks inside our application
-        localClickMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
-            guard let self = self else { return event }
-            self.handleOuterClick(event: event)
-            return event
-        }
-        
-        // Monitor clicks outside our application
-        globalClickMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
-            guard let self = self else { return }
-            self.handleOuterClick(event: event)
-        }
-    }
-    
-    private func removeClickMonitors() {
-        if let monitor = localClickMonitor {
-            NSEvent.removeMonitor(monitor)
-            localClickMonitor = nil
-        }
-        if let monitor = globalClickMonitor {
-            NSEvent.removeMonitor(monitor)
-            globalClickMonitor = nil
-        }
-    }
-    
-    private func handleOuterClick(event: NSEvent) {
-        let mouseLoc = NSEvent.mouseLocation
-        
-        // Check if click was inside the popup window frame or the preview window frame
-        if self.frame.contains(mouseLoc) { return }
-        if let preview = previewWindow, preview.frame.contains(mouseLoc) { return }
-        
-        // Check if click was inside the menu bar status item frame (to prevent double-toggling)
-        if statusItemFrame.contains(mouseLoc) { return }
-        
-        // Check if click is inside any child window (e.g. settings popover, tooltips)
-        for childWin in self.childWindows ?? [] {
-            if childWin.frame.contains(mouseLoc) { return }
-        }
-        
-        // If a popover/sheet is the key window, don't dismiss
-        if let keyWin = NSApp.keyWindow, keyWin !== self {
-            if keyWin.frame.contains(mouseLoc) { return }
-        }
-        
-        // Click was outside everything: dismiss!
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            self.hidePreview()
-            self.orderOut(nil)
-            self.removeClickMonitors()
-            if PopupWindow.activeInstance == self {
-                PopupWindow.activeInstance = nil
-            }
-        }
-    }
-    
     func showPreview(for item: ClipboardItem, atRowMidY rowMidY: CGFloat) {
-        let windowFrame = self.frame
+        guard let delegate = NSApp.delegate as? AppDelegate,
+              let popover = delegate.popupPopover,
+              let popoverWindow = popover.contentViewController?.view.window else {
+            return
+        }
+        
+        let windowFrame = popoverWindow.frame
         let screenY = windowFrame.maxY - rowMidY
         
         let previewWidth: CGFloat = 280
@@ -256,41 +127,19 @@ class PopupWindow: NSWindow, NSWindowDelegate {
         } else {
             let preview = ClipboardPreviewWindow(contentRect: rect, text: item.text)
             previewWindow = preview
-            self.addChildWindow(preview, ordered: .above)
+            popoverWindow.addChildWindow(preview, ordered: .above)
             preview.orderFront(nil)
         }
     }
     
     func hidePreview() {
         if let preview = previewWindow {
-            self.removeChildWindow(preview)
+            preview.parent?.removeChildWindow(preview)
             preview.orderOut(nil)
             previewWindow = nil
         }
     }
-    
-    func animateIn() {
-        setupClickMonitors()
-        let finalFrame = self.frame
-        let startFrame = NSRect(
-            x: finalFrame.minX,
-            y: finalFrame.minY + 25,
-            width: finalFrame.width,
-            height: finalFrame.height
-        )
-        self.setFrame(startFrame, display: true)
-        self.alphaValue = 0.0
-        
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.3
-            context.timingFunction = CAMediaTimingFunction(controlPoints: 0.15, 0.85, 0.35, 1.15)
-            self.animator().setFrame(finalFrame, display: true)
-            self.animator().alphaValue = 1.0
-        }
-    }
 }
-
-    
 
 struct PopupView: View {
     enum Tab {
@@ -336,6 +185,18 @@ struct PopupView: View {
             }
         }
         HapticManager.shared.tick()
+    }
+    
+    private func evaluateActiveTab() {
+        if !timerManager.activeTimers.isEmpty {
+            activeTab = .timer
+        } else if let lastDrop = dropzoneManager.lastDropTime,
+                  Date().timeIntervalSince(lastDrop) < 5 * 60,
+                  !dropzoneManager.shelvedGroups.isEmpty {
+            activeTab = .dropzone
+        } else {
+            activeTab = .clipboard
+        }
     }
     
     private func switchToPrevTab() {
@@ -448,7 +309,7 @@ struct PopupView: View {
                 RoundedRectangle(cornerRadius: 18)
                     .stroke(Color.white.opacity(0.1), lineWidth: 0.5)
             )
-            
+
             if dropzoneManager.isShowingCombinePopover {
                 Color.black.opacity(0.35)
                     .edgesIgnoringSafeArea(.all)
@@ -485,12 +346,23 @@ struct PopupView: View {
                 .transition(.scale.combined(with: .opacity))
             }
         }
+        .onAppear {
+            evaluateActiveTab()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .popupWillOpen)) { _ in
+            evaluateActiveTab()
+        }
         .onChange(of: activeTab) {
-            PopupWindow.activeInstance?.hidePreview()
+            ClipboardPreviewManager.shared.hidePreview()
         }
         .onReceive(TimerManager.shared.$isShowingSetup) { showing in
             if showing {
                 activeTab = .timer
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didResignActiveNotification)) { _ in
+            if let delegate = NSApp.delegate as? AppDelegate {
+                delegate.popupPopover?.performClose(nil)
             }
         }
     }
@@ -1394,8 +1266,7 @@ struct TimerSetupView: View {
         }
         timerManager.isShowingSetup = false
         timerManager.setupTodoId = nil
-        PopupWindow.activeInstance?.orderOut(nil)
-        PopupWindow.activeInstance = nil
+        if let delegate = NSApp.delegate as? AppDelegate { delegate.closeAllPanels() }
     }
     
     private func formatTime(_ seconds: TimeInterval) -> String {
@@ -1565,7 +1436,9 @@ struct LargeEyeView: View {
     }
     
     private func pupilOffset() -> CGSize {
-        guard let window = PopupWindow.activeInstance else {
+        guard let delegate = NSApp.delegate as? AppDelegate,
+              let popover = delegate.popupPopover,
+              let window = popover.contentViewController?.view.window else {
             return .zero
         }
         
@@ -1933,14 +1806,14 @@ struct ClipboardRow: View {
                         if isHovering {
                             let frame = geometry.frame(in: .global)
                             let midY = frame.midY
-                            PopupWindow.activeInstance?.showPreview(for: item, atRowMidY: midY)
+                            ClipboardPreviewManager.shared.showPreview(for: item, atRowMidY: midY)
                         }
                     }
                     hoverWorkItem = workItem
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.8, execute: workItem)
                 } else {
                     hoverWorkItem = nil
-                    PopupWindow.activeInstance?.hidePreview()
+                    ClipboardPreviewManager.shared.hidePreview()
                 }
             }
             .onTapGesture {
@@ -1948,9 +1821,8 @@ struct ClipboardRow: View {
                 onCopy()
                 hoverWorkItem?.cancel()
                 hoverWorkItem = nil
-                PopupWindow.activeInstance?.hidePreview()
-                PopupWindow.activeInstance?.orderOut(nil)
-                PopupWindow.activeInstance = nil
+                ClipboardPreviewManager.shared.hidePreview()
+                if let delegate = NSApp.delegate as? AppDelegate { delegate.closeAllPanels() }
             }
         }
         .frame(height: 34)
