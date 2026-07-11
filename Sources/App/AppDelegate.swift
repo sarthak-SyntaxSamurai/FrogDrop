@@ -8,7 +8,7 @@ extension Notification.Name {
 }
 
 @MainActor
-class AppDelegate: NSObject, NSApplicationDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     static var shared: AppDelegate!
     
     var statusItem: NSStatusItem?
@@ -152,6 +152,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             popover.contentSize = NSSize(width: 340, height: 460)
             popover.behavior = .transient
             popover.contentViewController = NSHostingController(rootView: PopupView())
+            popover.delegate = self
             self.popupPopover = popover
         }
         
@@ -171,6 +172,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func closeAllPanels() {
         dropzonePanel?.slideOut(force: true)
         popupPopover?.performClose(nil)
+        ClipboardPreviewManager.shared.hidePreview()
+    }
+    
+    // MARK: - NSPopoverDelegate
+    
+    func popoverWillClose(_ notification: Notification) {
+        ClipboardPreviewManager.shared.hidePreview()
     }
     
     @objc func openDashboard() {

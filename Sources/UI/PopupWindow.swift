@@ -2,99 +2,71 @@ import AppKit
 import SwiftUI
 import UniformTypeIdentifiers
 
-class PreviewModel: ObservableObject {
-    @Published var text: String = ""
-}
-
 struct ClipboardPreviewView: View {
-    @ObservedObject var model: PreviewModel
-    @AppStorage("uiDimOpacity") private var uiDimOpacity: Double = 0.0
+    let text: String
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("PREVIEW")
-                .font(.system(size: 9, weight: .bold, design: .rounded))
-                .tracking(1.2)
-                .foregroundColor(Color(red: 0.15, green: 0.85, blue: 0.45))
-                
-            Divider()
-                .background(Color.white.opacity(0.1))
-                
-            ScrollView {
-                Text(model.text)
-                    .font(.system(.subheadline, design: .monospaced))
-                    .lineSpacing(4)
-                    .foregroundColor(.primary)
-                    .multilineTextAlignment(.leading)
-                    .frame(maxWidth: .infinity, alignment: .topLeading)
-            }
-        }
-        .padding(14)
-        .frame(width: 280, height: 200)
-        .background(Color.black.opacity(uiDimOpacity))
-        .overlay(
-            RoundedRectangle(cornerRadius: 14)
-                .stroke(Color.white.opacity(0.1), lineWidth: 0.5)
-        )
+        Text(text)
+            .font(.system(size: 9.5, weight: .regular))
+            .foregroundColor(.primary)
+            .multilineTextAlignment(.leading)
+            .lineLimit(nil)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(10)
+            .frame(minWidth: 150, maxWidth: 280, alignment: .topLeading)
     }
 }
 
 class ClipboardPreviewWindow: NSWindow {
-    let model = PreviewModel()
+    let hostingView: NSHostingView<ClipboardPreviewView>
     
-    init(contentRect: NSRect, text: String) {
-        model.text = text
+    init(text: String) {
+        let view = NSHostingView(rootView: ClipboardPreviewView(text: text))
+        self.hostingView = view
+        
         super.init(
-            contentRect: contentRect,
-            styleMask: [.borderless, .nonactivatingPanel],
+            contentRect: .zero,
+            styleMask: [.borderless],
             backing: .buffered,
             defer: false
         )
         
         self.isOpaque = false
         self.backgroundColor = .clear
-        self.level = .statusBar
         self.hasShadow = true
-        self.appearance = NSAppearance(named: .vibrantDark)
-        
-        let hostingView = NSHostingView(rootView: ClipboardPreviewView(model: model))
-        hostingView.translatesAutoresizingMaskIntoConstraints = false
+        self.level = .floating
+        self.ignoresMouseEvents = true
         
         let nsView = NSView()
         nsView.wantsLayer = true
-        nsView.layer?.cornerRadius = 14
-        nsView.layer?.masksToBounds = true
         
         let effectView = NSVisualEffectView()
         effectView.material = .hudWindow
         effectView.blendingMode = .behindWindow
         effectView.state = .active
         effectView.wantsLayer = true
-        effectView.layer?.cornerRadius = 14
+        effectView.layer?.cornerRadius = 12
         
         self.contentView = nsView
         nsView.addSubview(effectView)
-        nsView.addSubview(hostingView)
+        nsView.addSubview(view)
         
         effectView.translatesAutoresizingMaskIntoConstraints = false
+        view.translatesAutoresizingMaskIntoConstraints = false
+        
         NSLayoutConstraint.activate([
             effectView.leadingAnchor.constraint(equalTo: nsView.leadingAnchor),
             effectView.trailingAnchor.constraint(equalTo: nsView.trailingAnchor),
             effectView.topAnchor.constraint(equalTo: nsView.topAnchor),
             effectView.bottomAnchor.constraint(equalTo: nsView.bottomAnchor),
             
-            hostingView.leadingAnchor.constraint(equalTo: nsView.leadingAnchor),
-            hostingView.trailingAnchor.constraint(equalTo: nsView.trailingAnchor),
-            hostingView.topAnchor.constraint(equalTo: nsView.topAnchor),
-            hostingView.bottomAnchor.constraint(equalTo: nsView.bottomAnchor)
+            view.leadingAnchor.constraint(equalTo: nsView.leadingAnchor),
+            view.trailingAnchor.constraint(equalTo: nsView.trailingAnchor),
+            view.topAnchor.constraint(equalTo: nsView.topAnchor),
+            view.bottomAnchor.constraint(equalTo: nsView.bottomAnchor)
         ])
     }
-    
-    func updateContent(text: String) {
-        model.text = text
-    }
 }
-
 
 @MainActor
 class ClipboardPreviewManager {
@@ -102,39 +74,46 @@ class ClipboardPreviewManager {
     
     private var previewWindow: ClipboardPreviewWindow?
     
-    func showPreview(for item: ClipboardItem, atRowMidY rowMidY: CGFloat) {
+    func showPreview(for item: ClipboardItem, atRowFrame frame: CGRect) {
         guard let delegate = NSApp.delegate as? AppDelegate,
-              let popover = delegate.popupPopover,
-              let popoverWindow = popover.contentViewController?.view.window else {
+              let mainPopover = delegate.popupPopover,
+              let popoverWindow = mainPopover.contentViewController?.view.window else {
             return
         }
         
-        let windowFrame = popoverWindow.frame
-        let screenY = windowFrame.maxY - rowMidY
-        
-        let previewWidth: CGFloat = 280
-        let previewHeight: CGFloat = 200
-        
-        let previewX = windowFrame.minX - previewWidth - 8
-        let previewY = screenY - (previewHeight / 2)
-        
-        let rect = NSRect(x: previewX, y: previewY, width: previewWidth, height: previewHeight)
-        
-        if let preview = previewWindow {
-            preview.updateContent(text: item.text)
-            preview.setFrame(rect, display: true, animate: false)
-            preview.orderFront(nil)
-        } else {
-            let preview = ClipboardPreviewWindow(contentRect: rect, text: item.text)
-            previewWindow = preview
-            popoverWindow.addChildWindow(preview, ordered: .above)
-            preview.orderFront(nil)
+        if let oldWindow = previewWindow {
+            popoverWindow.removeChildWindow(oldWindow)
+            oldWindow.orderOut(nil)
         }
+        
+        let preview = ClipboardPreviewWindow(text: item.text)
+        self.previewWindow = preview
+        
+        let hostingView = preview.hostingView
+        hostingView.layoutSubtreeIfNeeded()
+        let fittingSize = hostingView.fittingSize
+        
+        let width = min(max(fittingSize.width, 150), 280)
+        let height = min(max(fittingSize.height, 20), 400)
+        
+        let windowFrame = popoverWindow.frame
+        let screenX = windowFrame.minX - width - 8
+        let rowCenterY = windowFrame.maxY - frame.minY - (frame.height / 2)
+        let screenY = rowCenterY - (height / 2)
+        
+        let rect = NSRect(x: screenX, y: screenY, width: width, height: height)
+        preview.setFrame(rect, display: true, animate: false)
+        
+        popoverWindow.addChildWindow(preview, ordered: .above)
     }
     
     func hidePreview() {
         if let preview = previewWindow {
-            preview.parent?.removeChildWindow(preview)
+            if let delegate = NSApp.delegate as? AppDelegate,
+               let mainPopover = delegate.popupPopover,
+               let popoverWindow = mainPopover.contentViewController?.view.window {
+                popoverWindow.removeChildWindow(preview)
+            }
             preview.orderOut(nil)
             previewWindow = nil
         }
@@ -346,15 +325,14 @@ struct PopupView: View {
                 .transition(.scale.combined(with: .opacity))
             }
         }
+        .coordinateSpace(name: "PopupWindowSpace")
         .onAppear {
             evaluateActiveTab()
         }
         .onReceive(NotificationCenter.default.publisher(for: .popupWillOpen)) { _ in
             evaluateActiveTab()
         }
-        .onChange(of: activeTab) {
-            ClipboardPreviewManager.shared.hidePreview()
-        }
+
         .onReceive(TimerManager.shared.$isShowingSetup) { showing in
             if showing {
                 activeTab = .timer
@@ -1708,11 +1686,11 @@ struct ClipboardRow: View {
                 
                 if isHovering {
                     HStack(spacing: 4) {
-                        if isURL {
+                        if !pathsAndURLs.isEmpty {
                             Button(action: {
-                                shortenItemLink()
+                                openItemLinksAndPaths()
                             }) {
-                                Image(systemName: "link.badge.plus")
+                                Image(systemName: "arrow.up.right.square")
                                     .font(.system(size: 10))
                                     .foregroundColor(.blue)
                                     .padding(5)
@@ -1720,7 +1698,7 @@ struct ClipboardRow: View {
                                     .cornerRadius(5)
                             }
                             .buttonStyle(.plain)
-                            .help("Shorten Link")
+                            .help("Open Link or Path")
                         }
                         
                         Button(action: {
@@ -1804,13 +1782,12 @@ struct ClipboardRow: View {
                     
                     let workItem = DispatchWorkItem {
                         if isHovering {
-                            let frame = geometry.frame(in: .global)
-                            let midY = frame.midY
-                            ClipboardPreviewManager.shared.showPreview(for: item, atRowMidY: midY)
+                            let frame = geometry.frame(in: .named("PopupWindowSpace"))
+                            ClipboardPreviewManager.shared.showPreview(for: item, atRowFrame: frame)
                         }
                     }
                     hoverWorkItem = workItem
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.8, execute: workItem)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: workItem)
                 } else {
                     hoverWorkItem = nil
                     ClipboardPreviewManager.shared.hidePreview()
@@ -1828,31 +1805,40 @@ struct ClipboardRow: View {
         .frame(height: 34)
     }
     
-    private var isURL: Bool {
-        if let url = URL(string: item.text.trimmingCharacters(in: .whitespacesAndNewlines)) {
-            return url.scheme == "http" || url.scheme == "https"
-        }
-        return false
-    }
-    
-    private func shortenItemLink() {
-        let originalString = item.text.trimmingCharacters(in: .whitespacesAndNewlines)
-        let tinyURLString = "https://tinyurl.com/api-create?url=\(originalString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
-        guard let fetchURL = URL(string: tinyURLString) else { return }
-        
-        HapticManager.shared.click()
-        
-        URLSession.shared.dataTask(with: fetchURL) { data, _, _ in
-            if let data = data, let shortened = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) {
-                DispatchQueue.main.async {
-                    let pasteboard = NSPasteboard.general
-                    pasteboard.declareTypes([.string], owner: nil)
-                    pasteboard.setString(shortened, forType: .string)
-                    HapticManager.shared.success()
+    private var pathsAndURLs: [URL] {
+        var urls: [URL] = []
+        let lines = item.text.components(separatedBy: .newlines)
+        for line in lines {
+            let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !trimmed.isEmpty else { continue }
+            
+            if trimmed.hasPrefix("http://") || trimmed.hasPrefix("https://") {
+                if let url = URL(string: trimmed) {
+                    urls.append(url)
+                }
+            } else if trimmed.hasPrefix("/") || trimmed.hasPrefix("~") {
+                let expanded = (trimmed as NSString).expandingTildeInPath
+                let fileURL = URL(fileURLWithPath: expanded)
+                if FileManager.default.fileExists(atPath: fileURL.path) {
+                    urls.append(fileURL)
                 }
             }
         }
-        .resume()
+        return urls
+    }
+    
+    private func openItemLinksAndPaths() {
+        let targets = pathsAndURLs
+        guard !targets.isEmpty else { return }
+        
+        HapticManager.shared.success()
+        for url in targets {
+            NSWorkspace.shared.open(url)
+        }
+        
+        if let delegate = NSApp.delegate as? AppDelegate {
+            delegate.closeAllPanels()
+        }
     }
     
     private func formatTimestamp(_ date: Date) -> String {

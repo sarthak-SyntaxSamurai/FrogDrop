@@ -163,6 +163,7 @@ private struct GeneralSettingsContent: View {
     @AppStorage("dailyFocusGoal") var dailyFocusGoal: Int = 120
     @AppStorage("uiDimOpacity") var uiDimOpacity: Double = 0.0
     @AppStorage("clipboardRetentionDays") var clipboardRetentionDays: Int = 0
+    @AppStorage("autoCleanURLs") var autoCleanURLs: Bool = false
     @AppStorage("menuBarIconStyle") var menuBarIconStyle: String = "frog"
     @AppStorage("menuBarCustomImagePath") var menuBarCustomImagePath: String = ""
     @Binding var hapticLevel: HapticManager.HapticLevel
@@ -260,20 +261,51 @@ private struct GeneralSettingsContent: View {
                 }
             }
 
+            SettingsSection(title: "URL Shortening", icon: "link.badge.plus") {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Automatically shorten copied URLs by stripping tracking parameters locally.")
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary)
+
+                    Toggle("Shorten Copied Links Automatically", isOn: $autoCleanURLs)
+                        .toggleStyle(.checkbox)
+                        .font(.system(size: 12))
+                }
+            }
+
             SettingsSection(title: "Clipboard Retention", icon: "clock.arrow.circlepath") {
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Auto-delete old unpinned clipboard items.")
                         .font(.system(size: 11))
                         .foregroundColor(.secondary)
 
-                    Picker("", selection: $clipboardRetentionDays) {
-                        Text("Never Delete").tag(0)
-                        Text("7 Days").tag(7)
-                        Text("14 Days").tag(14)
-                        Text("30 Days").tag(30)
+                    HStack {
+                        Toggle("Enable Auto-delete", isOn: Binding(
+                            get: { clipboardRetentionDays > 0 },
+                            set: { isOn in
+                                if isOn && clipboardRetentionDays == 0 {
+                                    clipboardRetentionDays = 7
+                                } else if !isOn {
+                                    clipboardRetentionDays = 0
+                                }
+                            }
+                        ))
+                        .toggleStyle(.checkbox)
+                        .font(.system(size: 12))
+
+                        if clipboardRetentionDays > 0 {
+                            Spacer()
+                            Picker("", selection: $clipboardRetentionDays) {
+                                Text("1 Day").tag(1)
+                                Text("7 Days").tag(7)
+                                Text("14 Days").tag(14)
+                                Text("30 Days").tag(30)
+                            }
+                            .pickerStyle(.menu)
+                            .labelsHidden()
+                            .frame(width: 100)
+                        }
                     }
-                    .pickerStyle(.menu)
-                    .labelsHidden()
                 }
             }
 
@@ -409,6 +441,7 @@ private struct GridSettingsContent: View {
                     ToggleActionRow(title: "Upload to Imgur", actionType: "imgur")
                     ToggleActionRow(title: "Shorten URL", actionType: "shortenURL")
                     ToggleActionRow(title: "Copy File Path", actionType: "copyPath")
+                    ToggleActionRow(title: "Open Path", actionType: "openPath")
                 }
             }
         }

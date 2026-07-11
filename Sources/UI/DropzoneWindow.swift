@@ -54,7 +54,7 @@ struct ShelfGroup: Identifiable {
     var shelvedFiles: [URL] { shelvedGroups.flatMap { $0.files } } // compat shim
     @Published var hoveredActionKey: String? = nil
     @Published var customFolders: [DropzoneItem] = []
-    @Published var enabledActions: [String] = ["airdrop", "email", "imgur", "shortenURL", "zip", "resizeImage", "convertImage", "copyPath"]
+    @Published var enabledActions: [String] = ["airdrop", "email", "imgur", "shortenURL", "zip", "resizeImage", "convertImage", "copyPath", "openPath"]
     @Published var lastDropTime: Date? = nil
     @Published var registeredFrames: [String: NSRect] = [:]
     @Published var actionProgress: [String: TaskProgressState] = [:]
@@ -64,7 +64,7 @@ struct ShelfGroup: Identifiable {
     private let foldersKey = "frogdrop.customFolders"
     private let actionsKey = "frogdrop.enabledActions"
     // All possible actions — always merged in
-    private let allActions = ["airdrop", "email", "imgur", "shortenURL", "zip", "resizeImage", "convertImage", "copyPath"]
+    private let allActions = ["airdrop", "email", "imgur", "shortenURL", "zip", "resizeImage", "convertImage", "copyPath", "openPath"]
     
     private init() {
         loadSettings()
@@ -311,6 +311,8 @@ struct ShelfGroup: Identifiable {
             Task {
                 await convertImagesToPNG(urls)
             }
+        } else if key == "action_openPath" {
+            openPaths(urls)
         }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
@@ -319,6 +321,46 @@ struct ShelfGroup: Identifiable {
     }
     
     // Actions implementation
+    func openPaths(_ urls: [URL]) {
+        let actionKey = "action_openPath"
+        setProgress(.running("Opening..."), for: actionKey)
+        var openedCount = 0
+        for url in urls {
+            if NSWorkspace.shared.open(url) {
+                openedCount += 1
+            }
+        }
+        if openedCount > 0 {
+            HapticManager.shared.success()
+            setProgress(.success("Opened!"), for: actionKey)
+        } else {
+            HapticManager.shared.click()
+            setProgress(.failure("Error"), for: actionKey)
+        }
+    }
+    
+    func openPathFromClipboard() {
+        let actionKey = "action_openPath"
+        setProgress(.running("Reading..."), for: actionKey)
+        let pasteboard = NSPasteboard.general
+        if let clipboardText = pasteboard.string(forType: .string) {
+            let trimmed = clipboardText.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmed.isEmpty {
+                let expanded = (trimmed as NSString).expandingTildeInPath
+                let url = URL(fileURLWithPath: expanded)
+                if FileManager.default.fileExists(atPath: url.path) {
+                    if NSWorkspace.shared.open(url) {
+                        HapticManager.shared.success()
+                        setProgress(.success("Opened!"), for: actionKey)
+                        return
+                    }
+                }
+            }
+        }
+        HapticManager.shared.click()
+        setProgress(.failure("Invalid Path"), for: actionKey)
+    }
+    
     func copyPaths(_ urls: [URL]) {
         let actionKey = "action_copyPath"
         setProgress(.running("Copying..."), for: actionKey)
@@ -482,42 +524,32 @@ struct ShelfGroup: Identifiable {
         
         if url.scheme == "http" || url.scheme == "https" {
             let originalString = url.absoluteString
-            let tinyURLString = "https://tinyurl.com/api-create?url=\(originalString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
+            let cleanedString = ClipboardManager.shared.cleanURL(originalString)
             
-            guard let fetchURL = URL(string: tinyURLString) else {
-                setProgress(.failure("Invalid URL"), for: actionKey)
-                return
-            }
-            
-            do {
-                let (data, _) = try await URLSession.shared.data(from: fetchURL)
-                if let shortened = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) {
-                    let pasteboard = NSPasteboard.general
-                    pasteboard.declareTypes([.string], owner: nil)
-                    pasteboard.setString(shortened, forType: .string)
-                    HapticManager.shared.success()
-                    setProgress(.success("Shortened!"), for: actionKey)
-                    
-                    let content = UNMutableNotificationContent()
-                    content.title = "FrogDrop"
-                    content.subtitle = "URL Shortened"
-                    content.body = "Shortened URL copied to clipboard!"
-                    content.sound = .default
-                    let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
-                    if Bundle.main.bundleIdentifier != nil {
-                        Task { try? await UNUserNotificationCenter.current().add(request) }
-                    }
-                } else {
-                    setProgress(.failure("Error"), for: actionKey)
+            await MainActor.run {
+                let pasteboard = NSPasteboard.general
+                pasteboard.declareTypes([.string], owner: nil)
+                pasteboard.setString(cleanedString, forType: .string)
+                HapticManager.shared.success()
+                setProgress(.success("Shortened!"), for: actionKey)
+                
+                let content = UNMutableNotificationContent()
+                content.title = "FrogDrop"
+                content.subtitle = "URL Shortened"
+                content.body = "Shortened URL copied to clipboard!"
+                content.sound = .default
+                let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+                if Bundle.main.bundleIdentifier != nil {
+                    Task { try? await UNUserNotificationCenter.current().add(request) }
                 }
-            } catch {
-                setProgress(.failure("API error"), for: actionKey)
             }
         } else {
-            let pasteboard = NSPasteboard.general
-            pasteboard.declareTypes([.string], owner: nil)
-            pasteboard.setString(url.lastPathComponent, forType: .string)
-            setProgress(.success("Copied Name"), for: actionKey)
+            await MainActor.run {
+                let pasteboard = NSPasteboard.general
+                pasteboard.declareTypes([.string], owner: nil)
+                pasteboard.setString(url.lastPathComponent, forType: .string)
+                setProgress(.success("Copied Name"), for: actionKey)
+            }
         }
     }
     
@@ -1410,7 +1442,7 @@ struct DropzoneGrid: View {
                                     actionKey: actionKey
                                 )
                                 .background(FrameRegistrationHelper(key: actionKey))
-                                .onDrop(of: [.fileURL], isTargeted: Binding(
+                                .onDrop(of: [.fileURL, .url, .utf8PlainText], isTargeted: Binding(
                                     get: { manager.hoveredActionKey == actionKey },
                                     set: { targeted in manager.hoveredActionKey = targeted ? actionKey : nil }
                                 )) { providers in
@@ -1421,6 +1453,13 @@ struct DropzoneGrid: View {
                                     if !manager.shelvedFiles.isEmpty {
                                         manager.handleDrop(urls: manager.shelvedFiles, onKey: actionKey)
                                         manager.clearShelf()
+                                    } else if let clipboardString = NSPasteboard.general.string(forType: .string),
+                                              let trimmed = clipboardString.trimmingCharacters(in: .whitespacesAndNewlines) as String?,
+                                              let url = URL(string: trimmed),
+                                              url.scheme == "http" || url.scheme == "https" {
+                                        Task {
+                                            await manager.shortenURL([url])
+                                        }
                                     } else {
                                         selectFilesAndRun(actionKey: actionKey)
                                     }
@@ -1434,7 +1473,7 @@ struct DropzoneGrid: View {
                                     )
                                 }
                                 .buttonStyle(.plain)
-                                .onDrop(of: [.fileURL], isTargeted: Binding(
+                                .onDrop(of: [.fileURL, .url, .utf8PlainText], isTargeted: Binding(
                                     get: { manager.hoveredActionKey == actionKey },
                                     set: { targeted in manager.hoveredActionKey = targeted ? actionKey : nil }
                                 )) { providers in
@@ -1618,6 +1657,50 @@ struct DropzoneGrid: View {
                                 }
                             }
                         }
+                        
+                        if manager.enabledActions.contains("openPath") {
+                            let actionKey = "action_openPath"
+                            if isDraggingMode {
+                                DropzoneTargetView(
+                                    title: "Open Path",
+                                    icon: "arrow.up.right.square",
+                                    iconColor: .orange,
+                                    isHovered: manager.hoveredActionKey == actionKey,
+                                    actionKey: actionKey
+                                )
+                                .background(FrameRegistrationHelper(key: actionKey))
+                                .onDrop(of: [.fileURL, .url, .utf8PlainText], isTargeted: Binding(
+                                    get: { manager.hoveredActionKey == actionKey },
+                                    set: { targeted in manager.hoveredActionKey = targeted ? actionKey : nil }
+                                )) { providers in
+                                    handleSwiftUIDrop(providers: providers, onKey: actionKey)
+                                }
+                            } else {
+                                Button(action: {
+                                    if !manager.shelvedFiles.isEmpty {
+                                        manager.handleDrop(urls: manager.shelvedFiles, onKey: actionKey)
+                                        manager.clearShelf()
+                                    } else {
+                                        manager.openPathFromClipboard()
+                                    }
+                                }) {
+                                    DropzoneTargetView(
+                                        title: "Open Path",
+                                        icon: "arrow.up.right.square",
+                                        iconColor: .orange,
+                                        isHovered: manager.hoveredActionKey == actionKey,
+                                        actionKey: actionKey
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                                .onDrop(of: [.fileURL, .url, .utf8PlainText], isTargeted: Binding(
+                                    get: { manager.hoveredActionKey == actionKey },
+                                    set: { targeted in manager.hoveredActionKey = targeted ? actionKey : nil }
+                                )) { providers in
+                                    handleSwiftUIDrop(providers: providers, onKey: actionKey)
+                                }
+                            }
+                        }
                     }
                     .padding(.horizontal, 10)
                 }
@@ -1647,10 +1730,24 @@ struct DropzoneGrid: View {
         
         for provider in providers {
             group.enter()
-            _ = provider.loadObject(ofClass: NSURL.self) { object, error in
-                if let nsUrl = object as? NSURL, let url = nsUrl as URL? {
-                    urls.append(url)
+            if provider.canLoadObject(ofClass: NSURL.self) {
+                _ = provider.loadObject(ofClass: NSURL.self) { object, error in
+                    if let nsUrl = object as? NSURL {
+                        let url = nsUrl as URL
+                        urls.append(url)
+                    }
+                    group.leave()
                 }
+            } else if provider.canLoadObject(ofClass: String.self) {
+                _ = provider.loadObject(ofClass: String.self) { object, error in
+                    if let str = object as? String,
+                       let url = URL(string: str.trimmingCharacters(in: .whitespacesAndNewlines)),
+                       url.scheme == "http" || url.scheme == "https" {
+                        urls.append(url)
+                    }
+                    group.leave()
+                }
+            } else {
                 group.leave()
             }
         }
@@ -2090,6 +2187,7 @@ struct MenuBarSettingsView: View {
     @State private var isLaunchAtLoginEnabled = false
     @AppStorage("uiDimOpacity") private var uiDimOpacity: Double = 0.0
     @AppStorage("clipboardRetentionDays") var clipboardRetentionDays: Int = 0
+    @AppStorage("autoCleanURLs") var autoCleanURLs: Bool = false
     
     // Icon Style state
     @AppStorage("menuBarIconStyle") var menuBarIconStyle: String = "frog"
@@ -2245,25 +2343,49 @@ struct MenuBarSettingsView: View {
                         Divider()
                             .background(Color.white.opacity(0.06))
                         
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("CLIPBOARD RETENTION")
-                                .font(.system(size: 9, weight: .bold))
-                                .foregroundColor(.secondary)
-                                .tracking(1.0)
-                            
-                            Picker("", selection: $clipboardRetentionDays) {
-                                Text("Never Delete").tag(0)
-                                Text("7 Days").tag(7)
-                                Text("14 Days").tag(14)
-                                Text("30 Days").tag(30)
+                        HStack(alignment: .center, spacing: 12) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("KEEP HISTORY")
+                                    .font(.system(size: 9, weight: .bold))
+                                    .foregroundColor(.secondary)
+                                    .tracking(1.0)
+                                    .lineLimit(1)
+                                    .fixedSize(horizontal: true, vertical: false)
+                                
+                                Picker("", selection: $clipboardRetentionDays) {
+                                    Text("Forever").tag(0)
+                                    Text("1 Day").tag(1)
+                                    Text("7 Days").tag(7)
+                                    Text("14 Days").tag(14)
+                                    Text("30 Days").tag(30)
+                                }
+                                .pickerStyle(.menu)
+                                .labelsHidden()
+                                .font(.system(size: 11, design: .rounded))
+                                .frame(width: 95)
                             }
-                            .pickerStyle(.menu)
-                            .labelsHidden()
-                            .font(.system(size: 11, design: .rounded))
                             
-                            Text("Auto-delete old unpinned clipboard items.")
-                                .font(.system(size: 9))
-                                .foregroundColor(.secondary)
+                            Spacer()
+                            
+                            Rectangle()
+                                .fill(Color.white.opacity(0.06))
+                                .frame(width: 1, height: 28)
+                            
+                            Spacer()
+                            
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("SHORTEN URL")
+                                    .font(.system(size: 9, weight: .bold))
+                                    .foregroundColor(.secondary)
+                                    .tracking(1.0)
+                                    .lineLimit(1)
+                                    .fixedSize(horizontal: true, vertical: false)
+                                
+                                Toggle("Auto", isOn: $autoCleanURLs)
+                                    .toggleStyle(.checkbox)
+                                    .font(.system(size: 11, design: .rounded))
+                                    .foregroundColor(.primary)
+                            }
                         }
                         
                         Divider()
@@ -2406,12 +2528,13 @@ struct MenuBarSettingsView: View {
                                 
                                 ToggleActionRow(title: "AirDrop", actionType: "airdrop")
                                 ToggleActionRow(title: "Email", actionType: "email")
-                                ToggleActionRow(title: "Imgur Upload", actionType: "imgur")
+                                ToggleActionRow(title: "Upload to Imgur", actionType: "imgur")
                                 ToggleActionRow(title: "Shorten URL", actionType: "shortenURL")
                                 ToggleActionRow(title: "Zip Files", actionType: "zip")
                                 ToggleActionRow(title: "Resize Image", actionType: "resizeImage")
                                 ToggleActionRow(title: "Convert to PNG", actionType: "convertImage")
                                 ToggleActionRow(title: "Copy Path", actionType: "copyPath")
+                                ToggleActionRow(title: "Open Path", actionType: "openPath")
                             }
                         }
                         .padding(16)

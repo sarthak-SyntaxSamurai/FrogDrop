@@ -79,6 +79,9 @@ class ClipboardManager: ObservableObject {
     }
     
     private init() {
+        UserDefaults.standard.register(defaults: [
+            "autoCleanURLs": false
+        ])
         loadSettings()
         loadHistory()
         lastChangeCount = pasteboard.changeCount
@@ -187,7 +190,19 @@ class ClipboardManager: ObservableObject {
                 return
             }
             
-            let normalizedNewText = newText.trimmingCharacters(in: .whitespacesAndNewlines)
+            var processedText = newText
+            let autoClean = UserDefaults.standard.bool(forKey: "autoCleanURLs")
+            if autoClean {
+                let cleaned = cleanURL(newText)
+                if cleaned != newText {
+                    processedText = cleaned
+                    pasteboard.declareTypes([.string], owner: nil)
+                    pasteboard.setString(cleaned, forType: .string)
+                    lastChangeCount = pasteboard.changeCount
+                }
+            }
+            
+            let normalizedNewText = processedText.trimmingCharacters(in: .whitespacesAndNewlines)
             let wasPinned = items.contains(where: { $0.text.trimmingCharacters(in: .whitespacesAndNewlines) == normalizedNewText && $0.isPinned })
             items.removeAll(where: { $0.text.trimmingCharacters(in: .whitespacesAndNewlines) == normalizedNewText })
             
@@ -195,7 +210,7 @@ class ClipboardManager: ObservableObject {
             let expires = isTemp ? Date().addingTimeInterval(tempDuration) : nil
             
             let newItem = ClipboardItem(
-                text: newText,
+                text: processedText,
                 sourceApp: appName,
                 isTemporary: isTemp,
                 expiresAt: expires,
@@ -209,6 +224,90 @@ class ClipboardManager: ObservableObject {
             saveHistory()
             NotificationCenter.default.post(name: NSNotification.Name("ShowClipboardToast"), object: newItem)
         }
+    }
+    
+    func cleanURL(_ string: String) -> String {
+        let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let url = URL(string: trimmed),
+              let host = url.host?.lowercased() else {
+            return string
+        }
+        
+        // 1. Amazon Rewriting
+        if host.contains("amazon.") {
+            let pattern = "/(dp|gp/product)/([A-Za-z0-9]{10})"
+            if let regex = try? NSRegularExpression(pattern: pattern, options: []),
+               let match = regex.firstMatch(in: trimmed, options: [], range: NSRange(trimmed.startIndex..., in: trimmed)) {
+                if let asinRange = Range(match.range(at: 2), in: trimmed) {
+                    let asin = String(trimmed[asinRange])
+                    return "https://\(host)/dp/\(asin)"
+                }
+            }
+        }
+        
+        // 2. Flipkart Rewriting
+        if host.contains("flipkart.com") {
+            let pattern = "/p/([A-Za-z0-9]{10,20})"
+            if let regex = try? NSRegularExpression(pattern: pattern, options: []),
+               let match = regex.firstMatch(in: trimmed, options: [], range: NSRange(trimmed.startIndex..., in: trimmed)) {
+                if let idRange = Range(match.range(at: 1), in: trimmed) {
+                    let productID = String(trimmed[idRange])
+                    return "https://flipkart.com/p/\(productID)"
+                }
+            }
+        }
+        
+        // 3. YouTube Rewriting
+        if host.contains("youtube.com") || host.contains("youtu.be") {
+            if let components = URLComponents(url: url, resolvingAgainstBaseURL: true) {
+                if host.contains("youtube.com") {
+                    if let queryItems = components.queryItems,
+                       let videoId = queryItems.first(where: { $0.name == "v" })?.value {
+                        return "https://youtu.be/\(videoId)"
+                    }
+                    let pathParts = components.path.components(separatedBy: "/")
+                    if pathParts.contains("shorts"), let videoId = pathParts.last, !videoId.isEmpty {
+                        return "https://youtu.be/\(videoId)"
+                    }
+                } else if host.contains("youtu.be") {
+                    let videoId = components.path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+                    if !videoId.isEmpty {
+                        return "https://youtu.be/\(videoId)"
+                    }
+                }
+            }
+        }
+        
+        // 4. Generic Tracking Parameter Cleaning
+        if let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
+           let queryItems = components.queryItems, !queryItems.isEmpty {
+            let trackingKeys: Set<String> = [
+                "utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", 
+                "utm_id", "utm_source_platform", "gclid", "fbclid", "msclkid", "twclid", 
+                "igshid", "yclid", "li_fat_id", "srsltid", "ref", "ref_", "referrer", 
+                "pid", "lid", "hl_lid", "marketplace", "fm", "pageUID", "sprefix"
+            ]
+            
+            let cleanedItems = queryItems.filter { item in
+                let key = item.name.lowercased()
+                if trackingKeys.contains(key) { return false }
+                if key.hasPrefix("pf_rd_") { return false }
+                return true
+            }
+            
+            var updatedComponents = components
+            if cleanedItems.isEmpty {
+                updatedComponents.queryItems = nil
+            } else {
+                updatedComponents.queryItems = cleanedItems
+            }
+            
+            if let cleanedString = updatedComponents.url?.absoluteString {
+                return cleanedString
+            }
+        }
+        
+        return string
     }
     
     func updateText(_ item: ClipboardItem, newText: String) {
