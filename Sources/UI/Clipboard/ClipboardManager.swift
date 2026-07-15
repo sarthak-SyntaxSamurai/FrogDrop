@@ -378,6 +378,7 @@ class ClipboardManager: ObservableObject {
         }
     }
     
+    
     private func loadHistory() {
         guard FileManager.default.fileExists(atPath: storageURL.path) else { return }
         do {

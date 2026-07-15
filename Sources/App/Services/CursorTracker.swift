@@ -24,24 +24,33 @@ class CursorTracker: ObservableObject {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            Task { @MainActor in self?.updateTrackingState() }
+            MainActor.assumeIsolated {
+                self?.updateTrackingState()
+            }
         }
     }
     
     private func updateTrackingState() {
         let style = UserDefaults.standard.string(forKey: "menuBarIconStyle") ?? "frog"
         if style == "frog" {
-            if timer == nil { startTracking() }
+            if timer == nil {
+                startTracking()
+            }
         } else {
             timer?.invalidate()
             timer = nil
         }
     }
     
-    func startTracking() {
-        timer = Timer.scheduledTimer(withTimeInterval: 0.04, repeats: true) { [weak self] _ in
-            Task { @MainActor in
-                self?.mouseLocation = NSEvent.mouseLocation
+    private func startTracking() {
+        timer?.invalidate()
+        timer = Timer.scheduledTimer(withTimeInterval: 0.08, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
+            MainActor.assumeIsolated {
+                let current = NSEvent.mouseLocation
+                if self.mouseLocation != current {
+                    self.mouseLocation = current
+                }
             }
         }
     }

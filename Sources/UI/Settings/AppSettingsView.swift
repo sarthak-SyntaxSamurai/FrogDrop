@@ -166,6 +166,7 @@ private struct GeneralSettingsContent: View {
     @AppStorage("autoCleanURLs") var autoCleanURLs: Bool = false
     @AppStorage("menuBarIconStyle") var menuBarIconStyle: String = "frog"
     @AppStorage("menuBarCustomImagePath") var menuBarCustomImagePath: String = ""
+    @AppStorage("popupStyle") var popupStyle: String = "popover"
     @Binding var hapticLevel: HapticManager.HapticLevel
     @ObservedObject var clipboardManager: ClipboardManager
     let accent: Color
@@ -354,25 +355,48 @@ private struct GeneralSettingsContent: View {
             }
 
             SettingsSection(title: "Appearance", icon: "slider.horizontal.3") {
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Adjust the darkness of the menu bar popup window.")
-                        .font(.system(size: 11))
-                        .foregroundColor(.secondary)
-
-                    HStack(spacing: 10) {
-                        Image(systemName: "sun.max")
+                VStack(alignment: .leading, spacing: 14) {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Adjust the darkness of the menu bar popup window.")
                             .font(.system(size: 11))
                             .foregroundColor(.secondary)
-                        Slider(value: $uiDimOpacity, in: 0.0...1.0, step: 0.05)
-                            .accentColor(accent)
-                        Image(systemName: "moon")
-                            .font(.system(size: 11))
+
+                        HStack(spacing: 10) {
+                            Image(systemName: "sun.max")
+                                .font(.system(size: 11))
+                                .foregroundColor(.secondary)
+                            Slider(value: $uiDimOpacity, in: 0.0...1.0, step: 0.05)
+                                .accentColor(accent)
+                            Image(systemName: "moon")
+                                .font(.system(size: 11))
+                                .foregroundColor(.secondary)
+                        }
+
+                        Text(uiDimOpacity < 0.15 ? "Fully Transparent" : uiDimOpacity < 0.45 ? "Light" : uiDimOpacity < 0.75 ? "Medium" : "Dark")
+                            .font(.system(size: 10, weight: .medium, design: .rounded))
                             .foregroundColor(.secondary)
                     }
-
-                    Text(uiDimOpacity < 0.15 ? "Fully Transparent" : uiDimOpacity < 0.45 ? "Light" : uiDimOpacity < 0.75 ? "Medium" : "Dark")
-                        .font(.system(size: 10, weight: .medium, design: .rounded))
-                        .foregroundColor(.secondary)
+                    
+                    Divider()
+                        .background(Color.white.opacity(0.06))
+                    
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Popup Window Style")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.primary)
+                        
+                        Picker("", selection: $popupStyle) {
+                            Text("Popover (Classic)").tag("popover")
+                            Text("Panel (WiFi Style)").tag("panel")
+                        }
+                        .pickerStyle(.segmented)
+                        .onChange(of: popupStyle) { _, _ in HapticManager.shared.click() }
+                        
+                        Text(popupStyle == "popover" ? "Classic popover anchored with a pointer arrow to the status item." : "Floating window style directly below the status item, matching native system menus.")
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                            .padding(.top, 2)
+                    }
                 }
             }
 

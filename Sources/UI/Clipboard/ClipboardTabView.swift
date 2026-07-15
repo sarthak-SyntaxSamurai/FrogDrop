@@ -96,8 +96,8 @@ struct ClipboardTabView: View {
             } else {
                 ScrollView {
                     LazyVStack(spacing: 6) {
-                        ForEach(filteredItems) { item in
-                            ClipboardRow(item: item, searchQuery: searchQuery) {
+                        ForEach(Array(filteredItems.enumerated()), id: \.element.id) { index, item in
+                            ClipboardRow(item: item, index: index, searchQuery: searchQuery) {
                                 clipboardManager.copyToPasteboard(item)
                             } onDelete: {
                                 clipboardManager.deleteItem(item)
@@ -127,6 +127,7 @@ fileprivate extension String {
 
 struct ClipboardRow: View {
     let item: ClipboardItem
+    let index: Int
     let searchQuery: String
     let onCopy: () -> Void
     let onDelete: () -> Void
@@ -134,8 +135,6 @@ struct ClipboardRow: View {
     @State private var isHovering = false
     @State private var hoverWorkItem: DispatchWorkItem? = nil
     @State private var isEditing = false
-    @State private var editText = ""
-    @FocusState private var isTextFieldFocused: Bool
     
     private var isTruncated: Bool {
         item.text.count > 38 || item.text.contains("\n") || item.text.contains("\r")
@@ -194,30 +193,12 @@ struct ClipboardRow: View {
                             .padding(.trailing, 2)
                     }
                     
-                    if isEditing {
-                        TextField("", text: $editText, onCommit: {
-                            ClipboardManager.shared.updateText(item, newText: editText)
-                            isEditing = false
-                        })
-                        .focused($isTextFieldFocused)
+                    highlightedText(displayPreviewText, query: searchQuery)
                         .font(.system(.subheadline, design: .rounded))
                         .fontWeight(.medium)
-                        .textFieldStyle(.plain)
-                        .padding(2)
-                        .background(Color.white.opacity(0.1))
-                        .cornerRadius(4)
-                        .onAppear {
-                            editText = item.text
-                            isTextFieldFocused = true
-                        }
-                    } else {
-                        highlightedText(displayPreviewText, query: searchQuery)
-                            .font(.system(.subheadline, design: .rounded))
-                            .fontWeight(.medium)
-                            .foregroundColor(.primary)
-                            .lineLimit(1)
-                            .multilineTextAlignment(.leading)
-                    }
+                        .foregroundColor(.primary)
+                        .lineLimit(1)
+                        .multilineTextAlignment(.leading)
                 }
                 
                 Spacer()
@@ -256,7 +237,6 @@ struct ClipboardRow: View {
                         }
                         
                         Button(action: {
-                            editText = item.text
                             isEditing = true
                         }) {
                             Image(systemName: "pencil")
@@ -294,6 +274,14 @@ struct ClipboardRow: View {
                         .buttonStyle(.plain)
                         .help("Delete Item")
                     }
+                } else if index < 10 {
+                    Text("⌘\(index)")
+                        .font(.system(size: 9, weight: .semibold, design: .monospaced))
+                        .foregroundColor(.secondary.opacity(0.7))
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 2)
+                        .background(Color.white.opacity(0.06))
+                        .cornerRadius(3)
                 }
             }
             .padding(.horizontal, 8)
@@ -353,10 +341,24 @@ struct ClipboardRow: View {
                 hoverWorkItem?.cancel()
                 hoverWorkItem = nil
                 ClipboardPreviewManager.shared.hidePreview()
-                if let delegate = NSApp.delegate as? AppDelegate { delegate.closeAllPanels() }
             }
+            .background(
+                Group {
+                    if index < 10 {
+                        Button("") {
+                            onCopy()
+                        }
+                        .keyboardShortcut(KeyEquivalent(Character(UnicodeScalar(48 + index)!)), modifiers: [.command])
+                        .opacity(0)
+                        .frame(width: 0, height: 0)
+                    }
+                }
+            )
         }
         .frame(height: 34)
+        .sheet(isPresented: $isEditing) {
+            EditClipboardView(item: item, isPresented: $isEditing)
+        }
     }
     
     private var pathsAndURLs: [URL] {
@@ -399,5 +401,72 @@ struct ClipboardRow: View {
         let formatter = RelativeDateTimeFormatter()
         formatter.unitsStyle = .abbreviated
         return formatter.localizedString(for: date, relativeTo: Date())
+    }
+}
+
+struct EditClipboardView: View {
+    let item: ClipboardItem
+    @Binding var isPresented: Bool
+    @State private var text: String
+    
+    init(item: ClipboardItem, isPresented: Binding<Bool>) {
+        self.item = item
+        self._isPresented = isPresented
+        self._text = State(initialValue: item.text)
+    }
+    
+    var body: some View {
+        VStack(spacing: 12) {
+            Text("Edit Clipboard Item")
+                .font(.system(size: 13, weight: .bold, design: .rounded))
+                .foregroundColor(.primary)
+                .padding(.top, 14)
+            
+            TextEditor(text: $text)
+                .font(.system(.body, design: .monospaced))
+                .padding(8)
+                .background(Color.white.opacity(0.04))
+                .cornerRadius(8)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.white.opacity(0.12), lineWidth: 1)
+                )
+                .frame(maxHeight: .infinity)
+            
+            HStack(spacing: 10) {
+                Button(action: {
+                    isPresented = false
+                    HapticManager.shared.click()
+                }) {
+                    Text("Cancel")
+                        .font(.system(size: 11, weight: .semibold, design: .rounded))
+                        .foregroundColor(.primary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(Color.white.opacity(0.08))
+                        .cornerRadius(6)
+                }
+                .buttonStyle(.plain)
+                
+                Button(action: {
+                    ClipboardManager.shared.updateText(item, newText: text)
+                    isPresented = false
+                    HapticManager.shared.success()
+                }) {
+                    Text("Save")
+                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                        .foregroundColor(.black)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(Color(red: 0.22, green: 0.72, blue: 0.42))
+                        .cornerRadius(6)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.bottom, 14)
+        }
+        .padding(.horizontal, 16)
+        .frame(width: 310, height: 360)
+        .background(Color(red: 0.1, green: 0.1, blue: 0.12).opacity(0.95))
     }
 }

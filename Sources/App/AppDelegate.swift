@@ -15,9 +15,22 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     private var tongueWindow: TongueOverlayWindow?
     private var lastSelectedDuration: TimerDuration = .cancel
     var dropzonePanel: DropzonePanelWindow?
+    var popupPanel: PopupPanelWindow?
+    private var panelCloseMonitor: Any?
+    private var localCloseMonitor: Any?
+    private var activity: NSObjectProtocol?
     
     func applicationDidFinishLaunching(_ notification: Notification) {
         AppDelegate.shared = self
+        
+        // Prevent AppKit from automatically terminating the application when idle (TAL)
+        ProcessInfo.processInfo.disableAutomaticTermination("Keep FrogDrop running in the Menu Bar permanently")
+        
+        // Prevent App Nap from suspending the background services
+        self.activity = ProcessInfo.processInfo.beginActivity(
+            options: [.userInitiated, .idleSystemSleepDisabled],
+            reason: "Keep FrogDrop services responsive"
+        )
         
         // Run as accessory app (only in Menu Bar, hides from Dock)
         NSApp.setActivationPolicy(.accessory)
@@ -42,6 +55,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         
         // Start monitoring global drag operations
         GlobalDragMonitor.shared.start()
+        
+        // Start monitoring global clipboard hotkeys (Cmd+0 to Cmd+9)
+        GlobalHotkeyManager.shared.setup()
         
         // Warm up managers
         _ = ClipboardManager.shared
@@ -144,34 +160,125 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     
     var popupPopover: NSPopover?
     
+    var activePopupWindow: NSWindow? {
+        let style = UserDefaults.standard.string(forKey: "popupStyle") ?? "popover"
+        if style == "panel" {
+            return popupPanel
+        } else {
+            return popupPopover?.contentViewController?.view.window
+        }
+    }
+    
     func togglePopupWindow() {
-        guard let button = statusItem?.button else { return }
+        guard let button = statusItem?.button, let buttonWindow = button.window else { return }
         
-        if popupPopover == nil {
-            let popover = NSPopover()
-            popover.contentSize = NSSize(width: 340, height: 460)
-            popover.behavior = .transient
-            popover.contentViewController = NSHostingController(rootView: PopupView())
-            popover.delegate = self
-            self.popupPopover = popover
+        // Convert button bounds to screen coordinates
+        let rectInWindow = button.convert(button.bounds, to: nil)
+        let buttonFrame = buttonWindow.convertToScreen(rectInWindow)
+        
+        let style = UserDefaults.standard.string(forKey: "popupStyle") ?? "popover"
+        
+        if style == "panel" {
+            // Close popover if shown
+            if let popover = popupPopover, popover.isShown {
+                popover.performClose(nil)
+            }
+            
+            if popupPanel == nil {
+                let hostingController = NSHostingController(rootView: PopupView())
+                popupPanel = PopupPanelWindow(contentView: hostingController.view)
+            }
+            
+            if let panel = popupPanel {
+                if panel.isVisible {
+                    closePanel()
+                    HapticManager.shared.click()
+                } else {
+                    NotificationCenter.default.post(name: .popupWillOpen, object: nil)
+                    panel.updatePosition(relativeTo: buttonFrame)
+                    NSApp.activate(ignoringOtherApps: true)
+                    panel.makeKeyAndOrderFront(nil)
+                    HapticManager.shared.click()
+                    startPanelCloseMonitor()
+                }
+            }
+        } else {
+            // Close panel if visible
+            closePanel()
+            
+            if popupPopover == nil {
+                let popover = NSPopover()
+                popover.contentSize = NSSize(width: 340, height: 460)
+                popover.behavior = .transient
+                popover.contentViewController = NSHostingController(rootView: PopupView())
+                popover.delegate = self
+                self.popupPopover = popover
+            }
+            
+            if let popover = popupPopover {
+                if popover.isShown {
+                    popover.performClose(nil)
+                    HapticManager.shared.click()
+                } else {
+                    NotificationCenter.default.post(name: .popupWillOpen, object: nil)
+                    NSApp.activate(ignoringOtherApps: true)
+                    popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+                    HapticManager.shared.click()
+                }
+            }
+        }
+    }
+    
+    func closePanel() {
+        popupPanel?.orderOut(nil)
+        stopPanelCloseMonitor()
+    }
+    
+    private func startPanelCloseMonitor() {
+        stopPanelCloseMonitor()
+        
+        // Monitor clicks in other apps
+        panelCloseMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
+            DispatchQueue.main.async {
+                self?.closePanel()
+            }
         }
         
-        if let popover = popupPopover {
-            if popover.isShown {
-                popover.performClose(nil)
-                HapticManager.shared.click()
-            } else {
-                NotificationCenter.default.post(name: .popupWillOpen, object: nil)
-                NSApp.activate(ignoringOtherApps: true)
-                popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
-                HapticManager.shared.click()
+        // Monitor clicks within our own app (like dashboard, settings, or menu bar clicks)
+        localCloseMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
+            guard let self = self, let panel = self.popupPanel, panel.isVisible else { return event }
+            
+            let mouseLocationInScreen = NSEvent.mouseLocation
+            if !panel.frame.contains(mouseLocationInScreen) {
+                // If it's a click on the status item button, let it be handled by the button's toggle action (which closes it)
+                if let buttonWindow = self.statusItem?.button?.window, buttonWindow.frame.contains(mouseLocationInScreen) {
+                    return event
+                }
+                
+                // Otherwise close the panel immediately
+                DispatchQueue.main.async {
+                    self.closePanel()
+                }
             }
+            return event
+        }
+    }
+    
+    private func stopPanelCloseMonitor() {
+        if let monitor = panelCloseMonitor {
+            NSEvent.removeMonitor(monitor)
+            panelCloseMonitor = nil
+        }
+        if let monitor = localCloseMonitor {
+            NSEvent.removeMonitor(monitor)
+            localCloseMonitor = nil
         }
     }
     
     func closeAllPanels() {
         dropzonePanel?.slideOut(force: true)
         popupPopover?.performClose(nil)
+        closePanel()
         ClipboardPreviewManager.shared.hidePreview()
     }
     
@@ -435,21 +542,30 @@ class GlobalDragMonitor {
     
     private var startPoint: NSPoint?
     private var isDragTriggered = false
+    private var initialDragChangeCount = 0
     
     private init() {}
     
     func start() {
-        // Monitor global mouse down to record start location
+        // Monitor global mouse down to record start location and pasteboard change count
         downMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown]) { _ in
             DispatchQueue.main.async {
                 self.startPoint = NSEvent.mouseLocation
                 self.isDragTriggered = false
+                self.initialDragChangeCount = NSPasteboard(name: .drag).changeCount
             }
         }
         
         // Monitor global drags
         dragMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDragged]) { _ in
             DispatchQueue.main.async {
+                // Check if the pasteboard change count has actually changed since mouseDown.
+                // If it has not changed, then no system drag-and-drop session has been initiated
+                // (e.g. the user is just selecting text, drawing, or moving windows).
+                let pasteboard = NSPasteboard(name: .drag)
+                guard pasteboard.changeCount != self.initialDragChangeCount else { return }
+                guard let types = pasteboard.types, !types.isEmpty else { return }
+                
                 guard let start = self.startPoint else { return }
                 let current = NSEvent.mouseLocation
                 let dx = current.x - start.x
@@ -460,7 +576,7 @@ class GlobalDragMonitor {
                 // This prevents clicks & double-clicks from triggering it
                 if dist > 15 && !self.isDragTriggered {
                     self.isDragTriggered = true
-                    AppDelegate.shared.popupPopover?.performClose(nil)
+                    AppDelegate.shared.closeAllPanels()
                     AppDelegate.shared.dropzonePanel?.showCollapsedIndicator()
                 }
             }
@@ -472,6 +588,7 @@ class GlobalDragMonitor {
                 self.startPoint = nil
                 self.isDragTriggered = false
                 AppDelegate.shared.dropzonePanel?.hideCollapsedIndicator()
+                AppDelegate.shared.dropzonePanel?.slideOut(force: true)
             }
         }
     }

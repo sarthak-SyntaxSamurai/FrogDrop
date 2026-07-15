@@ -23,6 +23,7 @@ struct MenuBarSettingsView: View {
     // Icon Style state
     @AppStorage("menuBarIconStyle") var menuBarIconStyle: String = "frog"
     @AppStorage("menuBarCustomImagePath") var menuBarCustomImagePath: String = ""
+    @AppStorage("popupStyle") var popupStyle: String = "popover"
     
     private func selectCustomImage() {
         let panel = NSOpenPanel()
@@ -294,6 +295,48 @@ struct MenuBarSettingsView: View {
                                 Text(uiDimOpacity < 0.15 ? "Glass (Fully Transparent)" : uiDimOpacity < 0.45 ? "Light" : uiDimOpacity < 0.75 ? "Medium" : "Dark")
                                     .font(.system(size: 9, weight: .semibold, design: .rounded))
                                     .foregroundColor(Color(red: 0.22, green: 0.72, blue: 0.42))
+                                
+                                Divider()
+                                    .background(Color.white.opacity(0.04))
+                                    .padding(.vertical, 4)
+                                
+                                Text("Popup window style")
+                                    .font(.system(size: 9))
+                                    .foregroundColor(.secondary)
+                                
+                                HStack(spacing: 4) {
+                                    Button(action: {
+                                        popupStyle = "popover"
+                                        HapticManager.shared.click()
+                                    }) {
+                                        Text("Popover")
+                                            .font(.system(size: 10, weight: popupStyle == "popover" ? .bold : .medium, design: .rounded))
+                                            .foregroundColor(popupStyle == "popover" ? .black : .primary)
+                                            .padding(.vertical, 5)
+                                            .frame(maxWidth: .infinity)
+                                            .background(popupStyle == "popover" ? Color(red: 0.22, green: 0.72, blue: 0.42) : Color.white.opacity(0.04))
+                                            .cornerRadius(6)
+                                    }
+                                    .buttonStyle(.plain)
+                                    
+                                    Button(action: {
+                                        popupStyle = "panel"
+                                        HapticManager.shared.click()
+                                    }) {
+                                        Text("Panel (WiFi)")
+                                            .font(.system(size: 10, weight: popupStyle == "panel" ? .bold : .medium, design: .rounded))
+                                            .foregroundColor(popupStyle == "panel" ? .black : .primary)
+                                            .padding(.vertical, 5)
+                                            .frame(maxWidth: .infinity)
+                                            .background(popupStyle == "panel" ? Color(red: 0.22, green: 0.72, blue: 0.42) : Color.white.opacity(0.04))
+                                            .cornerRadius(6)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                                
+                                Text(popupStyle == "popover" ? "Classic popover with pointer arrow." : "Floating window style like WiFi/Battery menus.")
+                                    .font(.system(size: 8))
+                                    .foregroundColor(.secondary)
                             }
                         }
                         .padding(16)

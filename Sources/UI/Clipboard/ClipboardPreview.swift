@@ -75,8 +75,7 @@ class ClipboardPreviewManager {
     
     func showPreview(for item: ClipboardItem, atRowFrame frame: CGRect) {
         guard let delegate = NSApp.delegate as? AppDelegate,
-              let mainPopover = delegate.popupPopover,
-              let popoverWindow = mainPopover.contentViewController?.view.window else {
+              let popoverWindow = delegate.activePopupWindow else {
             return
         }
         
@@ -109,8 +108,7 @@ class ClipboardPreviewManager {
     func hidePreview() {
         if let preview = previewWindow {
             if let delegate = NSApp.delegate as? AppDelegate,
-               let mainPopover = delegate.popupPopover,
-               let popoverWindow = mainPopover.contentViewController?.view.window {
+               let popoverWindow = delegate.activePopupWindow {
                 popoverWindow.removeChildWindow(preview)
             }
             preview.orderOut(nil)

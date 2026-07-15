@@ -10,40 +10,17 @@ struct DropzonePanelView: View {
             VStack(spacing: 0) {
                 // Elegant Header bar
                 HStack {
-                    Button(action: {
-                        isShowingSettings = true
-                    }) {
-                        Image(systemName: "plus")
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(.secondary)
-                            .padding(8)
-                    }
-                    .buttonStyle(.plain)
-                    .popover(isPresented: $isShowingSettings, arrowEdge: .top) {
-                        MenuBarSettingsView()
-                    }
-                    
                     Spacer()
                     
                     // Title
                     Text("FROG DROP")
-                        .font(.system(size: 10, weight: .black, design: .rounded))
-                        .foregroundColor(.primary)
-                        .tracking(1.0)
+                        .font(.system(size: 8.5, weight: .black, design: .rounded))
+                        .foregroundColor(.primary.opacity(0.8))
+                        .tracking(1.2)
                     
                     Spacer()
-                    
-                    Button(action: {
-                        isShowingSettings = true
-                    }) {
-                        Image(systemName: "gearshape")
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(.secondary)
-                            .padding(8)
-                    }
-                    .buttonStyle(.plain)
                 }
-                .frame(height: 38)
+                .frame(height: 28)
                 .padding(.horizontal, 8)
                 
                 Divider()
@@ -56,7 +33,7 @@ struct DropzonePanelView: View {
                     DropzoneGrid(isDraggingMode: true)
                 }
             }
-            .frame(width: 240, height: 520)
+            .frame(width: 260, height: 600)
             
             if manager.isShowingCombinePopover {
                 Color.black.opacity(0.35)
@@ -182,17 +159,26 @@ struct DropzoneGrid: View {
                     }
                     
                     // Core Row: Add to Grid, Drop Bar, Shelved Files
-                    LazyVGrid(columns: columns, spacing: 12) {
-                        if isDraggingMode {
-                            // Drop Bar
-                            DropzoneCoreTargetView(
-                                title: "Drop Bar",
-                                icon: "arrow.down",
-                                isHovered: manager.hoveredActionKey == "shelf",
-                                isDashed: true
-                            )
-                            .background(FrameRegistrationHelper(key: "shelf"))
-                        } else {
+                    if isDraggingMode {
+                        // Wide Drop Bar spanning full width
+                        DropzoneWideDropBarView(
+                            title: "Drop here to Shelve",
+                            isHovered: manager.hoveredActionKey == "shelf"
+                        )
+                        .background(FrameRegistrationHelper(key: "shelf"))
+                        .padding(.horizontal, 10)
+                        .padding(.bottom, 6)
+                        
+                        if !manager.shelvedGroups.isEmpty {
+                            LazyVGrid(columns: columns, spacing: 12) {
+                                ForEach(Array(manager.shelvedGroups.enumerated()), id: \.element.id) { idx, group in
+                                    ShelfGroupCard(group: group, groupIndex: idx, isDraggingMode: isDraggingMode)
+                                }
+                            }
+                            .padding(.horizontal, 10)
+                        }
+                    } else {
+                        LazyVGrid(columns: columns, spacing: 12) {
                             // Add to Grid
                             Button(action: {
                                 let panel = NSOpenPanel()
@@ -217,14 +203,14 @@ struct DropzoneGrid: View {
                             }
                             .buttonStyle(.plain)
                             .background(FrameRegistrationHelper(key: "addGrid"))
+                            
+                            // Each ShelfGroup = one slot (single file or N Items fan card)
+                            ForEach(Array(manager.shelvedGroups.enumerated()), id: \.element.id) { idx, group in
+                                ShelfGroupCard(group: group, groupIndex: idx, isDraggingMode: isDraggingMode)
+                            }
                         }
-                        
-                        // Each ShelfGroup = one slot (single file or N Items fan card)
-                        ForEach(Array(manager.shelvedGroups.enumerated()), id: \.element.id) { idx, group in
-                            ShelfGroupCard(group: group, groupIndex: idx, isDraggingMode: isDraggingMode)
-                        }
+                        .padding(.horizontal, 10)
                     }
-                    .padding(.horizontal, 10)
                 }
                 
                 // FOLDERS / APPS (Always shown, interactive when not dragging)
@@ -1121,5 +1107,36 @@ struct CombinePopoverView: View {
         .padding(10)
         .frame(width: 180)
         .background(Color.clear)
+    }
+}
+
+struct DropzoneWideDropBarView: View {
+    let title: String
+    let isHovered: Bool
+    
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "arrow.down")
+                .font(.system(size: 14, weight: .bold))
+                .foregroundColor(isHovered ? .green : .primary)
+            
+            Text(title)
+                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                .foregroundColor(isHovered ? .green : .secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 52)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(isHovered ? Color.green.opacity(0.12) : Color.white.opacity(0.02))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(
+                    isHovered ? Color.green : Color.white.opacity(0.18),
+                    style: StrokeStyle(lineWidth: isHovered ? 1.5 : 1, dash: [4, 4])
+                )
+        )
+        .shadow(color: isHovered ? Color.green.opacity(0.1) : Color.clear, radius: 4)
     }
 }

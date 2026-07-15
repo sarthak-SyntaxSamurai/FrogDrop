@@ -219,7 +219,7 @@ struct PopupView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didResignActiveNotification)) { _ in
             if let delegate = NSApp.delegate as? AppDelegate {
-                delegate.popupPopover?.performClose(nil)
+                delegate.closeAllPanels()
             }
         }
     }

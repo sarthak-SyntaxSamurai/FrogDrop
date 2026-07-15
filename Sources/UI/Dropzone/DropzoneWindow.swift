@@ -18,11 +18,11 @@ class DropzonePanelWindow: NSWindow {
     private let dragOverlay = DropzoneDragOverlay()
     
     private static func getCollapsedRect(statusItemFrame: NSRect) -> NSRect {
-        let width: CGFloat = 80
-        let height: CGFloat = 28
+        let width: CGFloat = 120
+        let height: CGFloat = 36
         let rect = NSRect(
             x: statusItemFrame.midX - (width / 2),
-            y: statusItemFrame.minY - height - 2,
+            y: statusItemFrame.minY - height - 4,
             width: width,
             height: height
         )
@@ -30,8 +30,8 @@ class DropzonePanelWindow: NSWindow {
     }
     
     private static func getExpandedRect(statusItemFrame: NSRect) -> NSRect {
-        let width: CGFloat = 240
-        let height: CGFloat = 520
+        let width: CGFloat = 260
+        let height: CGFloat = 600
         let rect = NSRect(
             x: statusItemFrame.midX - (width / 2),
             y: statusItemFrame.minY - height - 2,
@@ -174,6 +174,7 @@ class DropzonePanelWindow: NSWindow {
     }
     
     func updatePosition(statusItemFrame: NSRect) {
+        guard statusItemFrame != .zero else { return }
         self.statusItemFrame = statusItemFrame
         let targetRect = isExpanded ? Self.getExpandedRect(statusItemFrame: statusItemFrame) : Self.getCollapsedRect(statusItemFrame: statusItemFrame)
         self.setFrame(targetRect, display: true)

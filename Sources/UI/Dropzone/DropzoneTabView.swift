@@ -10,9 +10,9 @@ struct DropzoneTabView: View {
             HStack {
                 Spacer()
                 Text("FROG DROP")
-                    .font(.system(size: 10, weight: .black, design: .rounded))
-                    .foregroundColor(.primary)
-                    .tracking(1.0)
+                    .font(.system(size: 8.5, weight: .black, design: .rounded))
+                    .foregroundColor(.primary.opacity(0.8))
+                    .tracking(1.2)
                 Spacer()
             }
             .frame(height: 16)

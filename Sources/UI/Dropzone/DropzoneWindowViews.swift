@@ -102,25 +102,25 @@ class DropzoneHostingView<Content: View>: NSHostingView<Content> {
 
 struct CollapsedPanelView: View {
     var body: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: 6) {
             Image(systemName: "arrow.down")
-                .font(.system(size: 8, weight: .black))
-                .foregroundColor(.green)
+                .font(.system(size: 11, weight: .bold))
+                .foregroundColor(Color(red: 0.22, green: 0.72, blue: 0.42))
             Text("DROP")
-                .font(.system(size: 8, weight: .black, design: .rounded))
+                .font(.system(size: 11, weight: .bold, design: .rounded))
                 .foregroundColor(.primary)
-                .tracking(0.5)
+                .tracking(1.0)
         }
-        .frame(width: 70, height: 20)
+        .frame(width: 110, height: 28)
         .background(
             Capsule()
-                .fill(Color.white.opacity(0.08))
+                .fill(Color.black.opacity(0.6))
         )
         .overlay(
             Capsule()
-                .stroke(Color(red: 0.22, green: 0.72, blue: 0.42).opacity(0.5), lineWidth: 0.5)
+                .stroke(Color(red: 0.22, green: 0.72, blue: 0.42), lineWidth: 1.0)
         )
-        .shadow(color: Color(red: 0.22, green: 0.72, blue: 0.42).opacity(0.2), radius: 3)
-        .frame(width: 80, height: 28)
+        .shadow(color: Color(red: 0.22, green: 0.72, blue: 0.42).opacity(0.3), radius: 4)
+        .frame(width: 120, height: 36)
     }
 }
