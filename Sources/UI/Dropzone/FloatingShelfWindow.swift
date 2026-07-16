@@ -242,6 +242,7 @@ struct FloatingShelfView: View {
 
 struct ShelfCardStack: View {
     @ObservedObject var shelfManager = FloatingShelfManager.shared
+    @ObservedObject var manager = DropzoneManager.shared
     let window: FloatingShelfWindow
     @State private var currentIndex: Int = 0
     @State private var isExpanded = false
@@ -302,51 +303,28 @@ struct ShelfCardStack: View {
                             let isTop = offset == 0
                             let thumb = shelfManager.thumbnails[url]
                             
-                            SingleCardView(url: url, thumbnail: thumb, isTop: isTop)
-                                .offset(
-                                    x: CGFloat(showing - 1 - offset) * 3,
-                                    y: CGFloat(showing - 1 - offset) * -5
-                                )
-                                .rotationEffect(.degrees(Double(showing - 1 - offset) * -1.5))
-                                .scaleEffect(isTop ? 1.0 : 1.0 - CGFloat(showing - 1 - offset) * 0.03)
-                                .zIndex(Double(showing - offset))
-                                .overlay(
-                                    Group {
-                                        if isTop {
-                                            ShelfDragTrackerView(
-                                                url: url,
-                                                thumbnail: thumb ?? NSWorkspace.shared.icon(forFile: url.path)
-                                            ) { success in
-                                                if success {
-                                                    withAnimation(.spring()) {
-                                                        shelfManager.removeFileFromShelf(url)
-                                                        if currentIndex > 0 { currentIndex -= 1 }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                )
-                                .overlay(
-                                    Group {
-                                        if isTop {
-                                            Button(action: {
-                                                withAnimation(.spring()) {
-                                                    shelfManager.removeFileFromShelf(url)
-                                                    if currentIndex > 0 { currentIndex -= 1 }
-                                                }
-                                            }) {
-                                                Image(systemName: "xmark.circle.fill")
-                                                    .font(.system(size: 14))
-                                                    .foregroundColor(.white)
-                                                    .background(Circle().fill(Color.red.opacity(0.85)))
-                                            }
-                                            .buttonStyle(.plain)
-                                            .padding(2)
-                                        }
-                                    },
-                                    alignment: .topTrailing
-                                )
+                            ShelfCardView(
+                                url: url,
+                                thumbnail: thumb,
+                                isTop: isTop,
+                                files: files
+                            ) {
+                                withAnimation(.spring()) {
+                                    shelfManager.removeFileFromShelf(url)
+                                    if currentIndex > 0 { currentIndex -= 1 }
+                                }
+                            } onDragSuccess: {
+                                withAnimation(.spring()) {
+                                    shelfManager.shelfFiles.removeAll()
+                                }
+                            }
+                            .offset(
+                                x: CGFloat(showing - 1 - offset) * 3,
+                                y: CGFloat(showing - 1 - offset) * -5
+                            )
+                            .rotationEffect(.degrees(Double(showing - 1 - offset) * -1.5))
+                            .scaleEffect(isTop ? 1.0 : 1.0 - CGFloat(showing - 1 - offset) * 0.03)
+                            .zIndex(Double(showing - offset))
                         }
                     }
                     .frame(width: 110, height: 115)
@@ -418,10 +396,74 @@ struct ShelfCardStack: View {
                         HapticManager.shared.success()
                     }
                     Divider()
+                    ForEach(manager.enabledActions, id: \.self) { action in
+                        Button(action.capitalized) {
+                            manager.handleDrop(urls: files, onKey: "action_\(action)")
+                            shelfManager.shelfFiles.removeAll()
+                        }
+                    }
+                    if !manager.customFolders.isEmpty {
+                        Divider()
+                        Menu("Move to Folder") {
+                            ForEach(manager.customFolders) { folder in
+                                Button(folder.name) {
+                                    if let path = folder.path {
+                                        manager.handleDrop(urls: files, onKey: "folder_\(path)")
+                                        shelfManager.shelfFiles.removeAll()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    Divider()
                     Button("Clear All") { shelfManager.shelfFiles.removeAll() }
                 }
             }
         )
+    }
+}
+
+// MARK: - ShelfCardView
+
+struct ShelfCardView: View {
+    let url: URL
+    let thumbnail: NSImage?
+    let isTop: Bool
+    let files: [URL]
+    let onRemove: () -> Void
+    let onDragSuccess: () -> Void
+    
+    var body: some View {
+        SingleCardView(url: url, thumbnail: thumbnail, isTop: isTop)
+            .overlay(
+                Group {
+                    if isTop {
+                        ShelfDragTrackerView(
+                            urls: files,
+                            thumbnail: thumbnail ?? NSWorkspace.shared.icon(forFile: url.path)
+                        ) { success in
+                            if success {
+                                onDragSuccess()
+                            }
+                        }
+                    }
+                }
+            )
+            .overlay(
+                Group {
+                    if isTop {
+                        Button(action: onRemove) {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.system(size: 14))
+                                .foregroundColor(.white)
+                                .background(Circle().fill(Color.red.opacity(0.85)))
+                        }
+                        .buttonStyle(.plain)
+                        .padding(2)
+                    }
+                },
+                alignment: .topTrailing
+            )
     }
 }
 
@@ -457,7 +499,7 @@ struct ShelfListRow: View {
                 
                 // Individual item drag-out tracker
                 ShelfDragTrackerView(
-                    url: url,
+                    urls: [url],
                     thumbnail: thumbnail ?? NSWorkspace.shared.icon(forFile: url.path)
                 ) { success in
                     if success {
@@ -532,20 +574,20 @@ struct SingleCardView: View {
 // MARK: - ShelfDragTrackerView
 
 struct ShelfDragTrackerView: NSViewRepresentable {
-    let url: URL
+    let urls: [URL]
     let thumbnail: NSImage
     let onDragEnded: (Bool) -> Void
     
     func makeNSView(context: Context) -> ShelfDragTrackerNSView {
         let view = ShelfDragTrackerNSView()
-        view.url = url
+        view.urls = urls
         view.thumbnail = thumbnail
         view.onDragEnded = onDragEnded
         return view
     }
     
     func updateNSView(_ nsView: ShelfDragTrackerNSView, context: Context) {
-        nsView.url = url
+        nsView.urls = urls
         nsView.thumbnail = thumbnail
         nsView.onDragEnded = onDragEnded
     }
@@ -554,7 +596,7 @@ struct ShelfDragTrackerView: NSViewRepresentable {
 // MARK: - ShelfDragTrackerNSView
 
 class ShelfDragTrackerNSView: NSView {
-    var url: URL = URL(fileURLWithPath: "/")
+    var urls: [URL] = []
     var thumbnail: NSImage = NSImage()
     var onDragEnded: ((Bool) -> Void)?
     
@@ -578,12 +620,18 @@ class ShelfDragTrackerNSView: NSView {
         isDragging = true
         mouseDownEvent = nil
         
-        let item = NSDraggingItem(pasteboardWriter: url as NSURL)
-        let loc = convert(event.locationInWindow, from: nil)
-        item.setDraggingFrame(NSRect(x: loc.x - 27, y: loc.y - 27, width: 54, height: 54),
-                              contents: thumbnail)
+        let draggingItems = urls.map { url -> NSDraggingItem in
+            let item = NSDraggingItem(pasteboardWriter: url as NSURL)
+            let loc = convert(event.locationInWindow, from: nil)
+            let dragImage = NSWorkspace.shared.icon(forFile: url.path)
+            item.setDraggingFrame(NSRect(x: loc.x - 27, y: loc.y - 27, width: 54, height: 54),
+                                  contents: dragImage)
+            return item
+        }
         
-        beginDraggingSession(with: [item], event: event,
+        guard !draggingItems.isEmpty else { return }
+        
+        beginDraggingSession(with: draggingItems, event: event,
                              source: ShelfDraggingSource { [weak self] success in
             self?.onDragEnded?(success)
         })
