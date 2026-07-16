@@ -160,10 +160,6 @@ struct FloatingShelfView: View {
             WindowDragView()
                 .cornerRadius(16)
             
-            // Native AppKit Drop Target overlay
-            ShelfDropTargetView(isTargeted: $isTargeted)
-                .cornerRadius(16)
-            
             RoundedRectangle(cornerRadius: 16)
                 .stroke(isTargeted ? Color.green.opacity(0.6) : Color.white.opacity(0.12), lineWidth: 1.5)
             
@@ -211,78 +207,33 @@ struct FloatingShelfView: View {
             }
         }
         .frame(width: 150, height: 185)
+        .onDrop(of: [.fileURL], isTargeted: $isTargeted) { providers in
+            let group = DispatchGroup()
+            var urls: [URL] = []
+            
+            for provider in providers {
+                group.enter()
+                _ = provider.loadObject(ofClass: NSURL.self) { object, _ in
+                    if let nsUrl = object as? NSURL, let url = nsUrl as URL? {
+                        urls.append(url)
+                    }
+                    group.leave()
+                }
+            }
+            
+            group.notify(queue: .main) {
+                if !urls.isEmpty {
+                    FloatingShelfManager.shared.addFilesToShelf(urls)
+                }
+            }
+            return true
+        }
         .onChange(of: manager.shelvedGroups.isEmpty) { _, isEmpty in
             if isEmpty {
                 FloatingShelfManager.shared.shelfFiles.removeAll()
                 FloatingShelfManager.shared.thumbnails.removeAll()
                 FloatingShelfManager.shared.removeShelf(window)
             }
-        }
-    }
-}
-
-// MARK: - ShelfDropTargetView
-
-struct ShelfDropTargetView: NSViewRepresentable {
-    @Binding var isTargeted: Bool
-    
-    func makeNSView(context: Context) -> DraggingView {
-        let view = DraggingView(isTargeted: $isTargeted)
-        return view
-    }
-    
-    func updateNSView(_ nsView: DraggingView, context: Context) {}
-    
-    class DraggingView: NSView {
-        @Binding var isTargeted: Binding<Bool>
-        
-        init(isTargeted: Binding<Bool>) {
-            self._isTargeted = Binding<Binding<Bool>>.constant(isTargeted)
-            super.init(frame: .zero)
-            self.registerForDraggedTypes([
-                .fileURL,
-                NSPasteboard.PasteboardType(rawValue: "NSFilenamesPboardType"),
-                NSPasteboard.PasteboardType(rawValue: "public.file-url")
-            ])
-        }
-        
-        required init?(coder: NSCoder) {
-            fatalError("init(coder:) has not been implemented")
-        }
-        
-        override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
-            isTargeted.wrappedValue = true
-            return .copy
-        }
-        
-        override func draggingUpdated(_ sender: NSDraggingInfo) -> NSDragOperation {
-            isTargeted.wrappedValue = true
-            return .copy
-        }
-        
-        override func draggingExited(_ sender: NSDraggingInfo?) {
-            isTargeted.wrappedValue = false
-        }
-        
-        override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
-            isTargeted.wrappedValue = false
-            let pasteboard = sender.draggingPasteboard
-            var urls: [URL] = []
-            if let nsurls = pasteboard.readObjects(forClasses: [NSURL.self], options: nil) as? [URL] {
-                urls = nsurls
-            }
-            if urls.isEmpty {
-                if let filenames = pasteboard.propertyList(forType: NSPasteboard.PasteboardType(rawValue: "NSFilenamesPboardType")) as? [String] {
-                    urls = filenames.map { URL(fileURLWithPath: $0) }
-                }
-            }
-            
-            guard !urls.isEmpty else { return false }
-            
-            DispatchQueue.main.async {
-                FloatingShelfManager.shared.addFilesToShelf(urls)
-            }
-            return true
         }
     }
 }
