@@ -544,6 +544,13 @@ class GlobalDragMonitor {
     private var isDragTriggered = false
     private var initialDragChangeCount = 0
     
+    // Shake detection state variables
+    private var lastMouseLocation: NSPoint?
+    private var lastDirectionX: CGFloat = 0
+    private var directionChangeCount = 0
+    private var lastDirectionChangeTime = Date()
+    private var isShelfTriggered = false
+    
     private init() {}
     
     func start() {
@@ -551,7 +558,11 @@ class GlobalDragMonitor {
         downMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown]) { _ in
             DispatchQueue.main.async {
                 self.startPoint = NSEvent.mouseLocation
+                self.lastMouseLocation = NSEvent.mouseLocation
+                self.lastDirectionX = 0
+                self.directionChangeCount = 0
                 self.isDragTriggered = false
+                self.isShelfTriggered = false
                 self.initialDragChangeCount = NSPasteboard(name: .drag).changeCount
             }
         }
@@ -579,6 +590,38 @@ class GlobalDragMonitor {
                     AppDelegate.shared.closeAllPanels()
                     AppDelegate.shared.dropzonePanel?.showCollapsedIndicator()
                 }
+                
+                // Shake/wiggle gesture detection during active drag session
+                if let prev = self.lastMouseLocation {
+                    let moveX = current.x - prev.x
+                    // Threshold to ignore tiny micro-movements
+                    if abs(moveX) > 4.0 {
+                        let currentDirX = moveX > 0 ? 1.0 : -1.0
+                        if self.lastDirectionX != 0 && currentDirX != self.lastDirectionX {
+                            let now = Date()
+                            // Shaking requires rapid direction reversals
+                            if now.timeIntervalSince(self.lastDirectionChangeTime) < 0.35 {
+                                self.directionChangeCount += 1
+                            } else {
+                                self.directionChangeCount = 1
+                            }
+                            self.lastDirectionChangeTime = now
+                            
+                            if self.directionChangeCount >= 4 && !self.isShelfTriggered {
+                                self.isShelfTriggered = true
+                                
+                                // Spawn shelf empty — user manually drops files into it
+                                if FloatingShelfManager.shared.activeShelves.isEmpty {
+                                    FloatingShelfManager.shared.spawnShelf(at: current)
+                                } else {
+                                    HapticManager.shared.success()
+                                }
+                            }
+                        }
+                        self.lastDirectionX = currentDirX
+                    }
+                }
+                self.lastMouseLocation = current
             }
         }
         
@@ -586,7 +629,11 @@ class GlobalDragMonitor {
         upMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseUp]) { _ in
             DispatchQueue.main.async {
                 self.startPoint = nil
+                self.lastMouseLocation = nil
+                self.lastDirectionX = 0
+                self.directionChangeCount = 0
                 self.isDragTriggered = false
+                self.isShelfTriggered = false
                 AppDelegate.shared.dropzonePanel?.hideCollapsedIndicator()
                 AppDelegate.shared.dropzonePanel?.slideOut(force: true)
             }

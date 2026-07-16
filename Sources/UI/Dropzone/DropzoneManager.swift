@@ -138,6 +138,24 @@ import QuickLookThumbnailing
         if shelvedGroups.isEmpty { lastDropTime = nil }
     }
     
+    func removeFileFromShelf(_ url: URL, fromGroupId groupId: UUID? = nil) {
+        if let groupId = groupId {
+            if let idx = shelvedGroups.firstIndex(where: { $0.id == groupId }) {
+                shelvedGroups[idx].files.removeAll(where: { $0 == url })
+                shelvedGroups[idx].thumbnails.removeValue(forKey: url)
+            }
+        } else {
+            for i in 0..<shelvedGroups.count {
+                if shelvedGroups[i].files.contains(url) {
+                    shelvedGroups[i].files.removeAll(where: { $0 == url })
+                    shelvedGroups[i].thumbnails.removeValue(forKey: url)
+                }
+            }
+        }
+        shelvedGroups.removeAll(where: { $0.files.isEmpty })
+        if shelvedGroups.isEmpty { lastDropTime = nil }
+    }
+    
     func deleteShelfGroup(where predicate: (ShelfGroup) -> Bool) {
         if let index = shelvedGroups.firstIndex(where: predicate) {
             shelvedGroups.remove(at: index)

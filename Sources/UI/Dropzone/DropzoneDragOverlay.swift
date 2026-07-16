@@ -115,8 +115,22 @@ class DraggingSource: NSObject, NSDraggingSource {
                 }
             }
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-            AppDelegate.shared.closeAllPanels()
+        
+        // Check if drop location is inside the popup/popover frame
+        let isOverPopup: Bool
+        if let popupPanel = AppDelegate.shared.popupPanel, popupPanel.isVisible, popupPanel.frame.contains(screenPoint) {
+            isOverPopup = true
+        } else if let popupPopover = AppDelegate.shared.popupPopover, popupPopover.isShown,
+                  let window = popupPopover.contentViewController?.view.window, window.frame.contains(screenPoint) {
+            isOverPopup = true
+        } else {
+            isOverPopup = false
+        }
+        
+        if !isOverPopup {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                AppDelegate.shared.closeAllPanels()
+            }
         }
     }
 }
