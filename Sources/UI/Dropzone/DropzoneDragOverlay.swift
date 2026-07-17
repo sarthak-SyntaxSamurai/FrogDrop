@@ -114,6 +114,10 @@ class DraggingSource: NSObject, NSDraggingSource {
                     DropzoneManager.shared.currentlyDraggingGroup = nil
                 }
             }
+        } else {
+            DispatchQueue.main.async {
+                DropzoneManager.shared.currentlyDraggingGroup = nil
+            }
         }
         
         // Check if drop location is inside the popup/popover frame

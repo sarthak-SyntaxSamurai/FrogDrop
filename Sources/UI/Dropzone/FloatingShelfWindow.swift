@@ -56,10 +56,10 @@ class FloatingShelfManager: ObservableObject {
             let groupID = group.id
             for url in urls {
                 Task {
-                    if let thumb = await ShelfGroup.generateThumb(for: url) {
+                    if let img = await ShelfGroup.generateThumb(for: url) {
                         await MainActor.run {
                             if let index = manager.shelvedGroups.firstIndex(where: { $0.id == groupID }) {
-                                manager.shelvedGroups[index].thumbnails[url] = thumb
+                                manager.shelvedGroups[index].thumbnails[url] = img
                             }
                         }
                     }
@@ -94,6 +94,21 @@ class FloatingShelfManager: ObservableObject {
             activeShelves.removeAll()
             currentShelfGroupId = nil
         }
+    }
+
+    func removeGroupFromShelf(groupId: UUID) {
+        shelfFiles.removeAll()
+        thumbnails.removeAll()
+        
+        // Remove from DropzoneManager!
+        DropzoneManager.shared.deleteShelfGroup(where: { $0.id == groupId })
+        
+        // Close shelf windows
+        for shelf in activeShelves {
+            shelf.orderOut(nil)
+        }
+        activeShelves.removeAll()
+        currentShelfGroupId = nil
     }
 }
 
@@ -315,7 +330,11 @@ struct ShelfCardStack: View {
                                 }
                             } onDragSuccess: {
                                 withAnimation(.spring()) {
-                                    shelfManager.shelfFiles.removeAll()
+                                    if let groupId = shelfManager.currentShelfGroupId {
+                                        shelfManager.removeGroupFromShelf(groupId: groupId)
+                                    } else {
+                                        shelfManager.shelfFiles.removeAll()
+                                    }
                                 }
                             }
                             .offset(
@@ -379,6 +398,12 @@ struct ShelfCardStack: View {
                     .background(Capsule().fill(Color.black.opacity(0.5)))
                 }
             }
+            .padding(6)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(style: StrokeStyle(lineWidth: 1, dash: [3]))
+                    .foregroundColor(.white.opacity(0.18))
+            )
             .onChange(of: count) { _, newCount in
                 if newCount == 0 { currentIndex = 0 }
                 else if currentIndex >= newCount { currentIndex = newCount - 1 }
@@ -661,8 +686,16 @@ class ShelfDraggingSource: NSObject, NSDraggingSource {
                          endedAt screenPoint: NSPoint,
                          operation: NSDragOperation) {
         let success = operation != []
+        let droppedOnShelf = FloatingShelfManager.shared.activeShelves.contains { window in
+            window.frame.contains(screenPoint)
+        }
+        
         DispatchQueue.main.async {
-            self.onDragEnded(success)
+            if success && !droppedOnShelf {
+                self.onDragEnded(true)
+            } else {
+                self.onDragEnded(false)
+            }
         }
     }
 }
