@@ -31,11 +31,11 @@ struct DropzonePanelView: View {
                 // Dropzone Grid (Dragging mode is true in the slide-in panel)
                 ScrollView(.vertical, showsIndicators: true) {
                     DropzoneGrid(isDraggingMode: true)
-                        .padding(.bottom, 24)
+                        .padding(.bottom, 16)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .frame(width: 260, height: 600)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             
             if manager.isShowingCombinePopover {
                 Color.black.opacity(0.35)
@@ -81,9 +81,9 @@ struct DropzoneGrid: View {
     @ObservedObject var manager = DropzoneManager.shared
     
     let columns = [
-        GridItem(.flexible(), spacing: 10),
-        GridItem(.flexible(), spacing: 10),
-        GridItem(.flexible(), spacing: 10)
+        GridItem(.flexible(), spacing: 6),
+        GridItem(.flexible(), spacing: 6),
+        GridItem(.flexible(), spacing: 6)
     ]
     
     var body: some View {
@@ -242,9 +242,9 @@ struct DropzoneGrid: View {
                         .font(.system(size: 8, weight: .bold, design: .rounded))
                         .foregroundColor(.secondary.opacity(0.6))
                         .padding(.horizontal, 12)
-                        .padding(.top, 4)
+                        .padding(.top, 2)
                     
-                    LazyVGrid(columns: columns, spacing: 12) {
+                    LazyVGrid(columns: columns, spacing: 6) {
                         if manager.enabledActions.contains("inspectEXIF") {
                             let actionKey = "action_inspectEXIF"
                             if isDraggingMode {
@@ -1290,11 +1290,11 @@ struct DropzoneTargetView: View {
     var body: some View {
         let progressState = actionKey.flatMap { manager.actionProgress[$0] } ?? .idle
         
-        VStack(spacing: 4) {
+        VStack(spacing: 3) {
             ZStack {
                 Circle()
                     .fill(isHovered ? iconColor.opacity(0.2) : Color.white.opacity(0.05))
-                    .frame(width: 46, height: 46)
+                    .frame(width: 42, height: 42)
                     .overlay(
                         Circle()
                             .stroke(isHovered ? iconColor.opacity(0.4) : Color.white.opacity(0.1), lineWidth: 0.8)
@@ -1303,19 +1303,19 @@ struct DropzoneTargetView: View {
                 switch progressState {
                 case .idle:
                     Image(systemName: icon)
-                        .font(.system(size: 18))
+                        .font(.system(size: 16))
                         .foregroundColor(isHovered ? iconColor : .primary)
                 case .running:
                     ProgressView()
                         .progressViewStyle(.circular)
-                        .scaleEffect(0.8)
+                        .scaleEffect(0.75)
                 case .success:
                     Image(systemName: "checkmark")
-                        .font(.system(size: 18, weight: .bold))
+                        .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.green)
                 case .failure:
                     Image(systemName: "exclamationmark.triangle")
-                        .font(.system(size: 18, weight: .bold))
+                        .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.red)
                 }
             }
@@ -1338,7 +1338,7 @@ struct DropzoneTargetView: View {
                 .foregroundColor(isHovered ? iconColor : .secondary)
                 .lineLimit(1)
         }
-        .frame(width: 60, height: 68)
+        .frame(width: 62, height: 58)
     }
 }
 

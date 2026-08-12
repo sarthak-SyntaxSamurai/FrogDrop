@@ -119,17 +119,18 @@ class TimerManager: ObservableObject {
             if !timer.isBreakActive {
                 // Focus session finished
                 HistoryStore.shared.logSession(name: timer.name, duration: timer.focusDuration, isPomodoro: true)
+                FocusGamificationManager.shared.recordCompletedSession(minutes: max(1, Int(timer.focusDuration / 60)))
                 
                 if timer.currentCycle < timer.totalCycles {
                     // Switch to Break
                     timer.isBreakActive = true
                     timer.secondsRemaining = timer.breakDuration
                     timer.totalSeconds = timer.breakDuration
-                    sendSessionCompleteNotification(title: "Focus Session Finished!", body: "Time for a \(Int(timer.breakDuration / 60)) min break.")
+                    sendSessionCompleteNotification(title: "Focus Session Finished! ☕", body: "Time for a \(Int(timer.breakDuration / 60)) min break. Great job!")
                     updatedTimers.append(timer)
                 } else {
                     // All cycles finished
-                    sendSessionCompleteNotification(title: "Pomodoro Finished!", body: "Great job! All \(timer.totalCycles) cycles completed.")
+                    sendSessionCompleteNotification(title: "Pomodoro Finished! 🏆", body: "All \(timer.totalCycles) cycles completed! You earned golden flies.")
                 }
             } else {
                 // Break session finished
@@ -137,13 +138,14 @@ class TimerManager: ObservableObject {
                 timer.currentCycle += 1
                 timer.secondsRemaining = timer.focusDuration
                 timer.totalSeconds = timer.focusDuration
-                sendSessionCompleteNotification(title: "Break Finished!", body: "Time to focus on: \(timer.name). Cycle \(timer.currentCycle) of \(timer.totalCycles).")
+                sendSessionCompleteNotification(title: "Break Finished! 🐸", body: "Time to focus on: \(timer.name). Cycle \(timer.currentCycle) of \(timer.totalCycles).")
                 updatedTimers.append(timer)
             }
         } else {
             // Regular timer finished
             HistoryStore.shared.logSession(name: timer.name, duration: timer.totalSeconds, isPomodoro: false)
-            sendSessionCompleteNotification(title: "Timer Finished!", body: "Your timer for \"\(timer.name)\" has completed.")
+            FocusGamificationManager.shared.recordCompletedSession(minutes: max(1, Int(timer.totalSeconds / 60)))
+            sendSessionCompleteNotification(title: "Timer Finished! ⏰", body: "Your timer for \"\(timer.name)\" has completed.")
         }
     }
     
@@ -215,6 +217,22 @@ class TimerManager: ObservableObject {
         sendSessionStartNotification(for: newTimer)
         updateMenuBar()
         triggerWink()
+    }
+    
+    func startPomodoroPreset(taskName: String = "Pomodoro") {
+        startPomodoro(taskName: taskName, focusDuration: 25 * 60, breakDuration: 5 * 60, cycles: 4)
+    }
+    
+    func startDeepWorkPreset(taskName: String = "Deep Work") {
+        startPomodoro(taskName: taskName, focusDuration: 50 * 60, breakDuration: 10 * 60, cycles: 2)
+    }
+    
+    func startSprintPreset(taskName: String = "Sprint") {
+        startTimer(duration: 15 * 60, name: taskName)
+    }
+    
+    func startQuickBreakPreset() {
+        startTimer(duration: 5 * 60, name: "Power Break ☕")
     }
     
     func addTime(timerId: UUID, minutes: TimeInterval) {

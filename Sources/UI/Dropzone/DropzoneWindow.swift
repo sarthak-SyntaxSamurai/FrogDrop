@@ -30,8 +30,11 @@ class DropzonePanelWindow: NSWindow {
     }
     
     private static func getExpandedRect(statusItemFrame: NSRect) -> NSRect {
-        let width: CGFloat = 260
-        let height: CGFloat = 600
+        let screen = NSScreen.screens.first(where: { $0.frame.contains(statusItemFrame.origin) }) ?? NSScreen.main ?? NSScreen.screens[0]
+        let screenVisible = screen.visibleFrame
+        let width: CGFloat = 268
+        let availableHeight = max(520, statusItemFrame.minY - screenVisible.minY - 12)
+        let height: CGFloat = min(690, availableHeight)
         let rect = NSRect(
             x: statusItemFrame.midX - (width / 2),
             y: statusItemFrame.minY - height - 2,
