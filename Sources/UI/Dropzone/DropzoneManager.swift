@@ -12,7 +12,7 @@ import QuickLookThumbnailing
     var shelvedFiles: [URL] { shelvedGroups.flatMap { $0.files } } // compat shim
     @Published var hoveredActionKey: String? = nil
     @Published var customFolders: [DropzoneItem] = []
-    @Published var enabledActions: [String] = ["airdrop", "email", "imgur", "shortenURL", "zip", "resizeImage", "convertImage", "copyPath", "openPath"]
+    @Published var enabledActions: [String] = ["inspectEXIF", "ocr", "webp", "compress", "stripMetadata", "mergePDF", "pickColor", "airdrop", "zip", "email", "shortenURL", "resizeImage", "convertImage", "copyPath", "openPath"]
     @Published var lastDropTime: Date? = nil
     @Published var registeredFrames: [String: NSRect] = [:]
     @Published var actionProgress: [String: TaskProgressState] = [:]
@@ -22,7 +22,7 @@ import QuickLookThumbnailing
     private let foldersKey = "frogdrop.customFolders"
     private let actionsKey = "frogdrop.enabledActions"
     // All possible actions — always merged in
-    private let allActions = ["airdrop", "email", "imgur", "shortenURL", "zip", "resizeImage", "convertImage", "copyPath", "openPath"]
+    private let allActions = ["inspectEXIF", "ocr", "webp", "compress", "stripMetadata", "mergePDF", "pickColor", "airdrop", "zip", "email", "shortenURL", "resizeImage", "convertImage", "copyPath", "openPath"]
     
     private init() {
         loadSettings()
@@ -39,13 +39,18 @@ import QuickLookThumbnailing
             ]
         }
         
-        if var actions = UserDefaults.standard.stringArray(forKey: actionsKey) {
-            // Merge any new actions not yet saved
-            for a in allActions { if !actions.contains(a) { actions.append(a) } }
-            self.enabledActions = actions
+        if let savedActions = UserDefaults.standard.stringArray(forKey: actionsKey) {
+            var merged = allActions.filter { !savedActions.contains($0) }
+            for a in savedActions {
+                if allActions.contains(a) && !merged.contains(a) {
+                    merged.append(a)
+                }
+            }
+            self.enabledActions = merged
         } else {
             self.enabledActions = allActions
         }
+        UserDefaults.standard.set(enabledActions, forKey: actionsKey)
     }
     
     func saveSettings() {
@@ -260,6 +265,34 @@ import QuickLookThumbnailing
             let path = String(key.dropFirst(7))
             Task {
                 await moveToFolder(urls: urls, path: path, actionKey: key)
+            }
+        } else if key == "action_inspectEXIF" {
+            Task {
+                await inspectEXIF(urls)
+            }
+        } else if key == "action_ocr" {
+            Task {
+                await extractTextOCR(urls)
+            }
+        } else if key == "action_webp" {
+            Task {
+                await convertImagesToWebP(urls)
+            }
+        } else if key == "action_compress" {
+            Task {
+                await compressImages(urls)
+            }
+        } else if key == "action_stripMetadata" {
+            Task {
+                await stripMetadata(urls)
+            }
+        } else if key == "action_mergePDF" {
+            Task {
+                await mergePDFs(urls)
+            }
+        } else if key == "action_pickColor" {
+            Task {
+                await pickScreenColor()
             }
         } else if key == "action_airdrop" {
             airdropFiles(urls)
@@ -687,6 +720,99 @@ import QuickLookThumbnailing
                     DropzoneManager.shared.setProgress(.failure("Failed"), for: actionKey)
                 }
             }
+        }
+    }
+    
+    func inspectEXIF(_ urls: [URL]) async {
+        let actionKey = "action_inspectEXIF"
+        guard let first = urls.first else {
+            setProgress(.failure("No files"), for: actionKey)
+            return
+        }
+        EXIFInspectorManager.shared.inspect(url: first)
+        setProgress(.success("Inspected!"), for: actionKey)
+    }
+    
+    func extractTextOCR(_ urls: [URL]) async {
+        let actionKey = "action_ocr"
+        guard !urls.isEmpty else {
+            setProgress(.failure("No files"), for: actionKey)
+            return
+        }
+        setProgress(.running("Extracting..."), for: actionKey)
+        if let _ = await OCRManager.shared.extractText(from: urls) {
+            setProgress(.success("Copied to Clipboard!"), for: actionKey)
+        } else {
+            setProgress(.failure("No Text Found"), for: actionKey)
+        }
+    }
+    
+    func convertImagesToWebP(_ urls: [URL]) async {
+        let actionKey = "action_webp"
+        guard !urls.isEmpty else {
+            setProgress(.failure("No images"), for: actionKey)
+            return
+        }
+        setProgress(.running("Converting..."), for: actionKey)
+        let results = await ImageOptimizer.shared.convertToWebP(urls: urls)
+        if !results.isEmpty {
+            setProgress(.success("Converted to WebP!"), for: actionKey)
+        } else {
+            setProgress(.failure("Failed"), for: actionKey)
+        }
+    }
+    
+    func compressImages(_ urls: [URL]) async {
+        let actionKey = "action_compress"
+        guard !urls.isEmpty else {
+            setProgress(.failure("No images"), for: actionKey)
+            return
+        }
+        setProgress(.running("Compressing..."), for: actionKey)
+        let results = await ImageOptimizer.shared.compressImages(urls: urls)
+        if !results.isEmpty {
+            setProgress(.success("Compressed!"), for: actionKey)
+        } else {
+            setProgress(.failure("Failed"), for: actionKey)
+        }
+    }
+    
+    func stripMetadata(_ urls: [URL]) async {
+        let actionKey = "action_stripMetadata"
+        guard !urls.isEmpty else {
+            setProgress(.failure("No images"), for: actionKey)
+            return
+        }
+        setProgress(.running("Stripping..."), for: actionKey)
+        let results = await ImageOptimizer.shared.stripMetadata(urls: urls)
+        if !results.isEmpty {
+            setProgress(.success("Stripped!"), for: actionKey)
+        } else {
+            setProgress(.failure("Failed"), for: actionKey)
+        }
+    }
+    
+    func mergePDFs(_ urls: [URL]) async {
+        let actionKey = "action_mergePDF"
+        guard !urls.isEmpty else {
+            setProgress(.failure("No files"), for: actionKey)
+            return
+        }
+        setProgress(.running("Merging..."), for: actionKey)
+        if let _ = await PDFToolkit.shared.mergePDFs(urls: urls) {
+            setProgress(.success("PDFs Merged!"), for: actionKey)
+        } else {
+            setProgress(.failure("Failed"), for: actionKey)
+        }
+    }
+    
+    func pickScreenColor() async {
+        let actionKey = "action_pickColor"
+        setProgress(.running("Picking..."), for: actionKey)
+        if let hex = await ScreenColorSampler.shared.sampleColor() {
+            setProgress(.success("Copied \(hex)"), for: actionKey)
+        } else {
+            setProgress(.idle, for: actionKey)
         }
     }
     

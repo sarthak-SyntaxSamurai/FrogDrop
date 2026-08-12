@@ -15,14 +15,14 @@ echo "🐸 Starting FrogDrop Retina DMG Packaging..."
 # 1. Regenerate background TIFF
 python3 "$DIR/generate_dmg_bg.py"
 
-# 2. Check if FrogDrop.app exists
-if [ ! -d "$APP_PATH" ]; then
-  echo "⚠️  FrogDrop.app not found at $APP_PATH. Building release binary..."
-  cd "$DIR"
-  swift build -c release
-  mkdir -p "$APP_PATH/Contents/MacOS" "$APP_PATH/Contents/Resources"
-  cp "$DIR/.build/release/FrogDrop" "$APP_PATH/Contents/MacOS/"
-fi
+# 2. Build release binary and update FrogDrop.app bundle
+echo "🔨 Building latest FrogDrop release binary..."
+cd "$DIR"
+swift build -c release
+mkdir -p "$APP_PATH/Contents/MacOS" "$APP_PATH/Contents/Resources"
+cp "$DIR/.build/arm64-apple-macosx/release/FrogDrop" "$APP_PATH/Contents/MacOS/FrogDrop"
+chmod +x "$APP_PATH/Contents/MacOS/FrogDrop"
+codesign --force --deep --sign - "$APP_PATH" 2>/dev/null || true
 
 # 3. Clean previous build artifacts
 rm -rf "$OUTPUT_DMG" "$TEMP_DMG_DIR"

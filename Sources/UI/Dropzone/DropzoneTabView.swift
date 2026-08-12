@@ -62,8 +62,9 @@ struct DropzoneTabView: View {
             }
             
             // Scrollable grid — always shows shelf + folders + ACTIONS
-            ScrollView {
+            ScrollView(.vertical, showsIndicators: true) {
                 DropzoneGrid(isDraggingMode: false)
+                    .padding(.bottom, 20)
             }
         }
     }

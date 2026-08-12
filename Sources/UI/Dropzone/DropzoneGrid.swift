@@ -29,9 +29,11 @@ struct DropzonePanelView: View {
                     .padding(.bottom, 8)
                 
                 // Dropzone Grid (Dragging mode is true in the slide-in panel)
-                ScrollView {
+                ScrollView(.vertical, showsIndicators: true) {
                     DropzoneGrid(isDraggingMode: true)
+                        .padding(.bottom, 24)
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .frame(width: 260, height: 600)
             
@@ -243,6 +245,311 @@ struct DropzoneGrid: View {
                         .padding(.top, 4)
                     
                     LazyVGrid(columns: columns, spacing: 12) {
+                        if manager.enabledActions.contains("inspectEXIF") {
+                            let actionKey = "action_inspectEXIF"
+                            if isDraggingMode {
+                                DropzoneTargetView(
+                                    title: "Inspect EXIF",
+                                    icon: "magnifyingglass.circle.fill",
+                                    iconColor: .purple,
+                                    isHovered: manager.hoveredActionKey == actionKey,
+                                    actionKey: actionKey
+                                )
+                                .background(FrameRegistrationHelper(key: actionKey))
+                                .onDrop(of: [.fileURL, .image], isTargeted: Binding(
+                                    get: { manager.hoveredActionKey == actionKey },
+                                    set: { targeted in manager.hoveredActionKey = targeted ? actionKey : nil }
+                                )) { providers in
+                                    handleSwiftUIDrop(providers: providers, onKey: actionKey)
+                                }
+                            } else {
+                                Button(action: {
+                                    if !manager.shelvedFiles.isEmpty {
+                                        manager.handleDrop(urls: manager.shelvedFiles, onKey: actionKey)
+                                        manager.clearShelf()
+                                    } else {
+                                        selectFilesAndRun(actionKey: actionKey)
+                                    }
+                                }) {
+                                    DropzoneTargetView(
+                                        title: "Inspect EXIF",
+                                        icon: "magnifyingglass.circle.fill",
+                                        iconColor: .purple,
+                                        isHovered: manager.hoveredActionKey == actionKey,
+                                        actionKey: actionKey
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                                .onDrop(of: [.fileURL, .image], isTargeted: Binding(
+                                    get: { manager.hoveredActionKey == actionKey },
+                                    set: { targeted in manager.hoveredActionKey = targeted ? actionKey : nil }
+                                )) { providers in
+                                    handleSwiftUIDrop(providers: providers, onKey: actionKey)
+                                }
+                            }
+                        }
+                        
+                        if manager.enabledActions.contains("ocr") {
+                            let actionKey = "action_ocr"
+                            if isDraggingMode {
+                                DropzoneTargetView(
+                                    title: "Extract OCR",
+                                    icon: "text.viewfinder",
+                                    iconColor: .teal,
+                                    isHovered: manager.hoveredActionKey == actionKey,
+                                    actionKey: actionKey
+                                )
+                                .background(FrameRegistrationHelper(key: actionKey))
+                                .onDrop(of: [.fileURL, .image], isTargeted: Binding(
+                                    get: { manager.hoveredActionKey == actionKey },
+                                    set: { targeted in manager.hoveredActionKey = targeted ? actionKey : nil }
+                                )) { providers in
+                                    handleSwiftUIDrop(providers: providers, onKey: actionKey)
+                                }
+                            } else {
+                                Button(action: {
+                                    if !manager.shelvedFiles.isEmpty {
+                                        manager.handleDrop(urls: manager.shelvedFiles, onKey: actionKey)
+                                        manager.clearShelf()
+                                    } else {
+                                        Task {
+                                            if let _ = await OCRManager.shared.extractTextFromClipboard() {
+                                                manager.setProgress(.success("Copied to Clipboard!"), for: actionKey)
+                                            } else {
+                                                selectFilesAndRun(actionKey: actionKey)
+                                            }
+                                        }
+                                    }
+                                }) {
+                                    DropzoneTargetView(
+                                        title: "Extract OCR",
+                                        icon: "text.viewfinder",
+                                        iconColor: .teal,
+                                        isHovered: manager.hoveredActionKey == actionKey,
+                                        actionKey: actionKey
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                                .onDrop(of: [.fileURL, .image], isTargeted: Binding(
+                                    get: { manager.hoveredActionKey == actionKey },
+                                    set: { targeted in manager.hoveredActionKey = targeted ? actionKey : nil }
+                                )) { providers in
+                                    handleSwiftUIDrop(providers: providers, onKey: actionKey)
+                                }
+                            }
+                        }
+                        
+                        if manager.enabledActions.contains("webp") {
+                            let actionKey = "action_webp"
+                            if isDraggingMode {
+                                DropzoneTargetView(
+                                    title: "To WebP",
+                                    icon: "arrow.triangle.2.circlepath.doc.on.clipboard",
+                                    iconColor: .green,
+                                    isHovered: manager.hoveredActionKey == actionKey,
+                                    actionKey: actionKey
+                                )
+                                .background(FrameRegistrationHelper(key: actionKey))
+                                .onDrop(of: [.fileURL], isTargeted: Binding(
+                                    get: { manager.hoveredActionKey == actionKey },
+                                    set: { targeted in manager.hoveredActionKey = targeted ? actionKey : nil }
+                                )) { providers in
+                                    handleSwiftUIDrop(providers: providers, onKey: actionKey)
+                                }
+                            } else {
+                                Button(action: {
+                                    if !manager.shelvedFiles.isEmpty {
+                                        manager.handleDrop(urls: manager.shelvedFiles, onKey: actionKey)
+                                        manager.clearShelf()
+                                    } else {
+                                        selectFilesAndRun(actionKey: actionKey)
+                                    }
+                                }) {
+                                    DropzoneTargetView(
+                                        title: "To WebP",
+                                        icon: "arrow.triangle.2.circlepath.doc.on.clipboard",
+                                        iconColor: .green,
+                                        isHovered: manager.hoveredActionKey == actionKey,
+                                        actionKey: actionKey
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                                .onDrop(of: [.fileURL], isTargeted: Binding(
+                                    get: { manager.hoveredActionKey == actionKey },
+                                    set: { targeted in manager.hoveredActionKey = targeted ? actionKey : nil }
+                                )) { providers in
+                                    handleSwiftUIDrop(providers: providers, onKey: actionKey)
+                                }
+                            }
+                        }
+                        
+                        if manager.enabledActions.contains("compress") {
+                            let actionKey = "action_compress"
+                            if isDraggingMode {
+                                DropzoneTargetView(
+                                    title: "Compress",
+                                    icon: "arrow.down.right.and.arrow.up.left",
+                                    iconColor: .orange,
+                                    isHovered: manager.hoveredActionKey == actionKey,
+                                    actionKey: actionKey
+                                )
+                                .background(FrameRegistrationHelper(key: actionKey))
+                                .onDrop(of: [.fileURL], isTargeted: Binding(
+                                    get: { manager.hoveredActionKey == actionKey },
+                                    set: { targeted in manager.hoveredActionKey = targeted ? actionKey : nil }
+                                )) { providers in
+                                    handleSwiftUIDrop(providers: providers, onKey: actionKey)
+                                }
+                            } else {
+                                Button(action: {
+                                    if !manager.shelvedFiles.isEmpty {
+                                        manager.handleDrop(urls: manager.shelvedFiles, onKey: actionKey)
+                                        manager.clearShelf()
+                                    } else {
+                                        selectFilesAndRun(actionKey: actionKey)
+                                    }
+                                }) {
+                                    DropzoneTargetView(
+                                        title: "Compress",
+                                        icon: "arrow.down.right.and.arrow.up.left",
+                                        iconColor: .orange,
+                                        isHovered: manager.hoveredActionKey == actionKey,
+                                        actionKey: actionKey
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                                .onDrop(of: [.fileURL], isTargeted: Binding(
+                                    get: { manager.hoveredActionKey == actionKey },
+                                    set: { targeted in manager.hoveredActionKey = targeted ? actionKey : nil }
+                                )) { providers in
+                                    handleSwiftUIDrop(providers: providers, onKey: actionKey)
+                                }
+                            }
+                        }
+                        
+                        if manager.enabledActions.contains("stripMetadata") {
+                            let actionKey = "action_stripMetadata"
+                            if isDraggingMode {
+                                DropzoneTargetView(
+                                    title: "Strip EXIF",
+                                    icon: "shield.checkerboard",
+                                    iconColor: .indigo,
+                                    isHovered: manager.hoveredActionKey == actionKey,
+                                    actionKey: actionKey
+                                )
+                                .background(FrameRegistrationHelper(key: actionKey))
+                                .onDrop(of: [.fileURL], isTargeted: Binding(
+                                    get: { manager.hoveredActionKey == actionKey },
+                                    set: { targeted in manager.hoveredActionKey = targeted ? actionKey : nil }
+                                )) { providers in
+                                    handleSwiftUIDrop(providers: providers, onKey: actionKey)
+                                }
+                            } else {
+                                Button(action: {
+                                    if !manager.shelvedFiles.isEmpty {
+                                        manager.handleDrop(urls: manager.shelvedFiles, onKey: actionKey)
+                                        manager.clearShelf()
+                                    } else {
+                                        selectFilesAndRun(actionKey: actionKey)
+                                    }
+                                }) {
+                                    DropzoneTargetView(
+                                        title: "Strip EXIF",
+                                        icon: "shield.checkerboard",
+                                        iconColor: .indigo,
+                                        isHovered: manager.hoveredActionKey == actionKey,
+                                        actionKey: actionKey
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                                .onDrop(of: [.fileURL], isTargeted: Binding(
+                                    get: { manager.hoveredActionKey == actionKey },
+                                    set: { targeted in manager.hoveredActionKey = targeted ? actionKey : nil }
+                                )) { providers in
+                                    handleSwiftUIDrop(providers: providers, onKey: actionKey)
+                                }
+                            }
+                        }
+                        
+                        if manager.enabledActions.contains("mergePDF") {
+                            let actionKey = "action_mergePDF"
+                            if isDraggingMode {
+                                DropzoneTargetView(
+                                    title: "Merge PDF",
+                                    icon: "doc.on.doc.fill",
+                                    iconColor: .red,
+                                    isHovered: manager.hoveredActionKey == actionKey,
+                                    actionKey: actionKey
+                                )
+                                .background(FrameRegistrationHelper(key: actionKey))
+                                .onDrop(of: [.fileURL], isTargeted: Binding(
+                                    get: { manager.hoveredActionKey == actionKey },
+                                    set: { targeted in manager.hoveredActionKey = targeted ? actionKey : nil }
+                                )) { providers in
+                                    handleSwiftUIDrop(providers: providers, onKey: actionKey)
+                                }
+                            } else {
+                                Button(action: {
+                                    if !manager.shelvedFiles.isEmpty {
+                                        manager.handleDrop(urls: manager.shelvedFiles, onKey: actionKey)
+                                        manager.clearShelf()
+                                    } else {
+                                        selectFilesAndRun(actionKey: actionKey)
+                                    }
+                                }) {
+                                    DropzoneTargetView(
+                                        title: "Merge PDF",
+                                        icon: "doc.on.doc.fill",
+                                        iconColor: .red,
+                                        isHovered: manager.hoveredActionKey == actionKey,
+                                        actionKey: actionKey
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                                .onDrop(of: [.fileURL], isTargeted: Binding(
+                                    get: { manager.hoveredActionKey == actionKey },
+                                    set: { targeted in manager.hoveredActionKey = targeted ? actionKey : nil }
+                                )) { providers in
+                                    handleSwiftUIDrop(providers: providers, onKey: actionKey)
+                                }
+                            }
+                        }
+                        
+                        if manager.enabledActions.contains("pickColor") {
+                            let actionKey = "action_pickColor"
+                            if isDraggingMode {
+                                DropzoneTargetView(
+                                    title: "Pick Color",
+                                    icon: "eyedropper.halffull",
+                                    iconColor: .pink,
+                                    isHovered: manager.hoveredActionKey == actionKey,
+                                    actionKey: actionKey
+                                )
+                                .background(FrameRegistrationHelper(key: actionKey))
+                                .onDrop(of: [.fileURL], isTargeted: Binding(
+                                    get: { manager.hoveredActionKey == actionKey },
+                                    set: { targeted in manager.hoveredActionKey = targeted ? actionKey : nil }
+                                )) { providers in
+                                    handleSwiftUIDrop(providers: providers, onKey: actionKey)
+                                }
+                            } else {
+                                Button(action: {
+                                    Task {
+                                        await manager.pickScreenColor()
+                                    }
+                                }) {
+                                    DropzoneTargetView(
+                                        title: "Pick Color",
+                                        icon: "eyedropper.halffull",
+                                        iconColor: .pink,
+                                        isHovered: manager.hoveredActionKey == actionKey,
+                                        actionKey: actionKey
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        
                         if manager.enabledActions.contains("airdrop") {
                             let actionKey = "action_airdrop"
                             if isDraggingMode {
@@ -745,10 +1052,13 @@ struct ShelfGroupCard: View {
             }
         }
         .onTapGesture(count: 2) {
-            if group.files.count == 1, let url = group.files.first { NSWorkspace.shared.open(url) }
+            QuickLookManager.shared.togglePreview(urls: group.files)
         }
         .overlay(CardDragTrackerView(group: group))
         .contextMenu {
+            Button("QuickLook Preview") {
+                QuickLookManager.shared.togglePreview(urls: group.files)
+            }
             if group.files.count == 1, let url = group.files.first {
                 Button("Reveal in Finder") { NSWorkspace.shared.activateFileViewerSelecting([url]) }
                 Button("Copy Path") {
@@ -762,6 +1072,14 @@ struct ShelfGroupCard: View {
                     manager.deleteShelfGroup(at: groupIndex)
                 }
             }
+            Divider()
+            ForEach(manager.enabledActions, id: \.self) { action in
+                Button(actionDisplayName(action)) {
+                    manager.handleDrop(urls: group.files, onKey: "action_\(action)")
+                    manager.deleteShelfGroup(at: groupIndex)
+                }
+            }
+            Divider()
             Button("Remove from Shelf") { manager.deleteShelfGroup(at: groupIndex) }
             if manager.shelvedGroups.count > 1 {
                 Divider()
@@ -1138,5 +1456,27 @@ struct DropzoneWideDropBarView: View {
                 )
         )
         .shadow(color: isHovered ? Color.green.opacity(0.1) : Color.clear, radius: 4)
+    }
+}
+
+func actionDisplayName(_ key: String) -> String {
+    switch key {
+    case "inspectEXIF": return "Inspect EXIF Metadata"
+    case "ocr": return "Extract Text (OCR)"
+    case "webp": return "Convert to Web (AVIF)"
+    case "compress": return "Compress Image"
+    case "stripMetadata": return "Strip EXIF Metadata"
+    case "mergePDF": return "Merge into PDF"
+    case "pickColor": return "Pick Screen Color"
+    case "airdrop": return "AirDrop"
+    case "email": return "Email"
+    case "imgur": return "Upload to Imgur"
+    case "shortenURL": return "Shorten URL"
+    case "zip": return "Zip Files"
+    case "resizeImage": return "Resize Image (800px)"
+    case "convertImage": return "Convert to PNG"
+    case "copyPath": return "Copy Path"
+    case "openPath": return "Open Path"
+    default: return key.capitalized
     }
 }

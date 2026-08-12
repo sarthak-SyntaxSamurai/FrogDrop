@@ -31,6 +31,33 @@ class DropzoneDragOverlay: NSView {
         return self
     }
     
+    override func scrollWheel(with event: NSEvent) {
+        forwardMouseEvent(event) { $0.scrollWheel(with: event) }
+    }
+    
+    override func mouseDown(with event: NSEvent) {
+        forwardMouseEvent(event) { $0.mouseDown(with: event) }
+    }
+    
+    override func mouseUp(with event: NSEvent) {
+        forwardMouseEvent(event) { $0.mouseUp(with: event) }
+    }
+    
+    override func rightMouseDown(with event: NSEvent) {
+        forwardMouseEvent(event) { $0.rightMouseDown(with: event) }
+    }
+    
+    private func forwardMouseEvent(_ event: NSEvent, handler: (NSView) -> Void) {
+        if let superview = self.superview {
+            for subview in superview.subviews.reversed() where subview !== self && !subview.isHidden {
+                if let target = subview.hitTest(event.locationInWindow) {
+                    handler(target)
+                    return
+                }
+            }
+        }
+    }
+    
     override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
         onDragEntered?()
         updateHoveredAction(for: sender.draggingLocation)

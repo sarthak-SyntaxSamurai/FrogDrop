@@ -460,10 +460,20 @@ private struct GridSettingsContent: View {
 
             SettingsSection(title: "Built-in Actions", icon: "bolt.fill") {
                 VStack(spacing: 8) {
+                    ToggleActionRow(title: "Inspect EXIF", actionType: "inspectEXIF")
+                    ToggleActionRow(title: "Extract Text (OCR)", actionType: "ocr")
+                    ToggleActionRow(title: "Convert to Web (AVIF)", actionType: "webp")
+                    ToggleActionRow(title: "Compress Image", actionType: "compress")
+                    ToggleActionRow(title: "Strip EXIF Metadata", actionType: "stripMetadata")
+                    ToggleActionRow(title: "Merge PDFs", actionType: "mergePDF")
+                    ToggleActionRow(title: "Pick Screen Color", actionType: "pickColor")
                     ToggleActionRow(title: "AirDrop", actionType: "airdrop")
                     ToggleActionRow(title: "Send via Email", actionType: "email")
                     ToggleActionRow(title: "Upload to Imgur", actionType: "imgur")
                     ToggleActionRow(title: "Shorten URL", actionType: "shortenURL")
+                    ToggleActionRow(title: "Zip Files", actionType: "zip")
+                    ToggleActionRow(title: "Resize Image (800px)", actionType: "resizeImage")
+                    ToggleActionRow(title: "Convert to PNG", actionType: "convertImage")
                     ToggleActionRow(title: "Copy File Path", actionType: "copyPath")
                     ToggleActionRow(title: "Open Path", actionType: "openPath")
                 }

@@ -349,7 +349,19 @@ struct ShelfCardStack: View {
                     .frame(width: 110, height: 115)
                     
                     // Bottom navigation controls & Expand button
-                    HStack(spacing: 8) {
+                    HStack(spacing: 6) {
+                        Button(action: {
+                            QuickLookManager.shared.togglePreview(urls: files, initialIndex: safeIndex)
+                        }) {
+                            Image(systemName: "eye.fill")
+                                .font(.system(size: 8, weight: .bold))
+                                .foregroundColor(.white.opacity(0.85))
+                                .padding(.horizontal, 4)
+                                .padding(.vertical, 2)
+                        }
+                        .buttonStyle(.plain)
+                        .help("QuickLook Preview (Space)")
+                        
                         if count > 1 {
                             Button(action: {
                                 withAnimation(.spring(response: 0.25, dampingFraction: 0.7)) {
@@ -410,6 +422,9 @@ struct ShelfCardStack: View {
             }
             .contextMenu {
                 if !files.isEmpty {
+                    Button("QuickLook Preview") {
+                        QuickLookManager.shared.togglePreview(urls: files, initialIndex: safeIndex)
+                    }
                     Button("Reveal in Finder") {
                         NSWorkspace.shared.activateFileViewerSelecting(files)
                     }
@@ -422,7 +437,7 @@ struct ShelfCardStack: View {
                     }
                     Divider()
                     ForEach(manager.enabledActions, id: \.self) { action in
-                        Button(action.capitalized) {
+                        Button(actionDisplayName(action)) {
                             manager.handleDrop(urls: files, onKey: "action_\(action)")
                             shelfManager.shelfFiles.removeAll()
                         }
@@ -445,6 +460,28 @@ struct ShelfCardStack: View {
                 }
             }
         )
+    }
+    
+    private func actionDisplayName(_ key: String) -> String {
+        switch key {
+        case "inspectEXIF": return "Inspect EXIF Metadata"
+        case "ocr": return "Extract Text (OCR)"
+        case "webp": return "Convert to Web (AVIF)"
+        case "compress": return "Compress Image"
+        case "stripMetadata": return "Strip EXIF Metadata"
+        case "mergePDF": return "Merge into PDF"
+        case "pickColor": return "Pick Screen Color"
+        case "airdrop": return "AirDrop"
+        case "email": return "Email"
+        case "imgur": return "Upload to Imgur"
+        case "shortenURL": return "Shorten URL"
+        case "zip": return "Zip Files"
+        case "resizeImage": return "Resize Image (800px)"
+        case "convertImage": return "Convert to PNG"
+        case "copyPath": return "Copy Path"
+        case "openPath": return "Open Path"
+        default: return key.capitalized
+        }
     }
 }
 
@@ -539,6 +576,15 @@ struct ShelfListRow: View {
                 .lineLimit(1)
                 .frame(maxWidth: .infinity, alignment: .leading)
             
+            Button(action: {
+                QuickLookManager.shared.togglePreview(urls: [url])
+            }) {
+                Image(systemName: "eye")
+                    .font(.system(size: 11))
+                    .foregroundColor(.white.opacity(0.75))
+            }
+            .buttonStyle(.plain)
+            
             Button(action: onRemove) {
                 Image(systemName: "xmark.circle.fill")
                     .font(.system(size: 12))
@@ -584,6 +630,9 @@ struct SingleCardView: View {
                     RoundedRectangle(cornerRadius: 12)
                         .stroke(Color.white.opacity(isTop ? 0.2 : 0.08), lineWidth: 1.0)
                 )
+                .onTapGesture(count: 2) {
+                    QuickLookManager.shared.togglePreview(urls: [url])
+                }
             
             if isTop {
                 Text(url.lastPathComponent)

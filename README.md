@@ -46,14 +46,19 @@ I wanted one thing that does all of it, stays out of the way, and doesn't cost $
 ### 🐸 The Menu Bar Frog
 A hand-drawn frog lives in your menu bar. It **blinks**, **winks**, and **changes expression** based on what you're doing — relaxed when idle, focused brows when a timer's running, pink tongue out when something drops in. It's alive.
 
-### 📦 Dropzone — Drag files anywhere, instantly
+### 📦 Dropzone & Floating Shelf — Drag files anywhere, transform instantly
 
-Drag any file (or 100 files) onto the frog and it gets **shelved**. A smart grid pops up with your custom target folders and quick actions.
+Shake your cursor while dragging files to summon a floating shelf, or drop files directly onto the menu bar frog.
 
-- **Custom folder grid** — add your most-used folders, move files in one drag
-- **Built-in actions** — AirDrop, Email, Imgur upload, URL shortener
-- **Fallback dialogs** — clicking any action when no file is shelved opens a native file picker
-- Works with single files, bulk selections, anything Finder can drag
+- **🔍 Spacebar QuickLook** — Hover any card in the shelf or grid and press `Spacebar` (or tap the eye icon) for instant full-size native macOS previews.
+- **👁️ On-Device Vision OCR** — Drag any screenshot, photo, or receipt → 1-click extract formatted text directly to your clipboard.
+- **⚡ Modern WebP & Lossless Optimizer** — 1-click convert JPG/PNG to WebP, shrink file sizes by 70%, or strip GPS/EXIF metadata for privacy.
+- **📄 PDF Toolkit** — Drop multiple PDFs or images to merge them into a single PDF document in seconds.
+- **🎨 1-Click Screen Eyedropper** — Sample any pixel on screen and instantly copy formatted `#HEX` / `RGB` color codes.
+- **Custom folder grid** — Add your most-used folders, move files in one drag with duplicate collision protection.
+- **Built-in sharing** — AirDrop, Email, Imgur upload, URL shortener, Zip archives.
+- **Fallback dialogs** — Clicking any action when no file is shelved opens a native file picker.
+- Works with single files, bulk selections, anything Finder can drag.
 
 ### 📋 Clipboard History — Everything you ever copied, right here
 
