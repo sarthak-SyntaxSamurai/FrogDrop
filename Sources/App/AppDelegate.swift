@@ -282,7 +282,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         ClipboardPreviewManager.shared.hidePreview()
     }
     
-    // MARK: - NSPopoverDelegate
+    // NSPopoverDelegate
     
     func popoverWillClose(_ notification: Notification) {
         ClipboardPreviewManager.shared.hidePreview()
@@ -305,7 +305,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         UserDefaults.standard.set("custom", forKey: "menuBarIconStyle")
     }
     
-    // MARK: - Tongue Drag-Down Timer Setup
+    // Tongue Drag-Down Timer Setup
     
     private var tongueAnchorPoint: NSPoint = .zero
     
