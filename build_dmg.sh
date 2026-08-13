@@ -60,7 +60,6 @@ rm -rf "$TEMP_DMG_DIR"
 if [ -f "$OUTPUT_DMG" ]; then
   echo "✅ FrogDrop.dmg created successfully at $OUTPUT_DMG"
   ls -lh "$OUTPUT_DMG"
-  open "$OUTPUT_DMG"
 else
   echo "❌ Error: DMG creation failed."
   exit 1
