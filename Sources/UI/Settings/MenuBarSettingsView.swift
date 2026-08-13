@@ -423,14 +423,20 @@ struct MenuBarSettingsView: View {
                                         } else {
                                             HStack {
                                                 VStack(alignment: .leading, spacing: 2) {
-                                                    Text(updateManager.statusMessage.isEmpty ? "Up to date (\(updateManager.currentVersion))" : updateManager.statusMessage)
-                                                        .font(.system(size: 10, weight: .medium, design: .rounded))
-                                                        .foregroundColor(updateManager.errorMessage != nil ? .red : .secondary)
-                                                    
                                                     if let date = updateManager.lastCheckDate {
+                                                        Text(updateManager.statusMessage.isEmpty ? "FrogDrop is up to date" : updateManager.statusMessage)
+                                                            .font(.system(size: 10, weight: .medium, design: .rounded))
+                                                            .foregroundColor(updateManager.errorMessage != nil ? .red : .secondary)
                                                         Text("Checked \(date.formatted(date: .omitted, time: .shortened))")
                                                             .font(.system(size: 8))
                                                             .foregroundColor(.secondary.opacity(0.6))
+                                                    } else {
+                                                        Text("Check for new releases")
+                                                            .font(.system(size: 10, weight: .medium, design: .rounded))
+                                                            .foregroundColor(.secondary)
+                                                        Text("Click button to query GitHub")
+                                                            .font(.system(size: 8))
+                                                            .foregroundColor(.secondary.opacity(0.5))
                                                     }
                                                 }
                                                 Spacer()

@@ -56,7 +56,7 @@ class UpdateManager: NSObject, ObservableObject {
     @Published var lastCheckDate: Date? = nil
     
     var currentVersion: String {
-        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "2.0.0"
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "2.1.0"
         return version.hasPrefix("v") ? version : "v\(version)"
     }
     
