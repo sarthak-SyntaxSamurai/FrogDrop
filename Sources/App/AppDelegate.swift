@@ -305,6 +305,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         UserDefaults.standard.set("custom", forKey: "menuBarIconStyle")
     }
     
+    @objc func checkForUpdates() {
+        UpdateManager.shared.checkForUpdates()
+    }
+    
     // Tongue Drag-Down Timer Setup
     
     private var tongueAnchorPoint: NSPoint = .zero
@@ -499,6 +503,7 @@ class InteractiveFrogView: NSHostingView<MenuBarFrogView> {
         menu.addItem(iconStyleItem)
         menu.addItem(NSMenuItem.separator())
         
+        menu.addItem(NSMenuItem(title: "Check for Updates...", action: #selector(AppDelegate.checkForUpdates), keyEquivalent: "u"))
         menu.addItem(NSMenuItem(title: "Open Dashboard", action: #selector(AppDelegate.openDashboard), keyEquivalent: "d"))
         menu.addItem(NSMenuItem(title: "Quit FrogDrop", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
         NSMenu.popUpContextMenu(menu, with: event, for: self)

@@ -5,6 +5,7 @@ import ServiceManagement
 struct MenuBarSettingsView: View {
     @ObservedObject var manager = DropzoneManager.shared
     @ObservedObject var clipboardManager = ClipboardManager.shared
+    @ObservedObject var updateManager = UpdateManager.shared
     @Environment(\.presentationMode) var presentationMode
     
     @State private var selectedTab = 0 // 0 = General, 1 = Grid, 2 = Rules
@@ -337,6 +338,123 @@ struct MenuBarSettingsView: View {
                                 Text(popupStyle == "popover" ? "Classic popover with pointer arrow." : "Floating window style like WiFi/Battery menus.")
                                     .font(.system(size: 8))
                                     .foregroundColor(.secondary)
+                            }
+                            
+                            Divider()
+                                .background(Color.white.opacity(0.06))
+                            
+                            // FrogDrop Updates Section (General Tab Bottom)
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack {
+                                    Text("UPDATES")
+                                        .font(.system(size: 9, weight: .bold))
+                                        .foregroundColor(.secondary)
+                                        .tracking(1.0)
+                                    Spacer()
+                                    Text(updateManager.currentVersion)
+                                        .font(.system(size: 9, weight: .bold, design: .monospaced))
+                                        .foregroundColor(.secondary)
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 2)
+                                        .background(Color.white.opacity(0.06))
+                                        .cornerRadius(4)
+                                }
+                                
+                                if updateManager.updateAvailable {
+                                    VStack(alignment: .leading, spacing: 6) {
+                                        HStack(spacing: 6) {
+                                            Image(systemName: "sparkles")
+                                                .foregroundColor(Color(red: 0.22, green: 0.72, blue: 0.42))
+                                                .font(.system(size: 11))
+                                            Text("\(updateManager.latestVersion) Available!")
+                                                .font(.system(size: 11, weight: .bold, design: .rounded))
+                                                .foregroundColor(Color(red: 0.22, green: 0.72, blue: 0.42))
+                                        }
+                                        
+                                        if !updateManager.releaseNotes.isEmpty {
+                                            Text(updateManager.releaseNotes)
+                                                .font(.system(size: 9))
+                                                .foregroundColor(.secondary)
+                                                .lineLimit(2)
+                                        }
+                                        
+                                        if updateManager.isUpdating {
+                                            VStack(alignment: .leading, spacing: 4) {
+                                                ProgressView(value: updateManager.downloadProgress, total: 1.0)
+                                                    .accentColor(Color(red: 0.22, green: 0.72, blue: 0.42))
+                                                Text(updateManager.statusMessage)
+                                                    .font(.system(size: 8))
+                                                    .foregroundColor(.secondary)
+                                            }
+                                        } else {
+                                            Button(action: {
+                                                updateManager.downloadAndInstallUpdate()
+                                                HapticManager.shared.click()
+                                            }) {
+                                                HStack(spacing: 4) {
+                                                    Image(systemName: "arrow.triangle.2.circlepath.circle.fill")
+                                                    Text("Update & Relaunch")
+                                                }
+                                                .font(.system(size: 10, weight: .bold, design: .rounded))
+                                                .foregroundColor(.black)
+                                                .padding(.vertical, 6)
+                                                .frame(maxWidth: .infinity)
+                                                .background(Color(red: 0.22, green: 0.72, blue: 0.42))
+                                                .cornerRadius(6)
+                                            }
+                                            .buttonStyle(.plain)
+                                        }
+                                    }
+                                    .padding(8)
+                                    .background(Color(red: 0.22, green: 0.72, blue: 0.42).opacity(0.12))
+                                    .cornerRadius(8)
+                                } else {
+                                    VStack(alignment: .leading, spacing: 6) {
+                                        if updateManager.isChecking {
+                                            HStack(spacing: 6) {
+                                                ProgressView()
+                                                    .scaleEffect(0.6)
+                                                    .frame(width: 12, height: 12)
+                                                Text("Checking GitHub for updates...")
+                                                    .font(.system(size: 10))
+                                                    .foregroundColor(.secondary)
+                                            }
+                                            .padding(.vertical, 4)
+                                        } else {
+                                            HStack {
+                                                VStack(alignment: .leading, spacing: 2) {
+                                                    Text(updateManager.statusMessage.isEmpty ? "Up to date (\(updateManager.currentVersion))" : updateManager.statusMessage)
+                                                        .font(.system(size: 10, weight: .medium, design: .rounded))
+                                                        .foregroundColor(updateManager.errorMessage != nil ? .red : .secondary)
+                                                    
+                                                    if let date = updateManager.lastCheckDate {
+                                                        Text("Checked \(date.formatted(date: .omitted, time: .shortened))")
+                                                            .font(.system(size: 8))
+                                                            .foregroundColor(.secondary.opacity(0.6))
+                                                    }
+                                                }
+                                                Spacer()
+                                                Button(action: {
+                                                    updateManager.checkForUpdates()
+                                                    HapticManager.shared.click()
+                                                }) {
+                                                    HStack(spacing: 3) {
+                                                        Image(systemName: "arrow.clockwise")
+                                                            .font(.system(size: 9))
+                                                        Text("Check")
+                                                            .font(.system(size: 10, weight: .semibold, design: .rounded))
+                                                    }
+                                                    .foregroundColor(.primary)
+                                                    .padding(.horizontal, 8)
+                                                    .padding(.vertical, 4)
+                                                    .background(Color.white.opacity(0.08))
+                                                    .cornerRadius(5)
+                                                }
+                                                .buttonStyle(.plain)
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                         .padding(16)

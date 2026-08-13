@@ -400,11 +400,114 @@ private struct GeneralSettingsContent: View {
                 }
             }
 
-            SettingsSection(title: "About", icon: "info.circle") {
+            SettingsSection(title: "Updates & About", icon: "sparkles") {
+                VStack(alignment: .leading, spacing: 12) {
+                    SettingsInfoRow(label: "Current Version", value: UpdateManager.shared.currentVersion)
+                    SettingsInfoRow(label: "Build", value: "Release (Open Source)")
+                    SettingsInfoRow(label: "Platform", value: "macOS 14+ (Apple Silicon & Intel)")
+                    
+                    Divider().background(Color.white.opacity(0.06))
+                    
+                    DashboardUpdateView(accent: accent)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Dashboard Update View
+private struct DashboardUpdateView: View {
+    @ObservedObject var updateManager = UpdateManager.shared
+    let accent: Color
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if updateManager.updateAvailable {
                 VStack(alignment: .leading, spacing: 8) {
-                    SettingsInfoRow(label: "Version", value: "1.3.0")
-                    SettingsInfoRow(label: "Build", value: "Release")
-                    SettingsInfoRow(label: "Platform", value: "macOS 14+")
+                    HStack(spacing: 8) {
+                        Image(systemName: "sparkles")
+                            .foregroundColor(accent)
+                            .font(.system(size: 14))
+                        Text("\(updateManager.latestVersion) Available!")
+                            .font(.system(size: 13, weight: .bold, design: .rounded))
+                            .foregroundColor(accent)
+                        Spacer()
+                    }
+                    
+                    if !updateManager.releaseNotes.isEmpty {
+                        Text(updateManager.releaseNotes)
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                            .lineLimit(3)
+                    }
+                    
+                    if updateManager.isUpdating {
+                        VStack(alignment: .leading, spacing: 4) {
+                            ProgressView(value: updateManager.downloadProgress, total: 1.0)
+                                .accentColor(accent)
+                            Text(updateManager.statusMessage)
+                                .font(.system(size: 10))
+                                .foregroundColor(.secondary)
+                        }
+                    } else {
+                        Button(action: {
+                            updateManager.downloadAndInstallUpdate()
+                            HapticManager.shared.click()
+                        }) {
+                            HStack(spacing: 6) {
+                                Image(systemName: "arrow.triangle.2.circlepath.circle.fill")
+                                Text("Update & Relaunch Now")
+                            }
+                            .font(.system(size: 11, weight: .bold, design: .rounded))
+                            .foregroundColor(.black)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 8)
+                            .background(accent)
+                            .cornerRadius(7)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(12)
+                .background(accent.opacity(0.12))
+                .cornerRadius(10)
+            } else {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(updateManager.statusMessage.isEmpty ? "FrogDrop is up to date" : updateManager.statusMessage)
+                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                            .foregroundColor(updateManager.errorMessage != nil ? .red : .secondary)
+                        
+                        if let date = updateManager.lastCheckDate {
+                            Text("Last checked: \(date.formatted(date: .abbreviated, time: .shortened))")
+                                .font(.system(size: 10))
+                                .foregroundColor(.secondary.opacity(0.6))
+                        }
+                    }
+                    Spacer()
+                    
+                    if updateManager.isChecking {
+                        ProgressView()
+                            .scaleEffect(0.7)
+                            .frame(width: 20, height: 20)
+                    } else {
+                        Button(action: {
+                            updateManager.checkForUpdates()
+                            HapticManager.shared.click()
+                        }) {
+                            HStack(spacing: 5) {
+                                Image(systemName: "arrow.clockwise")
+                                Text("Check for Updates")
+                            }
+                            .font(.system(size: 11, weight: .semibold, design: .rounded))
+                            .foregroundColor(.primary)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(Color.white.opacity(0.08))
+                            .cornerRadius(6)
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
             }
         }
