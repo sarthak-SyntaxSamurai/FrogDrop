@@ -1,7 +1,7 @@
 # 🐸 FrogDrop
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/sarthak-SyntaxSamurai/FrogDrop/main/AppIcon.png" width="120" height="120" alt="FrogDrop">
+  <img src="media/FrogDropIcon.png" width="120" height="120" alt="FrogDrop">
 </p>
 
 <p align="center">
