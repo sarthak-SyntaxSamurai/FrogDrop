@@ -26,11 +26,14 @@
 ## 👀 Preview
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/sarthak-SyntaxSamurai/FrogDrop/main/media/collage.png" alt="FrogDrop — Clipboard, Timer, Dropzone" width="100%">
+  <video src="https://raw.githubusercontent.com/sarthak-SyntaxSamurai/FrogDrop/main/media/FrogDrop.mp4" width="100%" controls autoplay loop muted playsinline poster="media/collage.png">
+    <source src="media/FrogDrop.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
 </p>
 
 <p align="center">
-  📸 <a href="https://github.com/sarthak-SyntaxSamurai/FrogDrop/tree/main/media"><strong>Explore High-Res Previews in /media →</strong></a>
+  📸 <a href="https://github.com/sarthak-SyntaxSamurai/FrogDrop/tree/main/media"><strong>Explore High-Res Previews & Media →</strong></a>
 </p>
 
 ---
