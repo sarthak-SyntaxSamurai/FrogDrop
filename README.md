@@ -26,13 +26,13 @@
 ## 👀 Preview
 
 <p align="center">
-  <a href="https://github.com/sarthak-SyntaxSamurai/FrogDrop/releases/download/v2.1.0/FrogDrop.mp4">
+  <a href="https://github.com/sarthak-SyntaxSamurai/FrogDrop/blob/main/media/FrogDrop.mp4">
     <img src="media/video_thumbnail.png" alt="Watch FrogDrop Video Demo" width="100%">
   </a>
 </p>
 
 <p align="center">
-  ▶️ <a href="https://github.com/sarthak-SyntaxSamurai/FrogDrop/releases/download/v2.1.0/FrogDrop.mp4"><strong>Click to Play Full 1080p 60fps Video Demo (MP4) →</strong></a> &nbsp;•&nbsp; 📸 <a href="media"><strong>Explore Screenshots →</strong></a>
+  ▶️ <a href="https://github.com/sarthak-SyntaxSamurai/FrogDrop/blob/main/media/FrogDrop.mp4"><strong>Click to Play Full 1080p 60fps Video Demo (MP4) →</strong></a> &nbsp;•&nbsp; 📸 <a href="media"><strong>Explore Screenshots →</strong></a>
 </p>
 
 ---
