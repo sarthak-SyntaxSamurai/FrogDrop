@@ -26,14 +26,13 @@
 ## 👀 Preview
 
 <p align="center">
-  <video src="https://raw.githubusercontent.com/sarthak-SyntaxSamurai/FrogDrop/main/media/FrogDrop.mp4" width="100%" controls autoplay loop muted playsinline poster="media/collage.png">
-    <source src="media/FrogDrop.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
+  <a href="media/FrogDrop.mp4">
+    <img src="media/demo.gif" alt="FrogDrop Interactive Demo" width="100%">
+  </a>
 </p>
 
 <p align="center">
-  📸 <a href="https://github.com/sarthak-SyntaxSamurai/FrogDrop/tree/main/media"><strong>Explore High-Res Previews & Media →</strong></a>
+  ▶️ <a href="media/FrogDrop.mp4"><strong>Watch Full High-Res Video Demo (MP4) →</strong></a> &nbsp;•&nbsp; 📸 <a href="media"><strong>Explore Screenshots →</strong></a>
 </p>
 
 ---
