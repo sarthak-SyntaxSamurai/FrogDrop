@@ -75,7 +75,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
                 ClipboardToastPanelWindow.shared.show(
                     statusItemFrame: frame,
                     text: item.text,
-                    appName: item.sourceApp ?? "Unknown",
+                    appName: item.sourceApp ?? String(
+                        localized: "app.delegate.menu.icon-style.unknown",
+                        defaultValue: "Unknown",
+                        comment: "Fallback icon style label in the app menu"
+                    ),
                     isTemporary: item.isTemporary
                 )
             }
@@ -481,18 +485,34 @@ class InteractiveFrogView: NSHostingView<MenuBarFrogView> {
     override func rightMouseDown(with event: NSEvent) {
         let menu = NSMenu()
         
-        let iconStyleItem = NSMenuItem(title: "Icon Style", action: nil, keyEquivalent: "")
+        let iconStyleItem = NSMenuItem(title: String(
+            localized: "app.delegate.menu.icon-style.title",
+            defaultValue: "Icon Style",
+            comment: "Title of the icon style submenu in the app menu"
+        ), action: nil, keyEquivalent: "")
         let iconStyleMenu = NSMenu()
         
         let currentStyle = UserDefaults.standard.string(forKey: "menuBarIconStyle") ?? "frog"
         
-        let frogItem = NSMenuItem(title: "Default Frog", action: #selector(AppDelegate.setIconStyleFrog), keyEquivalent: "")
+        let frogItem = NSMenuItem(title: String(
+            localized: "app.delegate.menu.icon-style.default-frog",
+            defaultValue: "Default Frog",
+            comment: "Menu item for selecting the default frog icon style"
+        ), action: #selector(AppDelegate.setIconStyleFrog), keyEquivalent: "")
         frogItem.state = currentStyle == "frog" ? .on : .off
         
-        let minimalItem = NSMenuItem(title: "Minimal White", action: #selector(AppDelegate.setIconStyleMinimal), keyEquivalent: "")
+        let minimalItem = NSMenuItem(title: String(
+            localized: "app.delegate.menu.icon-style.minimal-white",
+            defaultValue: "Minimal White",
+            comment: "Menu item for selecting the minimal white icon style"
+        ), action: #selector(AppDelegate.setIconStyleMinimal), keyEquivalent: "")
         minimalItem.state = currentStyle == "minimal" ? .on : .off
         
-        let customItem = NSMenuItem(title: "Custom Image", action: #selector(AppDelegate.setIconStyleCustom), keyEquivalent: "")
+        let customItem = NSMenuItem(title: String(
+            localized: "app.delegate.menu.icon-style.custom-image",
+            defaultValue: "Custom Image",
+            comment: "Menu item for selecting a custom image icon style"
+        ), action: #selector(AppDelegate.setIconStyleCustom), keyEquivalent: "")
         customItem.state = currentStyle == "custom" ? .on : .off
         
         iconStyleMenu.addItem(frogItem)
@@ -503,9 +523,21 @@ class InteractiveFrogView: NSHostingView<MenuBarFrogView> {
         menu.addItem(iconStyleItem)
         menu.addItem(NSMenuItem.separator())
         
-        menu.addItem(NSMenuItem(title: "Check for Updates...", action: #selector(AppDelegate.checkForUpdates), keyEquivalent: "u"))
-        menu.addItem(NSMenuItem(title: "Open Dashboard", action: #selector(AppDelegate.openDashboard), keyEquivalent: "d"))
-        menu.addItem(NSMenuItem(title: "Quit FrogDrop", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+        menu.addItem(NSMenuItem(title: String(
+            localized: "app.delegate.menu.check-for-updates",
+            defaultValue: "Check for Updates...",
+            comment: "App menu item to manually check for software updates"
+        ), action: #selector(AppDelegate.checkForUpdates), keyEquivalent: "u"))
+        menu.addItem(NSMenuItem(title: String(
+            localized: "app.delegate.menu.open-dashboard",
+            defaultValue: "Open Dashboard",
+            comment: "App menu item to open the main dashboard window"
+        ), action: #selector(AppDelegate.openDashboard), keyEquivalent: "d"))
+        menu.addItem(NSMenuItem(title: String(
+            localized: "app.delegate.menu.quit-app",
+            defaultValue: "Quit FrogDrop",
+            comment: "App menu item to quit the application"
+        ), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
         NSMenu.popUpContextMenu(menu, with: event, for: self)
     }
     

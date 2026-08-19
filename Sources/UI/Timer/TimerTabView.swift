@@ -35,7 +35,11 @@ struct TimerTabView: View {
                                         .font(.system(size: 11))
                                         .foregroundColor(Color(red: 0.15, green: 0.85, blue: 0.45))
                                     
-                                    TextField("What are you focusing on?", text: $taskIntent)
+                                    TextField(String(
+                                        localized: "timer.tab.focus-input.placeholder",
+                                        defaultValue: "What are you focusing on?",
+                                        comment: "Placeholder text for focus task input field"
+                                    ), text: $taskIntent)
                                         .textFieldStyle(.plain)
                                         .font(.system(.subheadline, design: .rounded))
                                 }
@@ -97,7 +101,11 @@ struct FocusGamificationHeaderView: View {
                 HStack(spacing: 4) {
                     Text("🔥")
                         .font(.system(size: 11))
-                    Text("\(gamification.streakDays)d streak")
+                    Text(String(format: String(
+                        localized: "timer.tab.gamification.streak-days",
+                        defaultValue: "%dd streak",
+                        comment: "Streak label showing number of consecutive days"
+                    ), gamification.streakDays))
                         .font(.system(size: 10, weight: .bold, design: .rounded))
                         .foregroundColor(.orange)
                 }
@@ -110,7 +118,11 @@ struct FocusGamificationHeaderView: View {
                 HStack(spacing: 3) {
                     Text("🪰")
                         .font(.system(size: 10))
-                    Text("\(gamification.goldenFlies)")
+                    Text(String(format: String(
+                        localized: "timer.tab.gamification.golden-flies-count",
+                        defaultValue: "%d",
+                        comment: "Displayed count of earned golden flies"
+                    ), gamification.goldenFlies))
                         .font(.system(size: 10, weight: .bold, design: .rounded))
                         .foregroundColor(.yellow)
                 }
@@ -142,7 +154,15 @@ struct FocusGamificationHeaderView: View {
                     HStack(spacing: 3) {
                         Image(systemName: "pip.fill")
                             .font(.system(size: 8))
-                        Text(pillManager.isVisible ? "HUD On" : "HUD")
+                        Text(pillManager.isVisible ? String(
+                            localized: "timer.tab.hud.toggle.on",
+                            defaultValue: "HUD On",
+                            comment: "Label for HUD enabled state"
+                        ) : String(
+                            localized: "timer.tab.hud.toggle.off",
+                            defaultValue: "HUD",
+                            comment: "Label for HUD disabled state"
+                        ))
                             .font(.system(size: 9, weight: .bold, design: .rounded))
                     }
                     .foregroundColor(pillManager.isVisible ? .black : .white.opacity(0.8))
@@ -176,7 +196,11 @@ struct FocusGamificationHeaderView: View {
                 }
                 .frame(height: 4)
                 
-                Text("\(gamification.totalMinutesToday)/\(gamification.dailyGoalMinutes)m")
+                Text(String(format: String(
+                    localized: "timer.tab.daily-goal.progress-minutes",
+                    defaultValue: "%d/%dm",
+                    comment: "Daily goal progress showing elapsed and target minutes"
+                ), gamification.totalMinutesToday, gamification.dailyGoalMinutes))
                     .font(.system(size: 8, weight: .bold, design: .monospaced))
                     .foregroundColor(.secondary)
             }
@@ -225,7 +249,15 @@ struct CircularFocusTimerCard: View {
                 
                 // Center Display
                 VStack(spacing: 2) {
-                    Text(timer.isBreakActive ? "☕ Break" : "🐸 Focus")
+                    Text(timer.isBreakActive ? String(
+                        localized: "timer.tab.mode.break",
+                        defaultValue: "☕ Break",
+                        comment: "Mode label for break session preset"
+                    ) : String(
+                        localized: "timer.tab.mode.focus",
+                        defaultValue: "🐸 Focus",
+                        comment: "Mode label for focus session preset"
+                    ))
                         .font(.system(size: 9, weight: .bold, design: .rounded))
                         .foregroundColor(timer.isBreakActive ? .orange : Color(red: 0.15, green: 0.85, blue: 0.45))
                     
@@ -248,7 +280,11 @@ struct CircularFocusTimerCard: View {
                     Button(action: {
                         timerManager.addTime(timerId: timer.id, minutes: 1)
                     }) {
-                        Text("+1m")
+                        Text(String(
+                            localized: "timer.tab.adjust-time.plus-one-minute",
+                            defaultValue: "+1m",
+                            comment: "Button label to add one minute"
+                        ))
                             .font(.system(size: 10, weight: .bold, design: .rounded))
                             .foregroundColor(.white.opacity(0.8))
                             .padding(.horizontal, 8)
@@ -261,7 +297,11 @@ struct CircularFocusTimerCard: View {
                     Button(action: {
                         timerManager.addTime(timerId: timer.id, minutes: 5)
                     }) {
-                        Text("+5m")
+                        Text(String(
+                            localized: "timer.tab.adjust-time.plus-five-minutes",
+                            defaultValue: "+5m",
+                            comment: "Button label to add five minutes"
+                        ))
                             .font(.system(size: 10, weight: .bold, design: .rounded))
                             .foregroundColor(.white.opacity(0.8))
                             .padding(.horizontal, 8)
@@ -327,26 +367,62 @@ struct QuickPresetsGrid: View {
     var body: some View {
         VStack(spacing: 6) {
             HStack(spacing: 6) {
-                FocusPresetChip(title: "25m Pomodoro", icon: "flame.fill", color: Color.green) {
-                    timerManager.startPomodoroPreset(taskName: taskName.isEmpty ? "Pomodoro" : taskName)
+                FocusPresetChip(title: String(
+                    localized: "timer.tab.preset.pomodoro.twenty-five-minutes",
+                    defaultValue: "25m Pomodoro",
+                    comment: "Timer preset label for 25 minute Pomodoro session"
+                ), icon: "flame.fill", color: Color.green) {
+                    timerManager.startPomodoroPreset(taskName: taskName.isEmpty ? String(
+                        localized: "timer.tab.preset.pomodoro.title",
+                        defaultValue: "Pomodoro",
+                        comment: "Short preset title for Pomodoro mode"
+                    ) : taskName)
                 }
                 
-                FocusPresetChip(title: "50m Deep Work", icon: "brain.head.profile", color: Color.teal) {
-                    timerManager.startDeepWorkPreset(taskName: taskName.isEmpty ? "Deep Work" : taskName)
+                FocusPresetChip(title: String(
+                    localized: "timer.tab.preset.deep-work.fifty-minutes",
+                    defaultValue: "50m Deep Work",
+                    comment: "Timer preset label for 50 minute deep work session"
+                ), icon: "brain.head.profile", color: Color.teal) {
+                    timerManager.startDeepWorkPreset(taskName: taskName.isEmpty ? String(
+                        localized: "timer.tab.preset.deep-work.title",
+                        defaultValue: "Deep Work",
+                        comment: "Short preset title for deep work mode"
+                    ) : taskName)
                 }
             }
             
             HStack(spacing: 6) {
-                FocusPresetChip(title: "15m Sprint", icon: "bolt.fill", color: Color.yellow) {
-                    timerManager.startSprintPreset(taskName: taskName.isEmpty ? "Sprint" : taskName)
+                FocusPresetChip(title: String(
+                    localized: "timer.tab.preset.sprint.fifteen-minutes",
+                    defaultValue: "15m Sprint",
+                    comment: "Timer preset label for 15 minute sprint session"
+                ), icon: "bolt.fill", color: Color.yellow) {
+                    timerManager.startSprintPreset(taskName: taskName.isEmpty ? String(
+                        localized: "timer.tab.preset.sprint.title",
+                        defaultValue: "Sprint",
+                        comment: "Short preset title for sprint mode"
+                    ) : taskName)
                 }
                 
-                FocusPresetChip(title: "5m Break", icon: "cup.and.saucer.fill", color: Color.orange) {
+                FocusPresetChip(title: String(
+                    localized: "timer.tab.preset.break.five-minutes",
+                    defaultValue: "5m Break",
+                    comment: "Timer preset label for 5 minute break session"
+                ), icon: "cup.and.saucer.fill", color: Color.orange) {
                     timerManager.startQuickBreakPreset()
                 }
                 
-                FocusPresetChip(title: "Stopwatch", icon: "stopwatch.fill", color: Color.blue) {
-                    timerManager.startStopwatch(name: taskName.isEmpty ? "Flow" : taskName)
+                FocusPresetChip(title: String(
+                    localized: "timer.tab.preset.stopwatch.title",
+                    defaultValue: "Stopwatch",
+                    comment: "Preset title for stopwatch mode"
+                ), icon: "stopwatch.fill", color: Color.blue) {
+                    timerManager.startStopwatch(name: taskName.isEmpty ? String(
+                        localized: "timer.tab.preset.flow.title",
+                        defaultValue: "Flow",
+                        comment: "Preset title for flow mode"
+                    ) : taskName)
                 }
             }
         }
@@ -404,7 +480,11 @@ struct AmbientSoundControlCard: View {
                     Image(systemName: "headphones")
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(Color(red: 0.15, green: 0.85, blue: 0.45))
-                    Text("AMBIENT FOCUS AUDIO")
+                    Text(String(
+                        localized: "timer.tab.ambient-audio.section-title",
+                        defaultValue: "AMBIENT FOCUS AUDIO",
+                        comment: "Section header for ambient focus audio controls"
+                    ))
                         .font(.system(size: 8, weight: .bold))
                         .foregroundColor(.secondary)
                         .tracking(0.8)
@@ -575,14 +655,22 @@ struct TimerSetupView: View {
                     Spacer()
                     HStack(spacing: 6) {
                         ScrollWheelPicker(range: 0...6, selection: $setupHours)
-                        Text("hours")
+                        Text(String(
+                            localized: "timer.tab.custom-duration.hours-label",
+                            defaultValue: "hours",
+                            comment: "Unit label for hour input in custom timer settings"
+                        ))
                             .font(.system(size: 11, weight: .bold, design: .rounded))
                             .foregroundColor(.secondary)
                     }
                     Spacer().frame(width: 16)
                     HStack(spacing: 6) {
                         ScrollWheelPicker(range: 0...59, selection: $setupMinutes)
-                        Text("min")
+                        Text(String(
+                            localized: "timer.tab.custom-duration.minutes-label",
+                            defaultValue: "min",
+                            comment: "Unit label for minute input in custom timer settings"
+                        ))
                             .font(.system(size: 11, weight: .bold, design: .rounded))
                             .foregroundColor(.secondary)
                     }
@@ -591,7 +679,11 @@ struct TimerSetupView: View {
                 .frame(height: 74)
                 .padding(.top, 4)
                 
-                Text("Ends at \(formatEndTime(endTime))")
+                Text(String(format: String(
+                    localized: "timer.tab.session.ends-at-time",
+                    defaultValue: "Ends at %@",
+                    comment: "Label showing session end time"
+                ), "\(formatEndTime(endTime))"))
                     .font(.system(.caption, design: .rounded))
                     .foregroundColor(.secondary)
             }
@@ -605,12 +697,20 @@ struct TimerSetupView: View {
             }
             
             VStack(alignment: .leading, spacing: 4) {
-                Text("TASK NAME")
+                Text(String(
+                    localized: "timer.tab.task-name.section-title",
+                    defaultValue: "TASK NAME",
+                    comment: "Section header for task name input"
+                ))
                     .font(.system(size: 8, weight: .bold))
                     .foregroundColor(.secondary)
                     .tracking(1.0)
                 
-                TextField("What are you working on?", text: $taskName)
+                TextField(String(
+                    localized: "timer.tab.task-name.placeholder",
+                    defaultValue: "What are you working on?",
+                    comment: "Placeholder for task name input field"
+                ), text: $taskName)
                     .textFieldStyle(.plain)
                     .font(.system(.subheadline, design: .rounded))
                     .padding(.horizontal, 10)
@@ -626,7 +726,11 @@ struct TimerSetupView: View {
             .padding(.horizontal, 4)
             
             Toggle(isOn: $isPomodoro.animation(.spring(response: 0.3, dampingFraction: 0.7))) {
-                Text("Pomodoro Mode")
+                Text(String(
+                    localized: "timer.tab.pomodoro.mode.label",
+                    defaultValue: "Pomodoro Mode",
+                    comment: "Label for pomodoro mode toggle"
+                ))
                     .font(.system(.subheadline, design: .rounded))
                     .fontWeight(.medium)
             }
@@ -636,24 +740,40 @@ struct TimerSetupView: View {
             if isPomodoro {
                 VStack(spacing: 8) {
                     HStack {
-                        Text("Break Duration")
+                        Text(String(
+                            localized: "timer.tab.pomodoro.break-duration.label",
+                            defaultValue: "Break Duration",
+                            comment: "Label for configuring pomodoro break duration"
+                        ))
                             .font(.system(.subheadline, design: .rounded))
                             .foregroundColor(.secondary)
                         Spacer()
                         Stepper(value: $breakMinutes, in: 1...60) {
-                            Text("\(breakMinutes) min")
+                            Text(String(format: String(
+                                localized: "timer.tab.pomodoro.break-duration.value",
+                                defaultValue: "%d min",
+                                comment: "Displayed pomodoro break duration in minutes"
+                            ), breakMinutes))
                                 .font(.system(.subheadline, design: .rounded))
                                 .fontWeight(.bold)
                         }
                     }
                     
                     HStack {
-                        Text("Cycles")
+                        Text(String(
+                            localized: "timer.tab.pomodoro.cycles.label",
+                            defaultValue: "Cycles",
+                            comment: "Label for number of pomodoro cycles"
+                        ))
                             .font(.system(.subheadline, design: .rounded))
                             .foregroundColor(.secondary)
                         Spacer()
                         Stepper(value: $cycles, in: 2...12) {
-                            Text("\(cycles)")
+                            Text(String(format: String(
+                                localized: "timer.tab.pomodoro.cycles.value",
+                                defaultValue: "%d",
+                                comment: "Displayed number of configured pomodoro cycles"
+                            ), cycles))
                                 .font(.system(.subheadline, design: .rounded))
                                 .fontWeight(.bold)
                         }
@@ -668,7 +788,11 @@ struct TimerSetupView: View {
             Spacer()
             
             HStack(spacing: 12) {
-                Button("Cancel") {
+                Button(String(
+                    localized: "timer.tab.session-setup.cancel",
+                    defaultValue: "Cancel",
+                    comment: "Cancel button title in timer setup panel"
+                )) {
                     cancelSetup()
                 }
                 .buttonStyle(.plain)
@@ -677,7 +801,11 @@ struct TimerSetupView: View {
                 Button(action: {
                     startTimer()
                 }) {
-                    Text("Start Focus")
+                    Text(String(
+                        localized: "timer.tab.session-setup.start-focus",
+                        defaultValue: "Start Focus",
+                        comment: "Primary button title to start focus session"
+                    ))
                         .font(.system(.subheadline, design: .rounded))
                         .fontWeight(.bold)
                         .foregroundColor(.black)
@@ -741,7 +869,11 @@ struct TimerHistoryListView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
-                Text("Focus History")
+                Text(String(
+                    localized: "timer.tab.history.title",
+                    defaultValue: "Focus History",
+                    comment: "Title for focus session history section"
+                ))
                     .font(.system(.subheadline, design: .rounded))
                     .fontWeight(.bold)
                     .foregroundColor(.secondary)
@@ -750,7 +882,11 @@ struct TimerHistoryListView: View {
                     Button(action: {
                         historyStore.clearHistory()
                     }) {
-                        Text("Clear")
+                        Text(String(
+                            localized: "timer.tab.history.clear",
+                            defaultValue: "Clear",
+                            comment: "Button title to clear focus history"
+                        ))
                             .font(.system(size: 9, weight: .bold, design: .rounded))
                             .foregroundColor(.red.opacity(0.6))
                     }
@@ -761,7 +897,11 @@ struct TimerHistoryListView: View {
             .padding(.top, 4)
             
             if historyStore.history.isEmpty {
-                Text("No sessions logged yet")
+                Text(String(
+                    localized: "timer.tab.history.empty-state",
+                    defaultValue: "No sessions logged yet",
+                    comment: "Empty state text when no focus sessions are logged"
+                ))
                     .font(.system(.caption, design: .rounded))
                     .foregroundColor(.secondary.opacity(0.5))
                     .padding(.vertical, 8)
@@ -807,9 +947,17 @@ struct TimerHistoryListView: View {
         let mins = Int(duration) / 60
         let secs = Int(duration) % 60
         if mins > 0 {
-            return "\(mins)m"
+            return String(format: String(
+                localized: "timer.tab.history.duration.minutes",
+                defaultValue: "%dm",
+                comment: "Session duration text showing whole minutes"
+            ), mins)
         } else {
-            return "\(secs)s"
+            return String(format: String(
+                localized: "timer.tab.history.duration.seconds",
+                defaultValue: "%ds",
+                comment: "Session duration text showing seconds when under a minute"
+            ), secs)
         }
     }
     

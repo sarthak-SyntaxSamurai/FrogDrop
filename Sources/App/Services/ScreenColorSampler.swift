@@ -30,7 +30,20 @@ class ScreenColorSampler {
         pb.setString(hexString, forType: .string)
         
         HapticManager.shared.success()
-        notifyUser(title: "Color Picked", body: "\(hexString) copied to clipboard!")
+        notifyUser(
+            title: String(
+                localized: "screen-color-sampler.color-picked.title",
+                defaultValue: "Color Picked",
+                bundle: .main,
+                comment: "Notification subtitle when a screen color is sampled"
+            ),
+            body: String(format: String(
+                localized: "screen-color-sampler.color-picked.body",
+                defaultValue: "%@ copied to clipboard!",
+                bundle: .main,
+                comment: "Notification body showing copied hex color"
+            ), hexString)
+        )
         
         return hexString
     }

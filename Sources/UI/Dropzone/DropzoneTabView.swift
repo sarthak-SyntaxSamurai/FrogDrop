@@ -9,7 +9,12 @@ struct DropzoneTabView: View {
             // Header
             HStack {
                 Spacer()
-                Text("FROG DROP")
+                Text(String(
+                    localized: "dropzone.tab.header.title",
+                    defaultValue: "FROG DROP",
+                    bundle: .main,
+                    comment: "Title text shown at top of dropzone tab"
+                ))
                     .font(.system(size: 8.5, weight: .black, design: .rounded))
                     .foregroundColor(.primary.opacity(0.8))
                     .tracking(1.2)
@@ -36,7 +41,17 @@ struct DropzoneTabView: View {
                     Image(systemName: "arrow.down.doc")
                         .font(.system(size: 12))
                         .foregroundColor(isTargeted ? .green : .secondary)
-                    Text(isTargeted ? "Drop files here" : "Drag files here to store")
+                    Text(isTargeted ? String(
+                        localized: "dropzone.tab.drop-target.title",
+                        defaultValue: "Drop files here",
+                        bundle: .main,
+                        comment: "Instruction shown while dragging files over dropzone"
+                    ) : String(
+                        localized: "dropzone.tab.drop-target.subtitle",
+                        defaultValue: "Drag files here to store",
+                        bundle: .main,
+                        comment: "Instruction shown when not dragging files over dropzone"
+                    ))
                         .font(.system(size: 10, weight: .medium, design: .rounded))
                         .foregroundColor(isTargeted ? .green : .secondary)
                 }

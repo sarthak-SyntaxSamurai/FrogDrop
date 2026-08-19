@@ -15,7 +15,9 @@ let package = Package(
             name: "FrogDrop",
             dependencies: [],
             path: "Sources",
-            resources: []
+            resources: [
+                .process("Resources")
+            ]
         )
     ]
 )

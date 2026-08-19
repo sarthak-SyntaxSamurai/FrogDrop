@@ -58,17 +58,29 @@ struct MenuBarSettingsView: View {
         VStack(spacing: 0) {
             // Minimalist Tab Bar
             HStack(spacing: 16) {
-                TabButton(title: "General", isSelected: selectedTab == 0) {
+                TabButton(title: String(
+                    localized: "settings.menu-bar.tab.general",
+                    defaultValue: "General",
+                    comment: "Tab title for general menu bar settings section"
+                ), isSelected: selectedTab == 0) {
                     withAnimation(.spring(response: 0.22, dampingFraction: 0.8)) {
                         selectedTab = 0
                     }
                 }
-                TabButton(title: "Grid", isSelected: selectedTab == 1) {
+                TabButton(title: String(
+                    localized: "settings.menu-bar.tab.grid",
+                    defaultValue: "Grid",
+                    comment: "Tab title for dropzone grid settings section"
+                ), isSelected: selectedTab == 1) {
                     withAnimation(.spring(response: 0.22, dampingFraction: 0.8)) {
                         selectedTab = 1
                     }
                 }
-                TabButton(title: "Rules", isSelected: selectedTab == 2) {
+                TabButton(title: String(
+                    localized: "settings.menu-bar.tab.rules",
+                    defaultValue: "Rules",
+                    comment: "Tab title for app rules settings section"
+                ), isSelected: selectedTab == 2) {
                     withAnimation(.spring(response: 0.22, dampingFraction: 0.8)) {
                         selectedTab = 2
                     }
@@ -89,16 +101,32 @@ struct MenuBarSettingsView: View {
                             
                             // Menu Bar Icon Section
                             VStack(alignment: .leading, spacing: 6) {
-                                Text("MENU BAR ICON")
+                                Text(String(
+                                    localized: "settings.menu-bar.general.menu-bar-icon.section-title",
+                                    defaultValue: "MENU BAR ICON",
+                                    comment: "Section header for menu bar icon settings"
+                                ))
                                     .font(.system(size: 9, weight: .bold))
                                     .foregroundColor(.secondary)
                                     .tracking(1.0)
                                 
                                 HStack(spacing: 4) {
                                     let options = [
-                                        ("frog", "Frog", "face.smiling"),
-                                        ("minimal", "Minimal", "square.and.arrow.down.fill"),
-                                        ("custom", "Custom", "photo")
+                                        ("frog", String(
+                                            localized: "settings.menu-bar.general.menu-bar-icon.style.frog",
+                                            defaultValue: "Frog",
+                                            comment: "Picker option for frog icon style"
+                                        ), "face.smiling"),
+                                        ("minimal", String(
+                                            localized: "settings.menu-bar.general.menu-bar-icon.style.minimal",
+                                            defaultValue: "Minimal",
+                                            comment: "Picker option for minimal icon style"
+                                        ), "square.and.arrow.down.fill"),
+                                        ("custom", String(
+                                            localized: "settings.menu-bar.general.menu-bar-icon.style.custom",
+                                            defaultValue: "Custom",
+                                            comment: "Picker option for custom icon style"
+                                        ), "photo")
                                     ]
                                     ForEach(options, id: \.0) { opt in
                                         Button(action: {
@@ -122,7 +150,11 @@ struct MenuBarSettingsView: View {
                                 }
                                 if menuBarIconStyle == "custom" {
                                     HStack {
-                                        Button("Choose Image...", action: selectCustomImage)
+                                        Button(String(
+                                            localized: "settings.menu-bar.general.menu-bar-icon.choose-image",
+                                            defaultValue: "Choose Image...",
+                                            comment: "Button title to choose a custom menu bar icon image"
+                                        ), action: selectCustomImage)
                                             .font(.system(size: 10, weight: .medium))
                                             .padding(.horizontal, 8).padding(.vertical, 4)
                                             .background(Color.white.opacity(0.08)).cornerRadius(5)
@@ -147,7 +179,11 @@ struct MenuBarSettingsView: View {
                                 .background(Color.white.opacity(0.06))
                             
                             VStack(alignment: .leading, spacing: 6) {
-                                Text("HAPTICS")
+                                Text(String(
+                                    localized: "settings.menu-bar.general.haptics.section-title",
+                                    defaultValue: "HAPTICS",
+                                    comment: "Section header for haptics settings"
+                                ))
                                     .font(.system(size: 9, weight: .bold))
                                     .foregroundColor(.secondary)
                                     .tracking(1.0)
@@ -178,7 +214,11 @@ struct MenuBarSettingsView: View {
                             
                             HStack(alignment: .center, spacing: 12) {
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text("KEEP HISTORY")
+                                    Text(String(
+                                        localized: "settings.menu-bar.general.keep-history.section-title",
+                                        defaultValue: "KEEP HISTORY",
+                                        comment: "Section header for clipboard history retention settings"
+                                    ))
                                         .font(.system(size: 9, weight: .bold))
                                         .foregroundColor(.secondary)
                                         .tracking(1.0)
@@ -186,11 +226,31 @@ struct MenuBarSettingsView: View {
                                         .fixedSize(horizontal: true, vertical: false)
                                     
                                     Picker("", selection: $clipboardRetentionDays) {
-                                        Text("Forever").tag(0)
-                                        Text("1 Day").tag(1)
-                                        Text("7 Days").tag(7)
-                                        Text("14 Days").tag(14)
-                                        Text("30 Days").tag(30)
+                                        Text(String(
+                                            localized: "settings.menu-bar.general.keep-history.option.forever",
+                                            defaultValue: "Forever",
+                                            comment: "Retention option to keep history forever"
+                                        )).tag(0)
+                                        Text(String(
+                                            localized: "settings.menu-bar.general.keep-history.option.one-day",
+                                            defaultValue: "1 Day",
+                                            comment: "Retention option to keep history for one day"
+                                        )).tag(1)
+                                        Text(String(
+                                            localized: "settings.menu-bar.general.keep-history.option.seven-days",
+                                            defaultValue: "7 Days",
+                                            comment: "Retention option to keep history for seven days"
+                                        )).tag(7)
+                                        Text(String(
+                                            localized: "settings.menu-bar.general.keep-history.option.fourteen-days",
+                                            defaultValue: "14 Days",
+                                            comment: "Retention option to keep history for fourteen days"
+                                        )).tag(14)
+                                        Text(String(
+                                            localized: "settings.menu-bar.general.keep-history.option.thirty-days",
+                                            defaultValue: "30 Days",
+                                            comment: "Retention option to keep history for thirty days"
+                                        )).tag(30)
                                     }
                                     .pickerStyle(.menu)
                                     .labelsHidden()
@@ -207,14 +267,22 @@ struct MenuBarSettingsView: View {
                                 Spacer()
                                 
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text("SHORTEN URL")
+                                    Text(String(
+                                        localized: "settings.menu-bar.general.shorten-url.section-title",
+                                        defaultValue: "SHORTEN URL",
+                                        comment: "Section header for automatic URL shortening settings"
+                                    ))
                                         .font(.system(size: 9, weight: .bold))
                                         .foregroundColor(.secondary)
                                         .tracking(1.0)
                                         .lineLimit(1)
                                         .fixedSize(horizontal: true, vertical: false)
                                     
-                                    Toggle("Auto", isOn: $autoCleanURLs)
+                                    Toggle(String(
+                                        localized: "settings.menu-bar.general.shorten-url.option.auto",
+                                        defaultValue: "Auto",
+                                        comment: "Option label for automatic URL shortening mode"
+                                    ), isOn: $autoCleanURLs)
                                         .toggleStyle(.checkbox)
                                         .font(.system(size: 11, design: .rounded))
                                         .foregroundColor(.primary)
@@ -226,12 +294,20 @@ struct MenuBarSettingsView: View {
                             
                             VStack(alignment: .leading, spacing: 6) {
                                 HStack {
-                                    Text("TEMP EXPIRATION")
+                                    Text(String(
+                                        localized: "settings.menu-bar.general.temp-expiration.section-title",
+                                        defaultValue: "TEMP EXPIRATION",
+                                        comment: "Section header for temporary clipboard expiration settings"
+                                    ))
                                         .font(.system(size: 9, weight: .bold))
                                         .foregroundColor(.secondary)
                                         .tracking(1.0)
                                     Spacer()
-                                    Text("\(Int(clipboardManager.tempDuration))s")
+                                    Text(String(format: String(
+                                        localized: "settings.menu-bar.general.temp-expiration.duration-seconds",
+                                        defaultValue: "%ds",
+                                        comment: "Label showing temporary clipboard expiration duration in seconds"
+                                    ), Int(clipboardManager.tempDuration)))
                                         .font(.system(size: 11, weight: .bold, design: .monospaced))
                                         .foregroundColor(.orange)
                                 }
@@ -242,7 +318,11 @@ struct MenuBarSettingsView: View {
                                         clipboardManager.saveSettings()
                                     }
                                 
-                                Text("Auto-delete items copied from temporary applications.")
+                                Text(String(
+                                    localized: "settings.menu-bar.general.temp-expiration.description",
+                                    defaultValue: "Auto-delete items copied from temporary applications.",
+                                    comment: "Description explaining temporary app clipboard auto-delete behavior"
+                                ))
                                     .font(.system(size: 9))
                                     .foregroundColor(.secondary)
                             }
@@ -251,7 +331,11 @@ struct MenuBarSettingsView: View {
                                 .background(Color.white.opacity(0.06))
                             
                             VStack(alignment: .leading, spacing: 6) {
-                                Text("STARTUP")
+                                Text(String(
+                                    localized: "settings.menu-bar.general.startup.section-title",
+                                    defaultValue: "STARTUP",
+                                    comment: "Section header for startup behavior settings"
+                                ))
                                     .font(.system(size: 9, weight: .bold))
                                     .foregroundColor(.secondary)
                                     .tracking(1.0)
@@ -262,7 +346,11 @@ struct MenuBarSettingsView: View {
                                         toggleLaunchAtLogin(newValue)
                                     }
                                 )) {
-                                    Text("Launch automatically at login")
+                                    Text(String(
+                                        localized: "settings.menu-bar.general.startup.launch-at-login",
+                                        defaultValue: "Launch automatically at login",
+                                        comment: "Toggle label for launching the app automatically at login"
+                                    ))
                                         .font(.system(size: 10, weight: .medium, design: .rounded))
                                         .foregroundColor(.primary)
                                 }
@@ -273,12 +361,20 @@ struct MenuBarSettingsView: View {
                                 .background(Color.white.opacity(0.06))
                             
                             VStack(alignment: .leading, spacing: 8) {
-                                Text("APPEARANCE")
+                                Text(String(
+                                    localized: "settings.menu-bar.general.appearance.section-title",
+                                    defaultValue: "APPEARANCE",
+                                    comment: "Section header for appearance settings"
+                                ))
                                     .font(.system(size: 9, weight: .bold))
                                     .foregroundColor(.secondary)
                                     .tracking(1.0)
                                 
-                                Text("Popup darkness")
+                                Text(String(
+                                    localized: "settings.menu-bar.general.appearance.popup-darkness.label",
+                                    defaultValue: "Popup darkness",
+                                    comment: "Label for popup darkness selection control"
+                                ))
                                     .font(.system(size: 9))
                                     .foregroundColor(.secondary)
                                 
@@ -293,7 +389,23 @@ struct MenuBarSettingsView: View {
                                         .foregroundColor(.secondary)
                                 }
                                 
-                                Text(uiDimOpacity < 0.15 ? "Glass (Fully Transparent)" : uiDimOpacity < 0.45 ? "Light" : uiDimOpacity < 0.75 ? "Medium" : "Dark")
+                                Text(uiDimOpacity < 0.15 ? String(
+                                    localized: "settings.menu-bar.general.appearance.popup-darkness.glass-fully-transparent",
+                                    defaultValue: "Glass (Fully Transparent)",
+                                    comment: "Appearance option for fully transparent glass popup style"
+                                ) : uiDimOpacity < 0.45 ? String(
+                                    localized: "settings.menu-bar.general.appearance.popup-darkness.light",
+                                    defaultValue: "Light",
+                                    comment: "Appearance option for light popup darkness"
+                                ) : uiDimOpacity < 0.75 ? String(
+                                    localized: "settings.menu-bar.general.appearance.popup-darkness.medium",
+                                    defaultValue: "Medium",
+                                    comment: "Appearance option for medium popup darkness"
+                                ) : String(
+                                    localized: "settings.menu-bar.general.appearance.popup-darkness.dark",
+                                    defaultValue: "Dark",
+                                    comment: "Appearance option for dark popup darkness"
+                                ))
                                     .font(.system(size: 9, weight: .semibold, design: .rounded))
                                     .foregroundColor(Color(red: 0.22, green: 0.72, blue: 0.42))
                                 
@@ -301,7 +413,11 @@ struct MenuBarSettingsView: View {
                                     .background(Color.white.opacity(0.04))
                                     .padding(.vertical, 4)
                                 
-                                Text("Popup window style")
+                                Text(String(
+                                    localized: "settings.menu-bar.general.appearance.popup-window-style.label",
+                                    defaultValue: "Popup window style",
+                                    comment: "Label for selecting popup window style"
+                                ))
                                     .font(.system(size: 9))
                                     .foregroundColor(.secondary)
                                 
@@ -310,7 +426,11 @@ struct MenuBarSettingsView: View {
                                         popupStyle = "popover"
                                         HapticManager.shared.click()
                                     }) {
-                                        Text("Popover")
+                                        Text(String(
+                                            localized: "settings.menu-bar.general.appearance.popup-window-style.popover",
+                                            defaultValue: "Popover",
+                                            comment: "Option label for classic popover window style"
+                                        ))
                                             .font(.system(size: 10, weight: popupStyle == "popover" ? .bold : .medium, design: .rounded))
                                             .foregroundColor(popupStyle == "popover" ? .black : .primary)
                                             .padding(.vertical, 5)
@@ -324,7 +444,11 @@ struct MenuBarSettingsView: View {
                                         popupStyle = "panel"
                                         HapticManager.shared.click()
                                     }) {
-                                        Text("Panel (WiFi)")
+                                        Text(String(
+                                            localized: "settings.menu-bar.general.appearance.popup-window-style.panel-wifi",
+                                            defaultValue: "Panel (WiFi)",
+                                            comment: "Option label for panel style popup window"
+                                        ))
                                             .font(.system(size: 10, weight: popupStyle == "panel" ? .bold : .medium, design: .rounded))
                                             .foregroundColor(popupStyle == "panel" ? .black : .primary)
                                             .padding(.vertical, 5)
@@ -335,7 +459,15 @@ struct MenuBarSettingsView: View {
                                     .buttonStyle(.plain)
                                 }
                                 
-                                Text(popupStyle == "popover" ? "Classic popover with pointer arrow." : "Floating window style like WiFi/Battery menus.")
+                                Text(popupStyle == "popover" ? String(
+                                    localized: "settings.menu-bar.general.appearance.popup-window-style.popover.description",
+                                    defaultValue: "Classic popover with pointer arrow.",
+                                    comment: "Description text for classic popover style option"
+                                ) : String(
+                                    localized: "settings.menu-bar.general.appearance.popup-window-style.panel-wifi.description",
+                                    defaultValue: "Floating window style like WiFi/Battery menus.",
+                                    comment: "Description text for floating panel style option"
+                                ))
                                     .font(.system(size: 8))
                                     .foregroundColor(.secondary)
                             }
@@ -346,7 +478,11 @@ struct MenuBarSettingsView: View {
                             // FrogDrop Updates Section (General Tab Bottom)
                             VStack(alignment: .leading, spacing: 8) {
                                 HStack {
-                                    Text("UPDATES")
+                                    Text(String(
+                                        localized: "settings.menu-bar.general.updates.section-title",
+                                        defaultValue: "UPDATES",
+                                        comment: "Section header for update status and actions"
+                                    ))
                                         .font(.system(size: 9, weight: .bold))
                                         .foregroundColor(.secondary)
                                         .tracking(1.0)
@@ -366,7 +502,11 @@ struct MenuBarSettingsView: View {
                                             Image(systemName: "sparkles")
                                                 .foregroundColor(Color(red: 0.22, green: 0.72, blue: 0.42))
                                                 .font(.system(size: 11))
-                                            Text("\(updateManager.latestVersion) Available!")
+                                            Text(String(format: String(
+                                                localized: "settings.menu-bar.general.updates.available-version",
+                                                defaultValue: "%@ Available!",
+                                                comment: "Update status message showing available version number"
+                                            ), "\(updateManager.latestVersion)"))
                                                 .font(.system(size: 11, weight: .bold, design: .rounded))
                                                 .foregroundColor(Color(red: 0.22, green: 0.72, blue: 0.42))
                                         }
@@ -393,7 +533,11 @@ struct MenuBarSettingsView: View {
                                             }) {
                                                 HStack(spacing: 4) {
                                                     Image(systemName: "arrow.triangle.2.circlepath.circle.fill")
-                                                    Text("Update & Relaunch")
+                                                    Text(String(
+                                                        localized: "settings.menu-bar.general.updates.update-relaunch.button",
+                                                        defaultValue: "Update & Relaunch",
+                                                        comment: "Primary action button title to update and relaunch app"
+                                                    ))
                                                 }
                                                 .font(.system(size: 10, weight: .bold, design: .rounded))
                                                 .foregroundColor(.black)
@@ -415,7 +559,11 @@ struct MenuBarSettingsView: View {
                                                 ProgressView()
                                                     .scaleEffect(0.6)
                                                     .frame(width: 12, height: 12)
-                                                Text("Checking GitHub for updates...")
+                                                Text(String(
+                                                    localized: "settings.menu-bar.general.updates.checking-github",
+                                                    defaultValue: "Checking GitHub for updates...",
+                                                    comment: "Status text displayed while checking GitHub for updates"
+                                                ))
                                                     .font(.system(size: 10))
                                                     .foregroundColor(.secondary)
                                             }
@@ -424,17 +572,33 @@ struct MenuBarSettingsView: View {
                                             HStack {
                                                 VStack(alignment: .leading, spacing: 2) {
                                                     if let date = updateManager.lastCheckDate {
-                                                        Text(updateManager.statusMessage.isEmpty ? "FrogDrop is up to date" : updateManager.statusMessage)
+                                                        Text(updateManager.statusMessage.isEmpty ? String(
+                                                            localized: "settings.menu-bar.general.updates.up-to-date",
+                                                            defaultValue: "FrogDrop is up to date",
+                                                            comment: "Status text shown when app is already on latest version"
+                                                        ) : updateManager.statusMessage)
                                                             .font(.system(size: 10, weight: .medium, design: .rounded))
                                                             .foregroundColor(updateManager.errorMessage != nil ? .red : .secondary)
-                                                        Text("Checked \(date.formatted(date: .omitted, time: .shortened))")
+                                                        Text(String(format: String(
+                                                            localized: "settings.menu-bar.general.updates.last-checked",
+                                                            defaultValue: "Checked %@",
+                                                            comment: "Status text showing last update check time"
+                                                        ), "\(date.formatted(date: .omitted, time: .shortened))"))
                                                             .font(.system(size: 8))
                                                             .foregroundColor(.secondary.opacity(0.6))
                                                     } else {
-                                                        Text("Check for new releases")
+                                                        Text(String(
+                                                            localized: "settings.menu-bar.general.updates.check-for-new-releases.title",
+                                                            defaultValue: "Check for new releases",
+                                                            comment: "Title text prompting user to check for new releases"
+                                                        ))
                                                             .font(.system(size: 10, weight: .medium, design: .rounded))
                                                             .foregroundColor(.secondary)
-                                                        Text("Click button to query GitHub")
+                                                        Text(String(
+                                                            localized: "settings.menu-bar.general.updates.check-for-new-releases.subtitle",
+                                                            defaultValue: "Click button to query GitHub",
+                                                            comment: "Subtitle text explaining update check action against GitHub"
+                                                        ))
                                                             .font(.system(size: 8))
                                                             .foregroundColor(.secondary.opacity(0.5))
                                                     }
@@ -447,7 +611,11 @@ struct MenuBarSettingsView: View {
                                                     HStack(spacing: 3) {
                                                         Image(systemName: "arrow.clockwise")
                                                             .font(.system(size: 9))
-                                                        Text("Check")
+                                                        Text(String(
+                                                            localized: "settings.menu-bar.general.updates.check.button",
+                                                            defaultValue: "Check",
+                                                            comment: "Button title to manually check for updates"
+                                                        ))
                                                             .font(.system(size: 10, weight: .semibold, design: .rounded))
                                                     }
                                                     .foregroundColor(.primary)
@@ -472,7 +640,11 @@ struct MenuBarSettingsView: View {
                     ScrollView {
                         VStack(alignment: .leading, spacing: 14) {
                             VStack(alignment: .leading, spacing: 6) {
-                                Text("FOLDERS & APPS")
+                                Text(String(
+                                    localized: "settings.menu-bar.grid.folders-apps.section-title",
+                                    defaultValue: "FOLDERS & APPS",
+                                    comment: "Section header for folders and apps configuration in grid tab"
+                                ))
                                     .font(.system(size: 9, weight: .bold))
                                     .foregroundColor(.secondary)
                                     .tracking(1.0)
@@ -506,7 +678,11 @@ struct MenuBarSettingsView: View {
                                 }) {
                                     HStack(spacing: 4) {
                                         Image(systemName: "plus.circle.fill")
-                                        Text("Add Folder...")
+                                        Text(String(
+                                            localized: "settings.menu-bar.grid.folders-apps.add-folder.button",
+                                            defaultValue: "Add Folder...",
+                                            comment: "Button title to add a folder to grid settings"
+                                        ))
                                     }
                                     .font(.system(size: 11, weight: .bold, design: .rounded))
                                     .foregroundColor(Color(red: 0.15, green: 0.85, blue: 0.45))
@@ -519,27 +695,95 @@ struct MenuBarSettingsView: View {
                                 .background(Color.white.opacity(0.06))
                             
                             VStack(alignment: .leading, spacing: 6) {
-                                Text("BUILT-IN ACTIONS")
+                                Text(String(
+                                    localized: "settings.menu-bar.grid.builtin-actions.section-title",
+                                    defaultValue: "BUILT-IN ACTIONS",
+                                    comment: "Section header for built-in grid actions"
+                                ))
                                     .font(.system(size: 9, weight: .bold))
                                     .foregroundColor(.secondary)
                                     .tracking(1.0)
                                 
-                                ToggleActionRow(title: "Inspect EXIF", actionType: "inspectEXIF")
-                                ToggleActionRow(title: "Extract Text (OCR)", actionType: "ocr")
-                                ToggleActionRow(title: "Convert to Web (AVIF)", actionType: "webp")
-                                ToggleActionRow(title: "Compress Image", actionType: "compress")
-                                ToggleActionRow(title: "Strip EXIF Metadata", actionType: "stripMetadata")
-                                ToggleActionRow(title: "Merge PDFs", actionType: "mergePDF")
-                                ToggleActionRow(title: "Pick Screen Color", actionType: "pickColor")
-                                ToggleActionRow(title: "AirDrop", actionType: "airdrop")
-                                ToggleActionRow(title: "Email", actionType: "email")
-                                ToggleActionRow(title: "Upload to Imgur", actionType: "imgur")
-                                ToggleActionRow(title: "Shorten URL", actionType: "shortenURL")
-                                ToggleActionRow(title: "Zip Files", actionType: "zip")
-                                ToggleActionRow(title: "Resize Image (800px)", actionType: "resizeImage")
-                                ToggleActionRow(title: "Convert to PNG", actionType: "convertImage")
-                                ToggleActionRow(title: "Copy Path", actionType: "copyPath")
-                                ToggleActionRow(title: "Open Path", actionType: "openPath")
+                                ToggleActionRow(title: String(
+                                    localized: "settings.menu-bar.grid.builtin-actions.inspect-exif",
+                                    defaultValue: "Inspect EXIF",
+                                    comment: "Built-in action label for inspecting EXIF metadata"
+                                ), actionType: "inspectEXIF")
+                                ToggleActionRow(title: String(
+                                    localized: "settings.menu-bar.grid.builtin-actions.extract-text-ocr",
+                                    defaultValue: "Extract Text (OCR)",
+                                    comment: "Built-in action label for extracting text using OCR"
+                                ), actionType: "ocr")
+                                ToggleActionRow(title: String(
+                                    localized: "settings.menu-bar.grid.builtin-actions.convert-to-web-avif",
+                                    defaultValue: "Convert to Web (AVIF)",
+                                    comment: "Built-in action label for converting images to AVIF"
+                                ), actionType: "webp")
+                                ToggleActionRow(title: String(
+                                    localized: "settings.menu-bar.grid.builtin-actions.compress-image",
+                                    defaultValue: "Compress Image",
+                                    comment: "Built-in action label for image compression"
+                                ), actionType: "compress")
+                                ToggleActionRow(title: String(
+                                    localized: "settings.menu-bar.grid.builtin-actions.strip-exif-metadata",
+                                    defaultValue: "Strip EXIF Metadata",
+                                    comment: "Built-in action label for removing EXIF metadata"
+                                ), actionType: "stripMetadata")
+                                ToggleActionRow(title: String(
+                                    localized: "settings.menu-bar.grid.builtin-actions.merge-pdfs",
+                                    defaultValue: "Merge PDFs",
+                                    comment: "Built-in action label for merging PDF files"
+                                ), actionType: "mergePDF")
+                                ToggleActionRow(title: String(
+                                    localized: "settings.menu-bar.grid.builtin-actions.pick-screen-color",
+                                    defaultValue: "Pick Screen Color",
+                                    comment: "Built-in action label for picking a screen color"
+                                ), actionType: "pickColor")
+                                ToggleActionRow(title: String(
+                                    localized: "settings.menu-bar.grid.builtin-actions.airdrop",
+                                    defaultValue: "AirDrop",
+                                    comment: "Built-in action label for sharing via AirDrop"
+                                ), actionType: "airdrop")
+                                ToggleActionRow(title: String(
+                                    localized: "settings.menu-bar.grid.builtin-actions.email",
+                                    defaultValue: "Email",
+                                    comment: "Built-in action label for sharing via email"
+                                ), actionType: "email")
+                                ToggleActionRow(title: String(
+                                    localized: "settings.menu-bar.grid.builtin-actions.upload-to-imgur",
+                                    defaultValue: "Upload to Imgur",
+                                    comment: "Built-in action label for uploading to Imgur"
+                                ), actionType: "imgur")
+                                ToggleActionRow(title: String(
+                                    localized: "settings.menu-bar.grid.builtin-actions.shorten-url",
+                                    defaultValue: "Shorten URL",
+                                    comment: "Built-in action label for shortening URLs"
+                                ), actionType: "shortenURL")
+                                ToggleActionRow(title: String(
+                                    localized: "settings.menu-bar.grid.builtin-actions.zip-files",
+                                    defaultValue: "Zip Files",
+                                    comment: "Built-in action label for zipping files"
+                                ), actionType: "zip")
+                                ToggleActionRow(title: String(
+                                    localized: "settings.menu-bar.grid.builtin-actions.resize-image-800px",
+                                    defaultValue: "Resize Image (800px)",
+                                    comment: "Built-in action label for resizing image to 800 pixels"
+                                ), actionType: "resizeImage")
+                                ToggleActionRow(title: String(
+                                    localized: "settings.menu-bar.grid.builtin-actions.convert-to-png",
+                                    defaultValue: "Convert to PNG",
+                                    comment: "Built-in action label for converting to PNG format"
+                                ), actionType: "convertImage")
+                                ToggleActionRow(title: String(
+                                    localized: "settings.menu-bar.grid.builtin-actions.copy-path",
+                                    defaultValue: "Copy Path",
+                                    comment: "Built-in action label for copying file path"
+                                ), actionType: "copyPath")
+                                ToggleActionRow(title: String(
+                                    localized: "settings.menu-bar.grid.builtin-actions.open-path",
+                                    defaultValue: "Open Path",
+                                    comment: "Built-in action label for opening file path"
+                                ), actionType: "openPath")
                             }
                         }
                         .padding(16)
@@ -550,7 +794,11 @@ struct MenuBarSettingsView: View {
                     VStack(spacing: 0) {
                         ScrollView {
                             VStack(alignment: .leading, spacing: 8) {
-                                Text("APP PREFERENCES")
+                                Text(String(
+                                    localized: "settings.menu-bar.rules.app-preferences.section-title",
+                                    defaultValue: "APP PREFERENCES",
+                                    comment: "Section header for app-specific preference rules"
+                                ))
                                     .font(.system(size: 9, weight: .bold))
                                     .foregroundColor(.secondary)
                                     .tracking(1.0)
@@ -569,13 +817,25 @@ struct MenuBarSettingsView: View {
                                         Spacer()
                                         
                                         Menu {
-                                            Button("Save (Permanent)") {
+                                            Button(String(
+                                                localized: "settings.menu-bar.rules.behavior.save-permanent",
+                                                defaultValue: "Save (Permanent)",
+                                                comment: "Rule behavior option to save items permanently"
+                                            )) {
                                                 clipboardManager.updateRule(id: rule.id, newType: .save)
                                             }
-                                            Button("Temporary") {
+                                            Button(String(
+                                                localized: "settings.menu-bar.rules.behavior.temporary",
+                                                defaultValue: "Temporary",
+                                                comment: "Rule behavior option to keep items temporarily"
+                                            )) {
                                                 clipboardManager.updateRule(id: rule.id, newType: .temporary)
                                             }
-                                            Button("Ignore (Don't Save)") {
+                                            Button(String(
+                                                localized: "settings.menu-bar.rules.behavior.ignore-dont-save",
+                                                defaultValue: "Ignore (Don't Save)",
+                                                comment: "Rule behavior option to ignore items and not save them"
+                                            )) {
                                                 clipboardManager.updateRule(id: rule.id, newType: .ignore)
                                             }
                                         } label: {
@@ -609,7 +869,11 @@ struct MenuBarSettingsView: View {
                         
                         // Add rule block
                         VStack(alignment: .leading, spacing: 6) {
-                            Text("ADD NEW PREFERENCE")
+                            Text(String(
+                                localized: "settings.menu-bar.rules.add-new-preference.section-title",
+                                defaultValue: "ADD NEW PREFERENCE",
+                                comment: "Section header for creating a new app preference rule"
+                            ))
                                 .font(.system(size: 8, weight: .bold))
                                 .foregroundColor(.secondary)
                             
@@ -624,7 +888,11 @@ struct MenuBarSettingsView: View {
                                     .labelsHidden()
                                     .frame(maxWidth: .infinity)
                                 } else {
-                                    TextField("App Name...", text: $newRuleAppName)
+                                    TextField(String(
+                                        localized: "settings.menu-bar.rules.add-new-preference.app-name.placeholder",
+                                        defaultValue: "App Name...",
+                                        comment: "Placeholder text for entering app name when creating new preference"
+                                    ), text: $newRuleAppName)
                                         .textFieldStyle(.plain)
                                         .font(.system(size: 11, design: .rounded))
                                         .padding(5)
@@ -633,8 +901,16 @@ struct MenuBarSettingsView: View {
                                 }
                                 
                                 Picker("", selection: $newRuleType) {
-                                    Text("Temp").tag(ClipboardPreferenceRule.RuleType.temporary)
-                                    Text("Ignore").tag(ClipboardPreferenceRule.RuleType.ignore)
+                                    Text(String(
+                                        localized: "settings.menu-bar.rules.add-new-preference.behavior.temp",
+                                        defaultValue: "Temp",
+                                        comment: "Short behavior option label for temporary save in new preference form"
+                                    )).tag(ClipboardPreferenceRule.RuleType.temporary)
+                                    Text(String(
+                                        localized: "settings.menu-bar.rules.add-new-preference.behavior.ignore",
+                                        defaultValue: "Ignore",
+                                        comment: "Short behavior option label for ignore action in new preference form"
+                                    )).tag(ClipboardPreferenceRule.RuleType.ignore)
                                 }
                                 .labelsHidden()
                                 .frame(width: 60)
@@ -664,7 +940,11 @@ struct MenuBarSettingsView: View {
             Divider()
                 .background(Color.white.opacity(0.08))
             
-            Button("Done") {
+            Button(String(
+                localized: "settings.menu-bar.rules.add-new-preference.done.button",
+                defaultValue: "Done",
+                comment: "Button title to complete adding a new app preference"
+            )) {
                 presentationMode.wrappedValue.dismiss()
             }
             .buttonStyle(.borderedProminent)

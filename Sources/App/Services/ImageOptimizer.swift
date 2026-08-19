@@ -50,7 +50,15 @@ class ImageOptimizer {
         
         if !results.isEmpty {
             HapticManager.shared.success()
-            notifyUser(title: "Converted to Web Format", body: "\(results.count) image(s) saved to Downloads.")
+            notifyUser(title: String(
+                localized: "image-optimizer.web-conversion.title",
+                defaultValue: "Converted to Web Format",
+                comment: "Title for notification after converting images to web format"
+            ), body: String(format: String(
+                localized: "image-optimizer.web-conversion.saved-summary",
+                defaultValue: "%d image(s) saved to Downloads.",
+                comment: "Summary for notification showing how many images were saved after web conversion"
+            ), results.count))
             NSWorkspace.shared.activateFileViewerSelecting(results)
         }
         return results
@@ -87,7 +95,15 @@ class ImageOptimizer {
         
         if !results.isEmpty {
             HapticManager.shared.success()
-            notifyUser(title: "Images Compressed", body: "\(results.count) image(s) compressed & saved to Downloads.")
+            notifyUser(title: String(
+                localized: "image-optimizer.compression.title",
+                defaultValue: "Images Compressed",
+                comment: "Title for notification after compressing images"
+            ), body: String(format: String(
+                localized: "image-optimizer.compression.saved-summary",
+                defaultValue: "%d image(s) compressed & saved to Downloads.",
+                comment: "Summary for notification showing how many images were compressed and saved"
+            ), results.count))
             NSWorkspace.shared.activateFileViewerSelecting(results)
         }
         return results
@@ -122,7 +138,15 @@ class ImageOptimizer {
         
         if !results.isEmpty {
             HapticManager.shared.success()
-            notifyUser(title: "Metadata Stripped", body: "EXIF & GPS location removed. Saved to Downloads.")
+            notifyUser(title: String(
+                localized: "image-optimizer.metadata-strip.title",
+                defaultValue: "Metadata Stripped",
+                comment: "Title for notification after removing metadata"
+            ), body: String(
+                localized: "image-optimizer.metadata-strip.summary",
+                defaultValue: "EXIF & GPS location removed. Saved to Downloads.",
+                comment: "Summary for notification after removing EXIF and GPS metadata"
+            ))
             NSWorkspace.shared.activateFileViewerSelecting(results)
         }
         return results

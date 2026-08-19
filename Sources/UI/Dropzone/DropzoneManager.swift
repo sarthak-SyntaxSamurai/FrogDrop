@@ -332,7 +332,11 @@ import QuickLookThumbnailing
     // Actions implementation
     func openPaths(_ urls: [URL]) {
         let actionKey = "action_openPath"
-        setProgress(.running("Opening..."), for: actionKey)
+        setProgress(.running(String(
+            localized: "dropzone.manager.status.opening",
+            defaultValue: "Opening...",
+            comment: "Toast status shown while opening a file or folder path"
+        )), for: actionKey)
         var openedCount = 0
         for url in urls {
             if NSWorkspace.shared.open(url) {
@@ -341,16 +345,28 @@ import QuickLookThumbnailing
         }
         if openedCount > 0 {
             HapticManager.shared.success()
-            setProgress(.success("Opened!"), for: actionKey)
+            setProgress(.success(String(
+                localized: "dropzone.manager.status.opened.path",
+                defaultValue: "Opened!",
+                comment: "Toast status shown after successfully opening a path"
+            )), for: actionKey)
         } else {
             HapticManager.shared.click()
-            setProgress(.failure("Error"), for: actionKey)
+            setProgress(.failure(String(
+                localized: "dropzone.manager.status.error.open-path",
+                defaultValue: "Error",
+                comment: "Toast title shown when opening a path fails"
+            )), for: actionKey)
         }
     }
     
     func openPathFromClipboard() {
         let actionKey = "action_openPath"
-        setProgress(.running("Reading..."), for: actionKey)
+        setProgress(.running(String(
+            localized: "dropzone.manager.status.reading",
+            defaultValue: "Reading...",
+            comment: "Toast status shown while reading path contents"
+        )), for: actionKey)
         let pasteboard = NSPasteboard.general
         if let clipboardText = pasteboard.string(forType: .string) {
             let trimmed = clipboardText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -360,29 +376,49 @@ import QuickLookThumbnailing
                 if FileManager.default.fileExists(atPath: url.path) {
                     if NSWorkspace.shared.open(url) {
                         HapticManager.shared.success()
-                        setProgress(.success("Opened!"), for: actionKey)
+                        setProgress(.success(String(
+                            localized: "dropzone.manager.status.opened.file",
+                            defaultValue: "Opened!",
+                            comment: "Toast status shown after successfully opening a file"
+                        )), for: actionKey)
                         return
                     }
                 }
             }
         }
         HapticManager.shared.click()
-        setProgress(.failure("Invalid Path"), for: actionKey)
+        setProgress(.failure(String(
+            localized: "dropzone.manager.status.invalid-path",
+            defaultValue: "Invalid Path",
+            comment: "Toast status shown when provided path is invalid"
+        )), for: actionKey)
     }
     
     func copyPaths(_ urls: [URL]) {
         let actionKey = "action_copyPath"
-        setProgress(.running("Copying..."), for: actionKey)
+        setProgress(.running(String(
+            localized: "dropzone.manager.status.copying",
+            defaultValue: "Copying...",
+            comment: "Toast status shown while copying files"
+        )), for: actionKey)
         let paths = urls.map { $0.path }.joined(separator: "\n")
         let pasteboard = NSPasteboard.general
         pasteboard.declareTypes([.string], owner: nil)
         pasteboard.setString(paths, forType: .string)
         HapticManager.shared.success()
-        setProgress(.success("Copied!"), for: actionKey)
+        setProgress(.success(String(
+            localized: "dropzone.manager.status.copied",
+            defaultValue: "Copied!",
+            comment: "Toast status shown after files are copied"
+        )), for: actionKey)
     }
     
     func moveToFolder(urls: [URL], path: String, actionKey: String) async {
-        setProgress(.running("Moving..."), for: actionKey)
+        setProgress(.running(String(
+            localized: "dropzone.manager.status.moving",
+            defaultValue: "Moving...",
+            comment: "Toast status shown while moving files"
+        )), for: actionKey)
         let destFolder = URL(fileURLWithPath: path)
         var count = 0
         let fileManager = FileManager.default
@@ -417,48 +453,88 @@ import QuickLookThumbnailing
         
         if count > 0 {
             HapticManager.shared.success()
-            setProgress(.success("Moved \(count) files"), for: actionKey)
+            setProgress(.success(String(format: String(
+                localized: "dropzone.manager.status.moved-files-count",
+                defaultValue: "Moved %d files",
+                comment: "Toast status showing how many files were moved"
+            ), count)), for: actionKey)
             
             let content = UNMutableNotificationContent()
             content.title = "FrogDrop"
-            content.subtitle = "Files Moved Successfully"
-            content.body = "\(count) file(s) moved to \(destFolder.lastPathComponent)."
+            content.subtitle = String(
+                localized: "dropzone.manager.status.files-moved-success-title",
+                defaultValue: "Files Moved Successfully",
+                comment: "Success alert title after moving files"
+            )
+            content.body = String(format: String(
+                localized: "dropzone.manager.status.files-moved-success-message",
+                defaultValue: "%d file(s) moved to %@.",
+                comment: "Success alert message with file count and destination folder name"
+            ), count, "\(destFolder.lastPathComponent)")
             content.sound = .default
             let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
             if Bundle.main.bundleIdentifier != nil {
                 Task { try? await UNUserNotificationCenter.current().add(request) }
             }
         } else {
-            setProgress(.failure("Error"), for: actionKey)
+            setProgress(.failure(String(
+                localized: "dropzone.manager.status.error.move-files",
+                defaultValue: "Error",
+                comment: "Error alert title when moving files fails"
+            )), for: actionKey)
         }
     }
     
     func airdropFiles(_ urls: [URL]) {
         let actionKey = "action_airdrop"
-        setProgress(.running("AirDrop..."), for: actionKey)
+        setProgress(.running(String(
+            localized: "dropzone.manager.status.airdrop.sending",
+            defaultValue: "AirDrop...",
+            comment: "Toast status shown while sending files via AirDrop"
+        )), for: actionKey)
         HapticManager.shared.success()
         let sharingService = NSSharingService(named: .sendViaAirDrop)
         sharingService?.perform(withItems: urls)
-        setProgress(.success("Sent!"), for: actionKey)
+        setProgress(.success(String(
+            localized: "dropzone.manager.status.airdrop.sent",
+            defaultValue: "Sent!",
+            comment: "Toast status shown after sending via AirDrop"
+        )), for: actionKey)
     }
     
     func emailFiles(_ urls: [URL]) {
         let actionKey = "action_email"
-        setProgress(.running("Email..."), for: actionKey)
+        setProgress(.running(String(
+            localized: "dropzone.manager.status.email.composing",
+            defaultValue: "Email...",
+            comment: "Toast status shown while composing email share"
+        )), for: actionKey)
         HapticManager.shared.success()
         let sharingService = NSSharingService(named: .composeEmail)
         sharingService?.perform(withItems: urls)
-        setProgress(.success("Composed!"), for: actionKey)
+        setProgress(.success(String(
+            localized: "dropzone.manager.status.email.composed",
+            defaultValue: "Composed!",
+            comment: "Toast status shown after email compose is prepared"
+        )), for: actionKey)
     }
     
     func uploadToImgur(_ urls: [URL]) async {
         let actionKey = "action_imgur"
         guard let url = urls.first else {
-            setProgress(.failure("No file"), for: actionKey)
+            setProgress(.failure(String(
+                localized: "dropzone.manager.status.no-file",
+                defaultValue: "No file",
+                comment: "Toast status shown when no file is available for the requested action"
+            )), for: actionKey)
             return
         }
         
-        setProgress(.running("Uploading..."), for: actionKey)
+        setProgress(.running(String(
+            localized: "dropzone.manager.status.uploading",
+            defaultValue: "Uploading...",
+            comment: "Toast status shown while uploading to external service"
+        )), for: actionKey)
         
         Task.detached(priority: .userInitiated) {
             do {
@@ -496,12 +572,24 @@ import QuickLookThumbnailing
                         pasteboard.declareTypes([.string], owner: nil)
                         pasteboard.setString(link, forType: .string)
                         HapticManager.shared.success()
-                        DropzoneManager.shared.setProgress(.success("Uploaded!"), for: actionKey)
+                        DropzoneManager.shared.setProgress(.success(String(
+                            localized: "dropzone.manager.status.uploaded",
+                            defaultValue: "Uploaded!",
+                            comment: "Toast status shown after upload completes successfully"
+                        )), for: actionKey)
                         
                         let content = UNMutableNotificationContent()
                         content.title = "FrogDrop"
-                        content.subtitle = "Imgur Upload Successful"
-                        content.body = "Link copied to clipboard!"
+                        content.subtitle = String(
+                            localized: "dropzone.manager.status.imgur-upload-successful.title",
+                            defaultValue: "Imgur Upload Successful",
+                            comment: "Success alert title shown after uploading to Imgur"
+                        )
+                        content.body = String(
+                            localized: "dropzone.manager.status.imgur-upload-successful.message",
+                            defaultValue: "Link copied to clipboard!",
+                            comment: "Success alert message shown after Imgur link is copied"
+                        )
                         content.sound = .default
                         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
                         if Bundle.main.bundleIdentifier != nil {
@@ -510,13 +598,21 @@ import QuickLookThumbnailing
                     }
                 } else {
                     await MainActor.run {
-                        DropzoneManager.shared.setProgress(.failure("Error"), for: actionKey)
+                        DropzoneManager.shared.setProgress(.failure(String(
+                            localized: "dropzone.manager.status.error.imgur-upload",
+                            defaultValue: "Error",
+                            comment: "Error alert title shown when Imgur upload fails"
+                        )), for: actionKey)
                     }
                 }
             } catch {
                 print("Imgur upload error: \(error)")
                 await MainActor.run {
-                    DropzoneManager.shared.setProgress(.failure("Error"), for: actionKey)
+                    DropzoneManager.shared.setProgress(.failure(String(
+                        localized: "dropzone.manager.status.error.imgur-link-copy",
+                        defaultValue: "Error",
+                        comment: "Error alert title shown when copying Imgur link fails"
+                    )), for: actionKey)
                 }
             }
         }
@@ -525,11 +621,19 @@ import QuickLookThumbnailing
     func shortenURL(_ urls: [URL]) async {
         let actionKey = "action_shortenURL"
         guard let url = urls.first else {
-            setProgress(.failure("No URL"), for: actionKey)
+            setProgress(.failure(String(
+                localized: "dropzone.manager.status.no-url",
+                defaultValue: "No URL",
+                comment: "Status text shown when no URL is available for shortening"
+            )), for: actionKey)
             return
         }
         
-        setProgress(.running("Shortening..."), for: actionKey)
+        setProgress(.running(String(
+            localized: "dropzone.manager.status.shortening",
+            defaultValue: "Shortening...",
+            comment: "Status text shown while URL shortening is in progress"
+        )), for: actionKey)
         
         if url.scheme == "http" || url.scheme == "https" {
             let originalString = url.absoluteString
@@ -540,12 +644,24 @@ import QuickLookThumbnailing
                 pasteboard.declareTypes([.string], owner: nil)
                 pasteboard.setString(cleanedString, forType: .string)
                 HapticManager.shared.success()
-                setProgress(.success("Shortened!"), for: actionKey)
+                setProgress(.success(String(
+                    localized: "dropzone.manager.status.shortened",
+                    defaultValue: "Shortened!",
+                    comment: "Status text shown when URL shortening completes"
+                )), for: actionKey)
                 
                 let content = UNMutableNotificationContent()
                 content.title = "FrogDrop"
-                content.subtitle = "URL Shortened"
-                content.body = "Shortened URL copied to clipboard!"
+                content.subtitle = String(
+                    localized: "dropzone.manager.status.url-shortened.title",
+                    defaultValue: "URL Shortened",
+                    comment: "Success alert title shown after URL is shortened"
+                )
+                content.body = String(
+                    localized: "dropzone.manager.status.url-shortened.message",
+                    defaultValue: "Shortened URL copied to clipboard!",
+                    comment: "Success alert message shown after shortened URL is copied"
+                )
                 content.sound = .default
                 let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
                 if Bundle.main.bundleIdentifier != nil {
@@ -557,7 +673,11 @@ import QuickLookThumbnailing
                 let pasteboard = NSPasteboard.general
                 pasteboard.declareTypes([.string], owner: nil)
                 pasteboard.setString(url.lastPathComponent, forType: .string)
-                setProgress(.success("Copied Name"), for: actionKey)
+                setProgress(.success(String(
+                    localized: "dropzone.manager.status.copied-name",
+                    defaultValue: "Copied Name",
+                    comment: "Status text shown when file name is copied"
+                )), for: actionKey)
             }
         }
     }
@@ -565,10 +685,18 @@ import QuickLookThumbnailing
     func zipFiles(_ urls: [URL]) async {
         let actionKey = "action_zip"
         guard !urls.isEmpty else {
-            setProgress(.failure("No files"), for: actionKey)
+            setProgress(.failure(String(
+                localized: "dropzone.manager.status.no-files",
+                defaultValue: "No files",
+                comment: "Status text shown when no files are available for zipping"
+            )), for: actionKey)
             return
         }
-        setProgress(.running("Zipping..."), for: actionKey)
+        setProgress(.running(String(
+            localized: "dropzone.manager.status.zipping",
+            defaultValue: "Zipping...",
+            comment: "Status text shown while files are being zipped"
+        )), for: actionKey)
         
         let fileManager = FileManager.default
         let targetDirectory = fileManager.urls(for: .downloadsDirectory, in: .userDomainMask).first ?? urls.first!.deletingLastPathComponent()
@@ -606,17 +734,29 @@ import QuickLookThumbnailing
                         pasteboard.declareTypes([.string], owner: nil)
                         pasteboard.setString(zipURL.path, forType: .string)
                         HapticManager.shared.success()
-                        DropzoneManager.shared.setProgress(.success("Compressed! → Downloads"), for: actionKey)
+                        DropzoneManager.shared.setProgress(.success(String(
+                            localized: "dropzone.manager.status.compressed-to-downloads",
+                            defaultValue: "Compressed! → Downloads",
+                            comment: "Status text shown after zip archive is saved to Downloads"
+                        )), for: actionKey)
                         NSWorkspace.shared.activateFileViewerSelecting([zipURL])
                     } else {
-                        DropzoneManager.shared.setProgress(.failure("Error"), for: actionKey)
+                        DropzoneManager.shared.setProgress(.failure(String(
+                            localized: "dropzone.manager.status.error.zip-files",
+                            defaultValue: "Error",
+                            comment: "Error alert title shown when zipping files fails"
+                        )), for: actionKey)
                     }
                 }
             } catch {
                 print("Failed to compress files: \(error)")
                 try? fileManager.removeItem(at: tempDir)
                 await MainActor.run {
-                    DropzoneManager.shared.setProgress(.failure("Error"), for: actionKey)
+                    DropzoneManager.shared.setProgress(.failure(String(
+                        localized: "dropzone.manager.status.error.copy-name",
+                        defaultValue: "Error",
+                        comment: "Error alert title shown when copying file name fails"
+                    )), for: actionKey)
                 }
             }
         }
@@ -625,10 +765,18 @@ import QuickLookThumbnailing
     func resizeImages(_ urls: [URL]) async {
         let actionKey = "action_resizeImage"
         guard !urls.isEmpty else {
-            setProgress(.failure("No images"), for: actionKey)
+            setProgress(.failure(String(
+                localized: "dropzone.manager.status.no-images.resize",
+                defaultValue: "No images",
+                comment: "Status text shown when no images are available for resize action"
+            )), for: actionKey)
             return
         }
-        setProgress(.running("Resizing..."), for: actionKey)
+        setProgress(.running(String(
+            localized: "dropzone.manager.status.resizing",
+            defaultValue: "Resizing...",
+            comment: "Status text shown while images are being resized"
+        )), for: actionKey)
         
         let downloadsDir = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first ?? FileManager.default.temporaryDirectory
         
@@ -672,10 +820,18 @@ import QuickLookThumbnailing
             await MainActor.run {
                 if finalCount > 0 {
                     HapticManager.shared.success()
-                    DropzoneManager.shared.setProgress(.success("Resized → Downloads"), for: actionKey)
+                    DropzoneManager.shared.setProgress(.success(String(
+                        localized: "dropzone.manager.status.resized-to-downloads",
+                        defaultValue: "Resized → Downloads",
+                        comment: "Status text shown after resized image is saved to Downloads"
+                    )), for: actionKey)
                     NSWorkspace.shared.open(downloadsDir)
                 } else {
-                    DropzoneManager.shared.setProgress(.failure("Failed"), for: actionKey)
+                    DropzoneManager.shared.setProgress(.failure(String(
+                        localized: "dropzone.manager.status.failed.resize",
+                        defaultValue: "Failed",
+                        comment: "Status text shown when image resize action fails"
+                    )), for: actionKey)
                 }
             }
         }
@@ -684,10 +840,18 @@ import QuickLookThumbnailing
     func convertImagesToPNG(_ urls: [URL]) async {
         let actionKey = "action_convertImage"
         guard !urls.isEmpty else {
-            setProgress(.failure("No images"), for: actionKey)
+            setProgress(.failure(String(
+                localized: "dropzone.manager.status.no-images.convert",
+                defaultValue: "No images",
+                comment: "Status text shown when no images are available for conversion action"
+            )), for: actionKey)
             return
         }
-        setProgress(.running("Converting..."), for: actionKey)
+        setProgress(.running(String(
+            localized: "dropzone.manager.status.converting.png",
+            defaultValue: "Converting...",
+            comment: "Status text shown while converting images to PNG"
+        )), for: actionKey)
         
         let downloadsDir = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first ?? FileManager.default.temporaryDirectory
         
@@ -714,10 +878,18 @@ import QuickLookThumbnailing
             await MainActor.run {
                 if finalCount > 0 {
                     HapticManager.shared.success()
-                    DropzoneManager.shared.setProgress(.success("Converted → Downloads"), for: actionKey)
+                    DropzoneManager.shared.setProgress(.success(String(
+                        localized: "dropzone.manager.status.converted-to-downloads.png",
+                        defaultValue: "Converted → Downloads",
+                        comment: "Status text shown after PNG conversion output is saved to Downloads"
+                    )), for: actionKey)
                     NSWorkspace.shared.open(downloadsDir)
                 } else {
-                    DropzoneManager.shared.setProgress(.failure("Failed"), for: actionKey)
+                    DropzoneManager.shared.setProgress(.failure(String(
+                        localized: "dropzone.manager.status.failed.convert-png",
+                        defaultValue: "Failed",
+                        comment: "Status text shown when PNG conversion fails"
+                    )), for: actionKey)
                 }
             }
         }
@@ -726,91 +898,187 @@ import QuickLookThumbnailing
     func inspectEXIF(_ urls: [URL]) async {
         let actionKey = "action_inspectEXIF"
         guard let first = urls.first else {
-            setProgress(.failure("No files"), for: actionKey)
+            setProgress(.failure(String(
+                localized: "dropzone.manager.status.no-files.inspect-exif",
+                defaultValue: "No files",
+                comment: "Status text shown when no files are available for EXIF inspection"
+            )), for: actionKey)
             return
         }
         EXIFInspectorManager.shared.inspect(url: first)
-        setProgress(.success("Inspected!"), for: actionKey)
+        setProgress(.success(String(
+            localized: "dropzone.manager.status.inspected-exif",
+            defaultValue: "Inspected!",
+            comment: "Status text shown after EXIF metadata inspection completes"
+        )), for: actionKey)
     }
     
     func extractTextOCR(_ urls: [URL]) async {
         let actionKey = "action_ocr"
         guard !urls.isEmpty else {
-            setProgress(.failure("No files"), for: actionKey)
+            setProgress(.failure(String(
+                localized: "dropzone.manager.status.no-files.extract-ocr",
+                defaultValue: "No files",
+                comment: "Status text shown when no files are available for OCR extraction"
+            )), for: actionKey)
             return
         }
-        setProgress(.running("Extracting..."), for: actionKey)
+        setProgress(.running(String(
+            localized: "dropzone.manager.status.extracting-ocr",
+            defaultValue: "Extracting...",
+            comment: "Status text shown while OCR text extraction is in progress"
+        )), for: actionKey)
         if let _ = await OCRManager.shared.extractText(from: urls) {
-            setProgress(.success("Copied to Clipboard!"), for: actionKey)
+            setProgress(.success(String(
+                localized: "dropzone.manager.status.copied-to-clipboard.ocr",
+                defaultValue: "Copied to Clipboard!",
+                comment: "Status text shown after extracted OCR text is copied to clipboard"
+            )), for: actionKey)
         } else {
-            setProgress(.failure("No Text Found"), for: actionKey)
+            setProgress(.failure(String(
+                localized: "dropzone.manager.status.no-text-found",
+                defaultValue: "No Text Found",
+                comment: "Status text shown when OCR finds no text in the selected file"
+            )), for: actionKey)
         }
     }
     
     func convertImagesToWebP(_ urls: [URL]) async {
         let actionKey = "action_webp"
         guard !urls.isEmpty else {
-            setProgress(.failure("No images"), for: actionKey)
+            setProgress(.failure(String(
+                localized: "dropzone.manager.status.no-images.convert-webp",
+                defaultValue: "No images",
+                comment: "Status text shown when no images are available for WebP conversion"
+            )), for: actionKey)
             return
         }
-        setProgress(.running("Converting..."), for: actionKey)
+        setProgress(.running(String(
+            localized: "dropzone.manager.status.converting.webp",
+            defaultValue: "Converting...",
+            comment: "Status text shown while converting images to WebP"
+        )), for: actionKey)
         let results = await ImageOptimizer.shared.convertToWebP(urls: urls)
         if !results.isEmpty {
-            setProgress(.success("Converted to WebP!"), for: actionKey)
+            setProgress(.success(String(
+                localized: "dropzone.manager.status.converted-to-webp",
+                defaultValue: "Converted to WebP!",
+                comment: "Status text shown after WebP conversion succeeds"
+            )), for: actionKey)
         } else {
-            setProgress(.failure("Failed"), for: actionKey)
+            setProgress(.failure(String(
+                localized: "dropzone.manager.status.failed.convert-webp",
+                defaultValue: "Failed",
+                comment: "Status text shown when WebP conversion fails"
+            )), for: actionKey)
         }
     }
     
     func compressImages(_ urls: [URL]) async {
         let actionKey = "action_compress"
         guard !urls.isEmpty else {
-            setProgress(.failure("No images"), for: actionKey)
+            setProgress(.failure(String(
+                localized: "dropzone.manager.status.no-images.compress",
+                defaultValue: "No images",
+                comment: "Status text shown when no images are available for compression"
+            )), for: actionKey)
             return
         }
-        setProgress(.running("Compressing..."), for: actionKey)
+        setProgress(.running(String(
+            localized: "dropzone.manager.status.compressing",
+            defaultValue: "Compressing...",
+            comment: "Status text shown while image compression is in progress"
+        )), for: actionKey)
         let results = await ImageOptimizer.shared.compressImages(urls: urls)
         if !results.isEmpty {
-            setProgress(.success("Compressed!"), for: actionKey)
+            setProgress(.success(String(
+                localized: "dropzone.manager.status.compressed",
+                defaultValue: "Compressed!",
+                comment: "Status text shown after image compression succeeds"
+            )), for: actionKey)
         } else {
-            setProgress(.failure("Failed"), for: actionKey)
+            setProgress(.failure(String(
+                localized: "dropzone.manager.status.failed.compress",
+                defaultValue: "Failed",
+                comment: "Status text shown when image compression fails"
+            )), for: actionKey)
         }
     }
     
     func stripMetadata(_ urls: [URL]) async {
         let actionKey = "action_stripMetadata"
         guard !urls.isEmpty else {
-            setProgress(.failure("No images"), for: actionKey)
+            setProgress(.failure(String(
+                localized: "dropzone.manager.status.no-images.strip-exif",
+                defaultValue: "No images",
+                comment: "Status text shown when no images are available for EXIF stripping"
+            )), for: actionKey)
             return
         }
-        setProgress(.running("Stripping..."), for: actionKey)
+        setProgress(.running(String(
+            localized: "dropzone.manager.status.stripping-exif",
+            defaultValue: "Stripping...",
+            comment: "Status text shown while stripping EXIF metadata"
+        )), for: actionKey)
         let results = await ImageOptimizer.shared.stripMetadata(urls: urls)
         if !results.isEmpty {
-            setProgress(.success("Stripped!"), for: actionKey)
+            setProgress(.success(String(
+                localized: "dropzone.manager.status.stripped-exif",
+                defaultValue: "Stripped!",
+                comment: "Status text shown after EXIF metadata is removed"
+            )), for: actionKey)
         } else {
-            setProgress(.failure("Failed"), for: actionKey)
+            setProgress(.failure(String(
+                localized: "dropzone.manager.status.failed.strip-exif",
+                defaultValue: "Failed",
+                comment: "Status text shown when EXIF stripping fails"
+            )), for: actionKey)
         }
     }
     
     func mergePDFs(_ urls: [URL]) async {
         let actionKey = "action_mergePDF"
         guard !urls.isEmpty else {
-            setProgress(.failure("No files"), for: actionKey)
+            setProgress(.failure(String(
+                localized: "dropzone.manager.status.no-files.merge-pdf",
+                defaultValue: "No files",
+                comment: "Status text shown when no files are available for PDF merge"
+            )), for: actionKey)
             return
         }
-        setProgress(.running("Merging..."), for: actionKey)
+        setProgress(.running(String(
+            localized: "dropzone.manager.status.merging-pdf",
+            defaultValue: "Merging...",
+            comment: "Status text shown while PDF files are being merged"
+        )), for: actionKey)
         if let _ = await PDFToolkit.shared.mergePDFs(urls: urls) {
-            setProgress(.success("PDFs Merged!"), for: actionKey)
+            setProgress(.success(String(
+                localized: "dropzone.manager.status.pdfs-merged",
+                defaultValue: "PDFs Merged!",
+                comment: "Status text shown after PDF merge succeeds"
+            )), for: actionKey)
         } else {
-            setProgress(.failure("Failed"), for: actionKey)
+            setProgress(.failure(String(
+                localized: "dropzone.manager.status.failed.merge-pdf",
+                defaultValue: "Failed",
+                comment: "Status text shown when PDF merge fails"
+            )), for: actionKey)
         }
     }
     
     func pickScreenColor() async {
         let actionKey = "action_pickColor"
-        setProgress(.running("Picking..."), for: actionKey)
+        setProgress(.running(String(
+            localized: "dropzone.manager.status.picking-color",
+            defaultValue: "Picking...",
+            comment: "Status text shown while screen color picking is in progress"
+        )), for: actionKey)
         if let hex = await ScreenColorSampler.shared.sampleColor() {
-            setProgress(.success("Copied \(hex)"), for: actionKey)
+            setProgress(.success(String(format: String(
+                localized: "dropzone.manager.status.copied-color-hex",
+                defaultValue: "Copied %@",
+                comment: "Status text shown after picked color hex value is copied"
+            ), "\(hex)")), for: actionKey)
         } else {
             setProgress(.idle, for: actionKey)
         }

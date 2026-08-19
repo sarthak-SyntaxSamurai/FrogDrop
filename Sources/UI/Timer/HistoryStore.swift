@@ -42,7 +42,11 @@ class HistoryStore: ObservableObject {
         let newSession = HistorySession(
             id: UUID(),
             date: Date(),
-            name: name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? (isPomodoro ? "Focus Session" : "Timer") : name,
+            name: name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? (isPomodoro ? String(
+                localized: "timer.history.default-name.focus-session",
+                defaultValue: "Focus Session",
+                comment: "Default session name used when pomodoro session name is empty"
+            ) : "Timer") : name,
             duration: duration,
             isPomodoro: isPomodoro
         )

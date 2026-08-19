@@ -184,7 +184,11 @@ struct FloatingShelfView: View {
                         Image(systemName: "arrow.down.doc")
                             .font(.system(size: 24))
                             .foregroundColor(.secondary)
-                        Text("Drop Files")
+                        Text(String(
+                            localized: "floating-shelf.window.drop-target.title",
+                            defaultValue: "Drop Files",
+                            comment: "Drop target title shown in floating shelf window"
+                        ))
                             .font(.system(size: 10, weight: .bold, design: .rounded))
                             .foregroundColor(.secondary)
                     }
@@ -298,7 +302,11 @@ struct ShelfCardStack: View {
                         HStack(spacing: 3) {
                             Image(systemName: "chevron.up")
                                 .font(.system(size: 8, weight: .bold))
-                            Text("Collapse")
+                            Text(String(
+                                localized: "floating-shelf.window.toolbar.collapse",
+                                defaultValue: "Collapse",
+                                comment: "Toolbar button title to collapse floating shelf window"
+                            ))
                                 .font(.system(size: 9, weight: .bold, design: .rounded))
                         }
                         .foregroundColor(.white.opacity(0.85))
@@ -360,7 +368,11 @@ struct ShelfCardStack: View {
                                 .padding(.vertical, 2)
                         }
                         .buttonStyle(.plain)
-                        .help("QuickLook Preview (Space)")
+                        .help(String(
+                            localized: "floating-shelf.window.quicklook.preview-with-shortcut",
+                            defaultValue: "QuickLook Preview (Space)",
+                            comment: "Label for QuickLook preview action including space key hint"
+                        ))
                         
                         if count > 1 {
                             Button(action: {
@@ -381,7 +393,11 @@ struct ShelfCardStack: View {
                                 }
                             }) {
                                 HStack(spacing: 3) {
-                                    Text("\(safeIndex + 1)/\(count)")
+                                    Text(String(format: String(
+                                        localized: "floating-shelf.window.quicklook.index-counter",
+                                        defaultValue: "%d/%d",
+                                        comment: "QuickLook item position counter showing current index and total count"
+                                    ), safeIndex + 1, count))
                                         .font(.system(size: 9, weight: .semibold, design: .rounded))
                                     Image(systemName: "chevron.down")
                                         .font(.system(size: 8, weight: .bold))
@@ -422,13 +438,25 @@ struct ShelfCardStack: View {
             }
             .contextMenu {
                 if !files.isEmpty {
-                    Button("QuickLook Preview") {
+                    Button(String(
+                        localized: "floating-shelf.window.context.quicklook-preview",
+                        defaultValue: "QuickLook Preview",
+                        comment: "Context menu item title for QuickLook preview"
+                    )) {
                         QuickLookManager.shared.togglePreview(urls: files, initialIndex: safeIndex)
                     }
-                    Button("Reveal in Finder") {
+                    Button(String(
+                        localized: "floating-shelf.window.context.reveal-in-finder",
+                        defaultValue: "Reveal in Finder",
+                        comment: "Context menu item title to reveal selected item in Finder"
+                    )) {
                         NSWorkspace.shared.activateFileViewerSelecting(files)
                     }
-                    Button("Copy Path(s)") {
+                    Button(String(
+                        localized: "floating-shelf.window.context.copy-paths",
+                        defaultValue: "Copy Path(s)",
+                        comment: "Context menu item title to copy one or more selected file paths"
+                    )) {
                         let paths = files.map { $0.path }.joined(separator: "\n")
                         let pb = NSPasteboard.general
                         pb.declareTypes([.string], owner: nil)
@@ -444,7 +472,11 @@ struct ShelfCardStack: View {
                     }
                     if !manager.customFolders.isEmpty {
                         Divider()
-                        Menu("Move to Folder") {
+                        Menu(String(
+                            localized: "floating-shelf.window.context.move-to-folder",
+                            defaultValue: "Move to Folder",
+                            comment: "Context menu item title to move selected items to another folder"
+                        )) {
                             ForEach(manager.customFolders) { folder in
                                 Button(folder.name) {
                                     if let path = folder.path {
@@ -456,7 +488,11 @@ struct ShelfCardStack: View {
                         }
                     }
                     Divider()
-                    Button("Clear All") { shelfManager.shelfFiles.removeAll() }
+                    Button(String(
+                        localized: "floating-shelf.window.context.clear-all",
+                        defaultValue: "Clear All",
+                        comment: "Context menu item title to clear all items from floating shelf"
+                    )) { shelfManager.shelfFiles.removeAll() }
                 }
             }
         )
@@ -464,22 +500,86 @@ struct ShelfCardStack: View {
     
     private func actionDisplayName(_ key: String) -> String {
         switch key {
-        case "inspectEXIF": return "Inspect EXIF Metadata"
-        case "ocr": return "Extract Text (OCR)"
-        case "webp": return "Convert to Web (AVIF)"
-        case "compress": return "Compress Image"
-        case "stripMetadata": return "Strip EXIF Metadata"
-        case "mergePDF": return "Merge into PDF"
-        case "pickColor": return "Pick Screen Color"
-        case "airdrop": return "AirDrop"
-        case "email": return "Email"
-        case "imgur": return "Upload to Imgur"
-        case "shortenURL": return "Shorten URL"
-        case "zip": return "Zip Files"
-        case "resizeImage": return "Resize Image (800px)"
-        case "convertImage": return "Convert to PNG"
-        case "copyPath": return "Copy Path"
-        case "openPath": return "Open Path"
+        case "inspectEXIF": return String(
+            localized: "floating-shelf.window.context.inspect-exif-metadata",
+            defaultValue: "Inspect EXIF Metadata",
+            comment: "Context menu item title to inspect EXIF metadata for selected images"
+        )
+        case "ocr": return String(
+            localized: "floating-shelf.window.context.extract-text-ocr",
+            defaultValue: "Extract Text (OCR)",
+            comment: "Context menu item title to extract text using OCR"
+        )
+        case "webp": return String(
+            localized: "floating-shelf.window.context.convert-to-web-avif",
+            defaultValue: "Convert to Web (AVIF)",
+            comment: "Context menu item title to convert selected images to AVIF"
+        )
+        case "compress": return String(
+            localized: "floating-shelf.window.context.compress-image",
+            defaultValue: "Compress Image",
+            comment: "Context menu item title to compress selected image files"
+        )
+        case "stripMetadata": return String(
+            localized: "floating-shelf.window.context.strip-exif-metadata",
+            defaultValue: "Strip EXIF Metadata",
+            comment: "Context menu item title to remove EXIF metadata from selected images"
+        )
+        case "mergePDF": return String(
+            localized: "floating-shelf.window.context.merge-into-pdf",
+            defaultValue: "Merge into PDF",
+            comment: "Context menu item title to merge selected files into a single PDF"
+        )
+        case "pickColor": return String(
+            localized: "floating-shelf.window.context.pick-screen-color",
+            defaultValue: "Pick Screen Color",
+            comment: "Context menu item title to pick a color from the screen"
+        )
+        case "airdrop": return String(
+            localized: "floating-shelf.window.context.airdrop",
+            defaultValue: "AirDrop",
+            comment: "Context menu item title to share selected items via AirDrop"
+        )
+        case "email": return String(
+            localized: "floating-shelf.window.context.email",
+            defaultValue: "Email",
+            comment: "Context menu item title to share selected items by email"
+        )
+        case "imgur": return String(
+            localized: "floating-shelf.window.context.upload-to-imgur",
+            defaultValue: "Upload to Imgur",
+            comment: "Context menu item title to upload selected content to Imgur"
+        )
+        case "shortenURL": return String(
+            localized: "floating-shelf.window.context.shorten-url",
+            defaultValue: "Shorten URL",
+            comment: "Context menu item title to shorten URL from selected content"
+        )
+        case "zip": return String(
+            localized: "floating-shelf.window.context.zip-files",
+            defaultValue: "Zip Files",
+            comment: "Context menu item title to zip selected files"
+        )
+        case "resizeImage": return String(
+            localized: "floating-shelf.window.context.resize-image-800px",
+            defaultValue: "Resize Image (800px)",
+            comment: "Context menu item title to resize selected images to 800 pixels"
+        )
+        case "convertImage": return String(
+            localized: "floating-shelf.window.context.convert-to-png",
+            defaultValue: "Convert to PNG",
+            comment: "Context menu item title to convert selected files to PNG"
+        )
+        case "copyPath": return String(
+            localized: "floating-shelf.window.context.copy-path",
+            defaultValue: "Copy Path",
+            comment: "Context menu item title to copy selected file path"
+        )
+        case "openPath": return String(
+            localized: "floating-shelf.window.context.open-path",
+            defaultValue: "Open Path",
+            comment: "Context menu item title to open selected file path"
+        )
         default: return key.capitalized
         }
     }

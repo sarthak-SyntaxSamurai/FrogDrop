@@ -103,7 +103,12 @@ class ClipboardManager: ObservableObject {
         } else {
             // Default rules for password managers (set to Temporary by default)
             self.customRules = [
-                ClipboardPreferenceRule(appName: "Keychain Access", ruleType: .temporary),
+                ClipboardPreferenceRule(appName: String(
+                    localized: "clipboard-manager.default-rule.keychain-access",
+                    defaultValue: "Keychain Access",
+                    bundle: .main,
+                    comment: "Default clipboard rule app name for Keychain Access"
+                ), ruleType: .temporary),
                 ClipboardPreferenceRule(appName: "1Password", ruleType: .temporary),
                 ClipboardPreferenceRule(appName: "Bitwarden", ruleType: .temporary)
             ]
@@ -181,7 +186,12 @@ class ClipboardManager: ObservableObject {
         
         if let newText = pasteboard.string(forType: .string), !newText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             let activeApp = NSWorkspace.shared.frontmostApplication
-            let appName = activeApp?.localizedName ?? "Unknown"
+            let appName = activeApp?.localizedName ?? String(
+                localized: "clipboard-manager.source-app.unknown",
+                defaultValue: "Unknown",
+                bundle: .main,
+                comment: "Fallback source app name when clipboard source is unavailable"
+            )
             
             let rule = customRules.first(where: { $0.appName.lowercased() == appName.lowercased() })?.ruleType ?? .save
             

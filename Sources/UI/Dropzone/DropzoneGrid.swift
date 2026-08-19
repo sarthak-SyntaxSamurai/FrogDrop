@@ -13,7 +13,11 @@ struct DropzonePanelView: View {
                     Spacer()
                     
                     // Title
-                    Text("FROG DROP")
+                    Text(String(
+                        localized: "dropzone.grid.title",
+                        defaultValue: "FROG DROP",
+                        comment: "Primary title shown at top of dropzone grid view"
+                    ))
                         .font(.system(size: 8.5, weight: .black, design: .rounded))
                         .foregroundColor(.primary.opacity(0.8))
                         .tracking(1.2)
@@ -109,7 +113,11 @@ struct DropzoneGrid: View {
                     // Shelf Header (only shown when items are shelved)
                     if !manager.shelvedGroups.isEmpty {
                         HStack {
-                            Text("SHELF (\(manager.shelvedGroups.count) group\(manager.shelvedGroups.count == 1 ? "" : "s"), \(manager.shelvedFiles.count) file\(manager.shelvedFiles.count == 1 ? "" : "s"))")
+                            Text(String(format: String(
+                                localized: "dropzone.grid.shelf.summary",
+                                defaultValue: "SHELF (%#@groups@, %#@files@)",
+                                comment: "Shelf summary showing counts of shelved groups and files"
+                            ), manager.shelvedGroups.count, manager.shelvedGroups.count == 1 ? "group" : "groups"))
                                 .font(.system(size: 9, weight: .bold, design: .rounded))
                                 .foregroundColor(.secondary.opacity(0.7))
                             
@@ -125,7 +133,11 @@ struct DropzoneGrid: View {
                                     HStack(spacing: 2) {
                                         Image(systemName: "square.stack.3d.up")
                                             .font(.system(size: 8))
-                                        Text("Combine")
+                                        Text(String(
+                                            localized: "dropzone.grid.shelf.combine.button",
+                                            defaultValue: "Combine",
+                                            comment: "Button title to combine shelved items"
+                                        ))
                                             .font(.system(size: 8, weight: .semibold))
                                     }
                                     .foregroundColor(Color(red: 0.15, green: 0.85, blue: 0.45))
@@ -143,7 +155,11 @@ struct DropzoneGrid: View {
                                 HStack(spacing: 2) {
                                     Image(systemName: "xmark")
                                         .font(.system(size: 8))
-                                    Text("Clear")
+                                    Text(String(
+                                        localized: "dropzone.grid.shelf.clear.button",
+                                        defaultValue: "Clear",
+                                        comment: "Button title to clear shelved items"
+                                    ))
                                         .font(.system(size: 8, weight: .semibold))
                                 }
                                 .foregroundColor(.red.opacity(0.7))
@@ -164,7 +180,11 @@ struct DropzoneGrid: View {
                     if isDraggingMode {
                         // Wide Drop Bar spanning full width
                         DropzoneWideDropBarView(
-                            title: "Drop here to Shelve",
+                            title: String(
+                                localized: "dropzone.grid.shelf.drop-target",
+                                defaultValue: "Drop here to Shelve",
+                                comment: "Drop target hint text for shelving files"
+                            ),
                             isHovered: manager.hoveredActionKey == "shelf"
                         )
                         .background(FrameRegistrationHelper(key: "shelf"))
@@ -187,8 +207,16 @@ struct DropzoneGrid: View {
                                 panel.canChooseFiles = false
                                 panel.canChooseDirectories = true
                                 panel.allowsMultipleSelection = false
-                                panel.prompt = "Add to Grid"
-                                panel.message = "Choose a folder to add to your Dropzone grid"
+                                panel.prompt = String(
+                                    localized: "dropzone.grid.add-folder.dialog.title",
+                                    defaultValue: "Add to Grid",
+                                    comment: "Dialog title for adding folder to dropzone grid"
+                                )
+                                panel.message = String(
+                                    localized: "dropzone.grid.add-folder.dialog.message",
+                                    defaultValue: "Choose a folder to add to your Dropzone grid",
+                                    comment: "Dialog message prompting user to choose folder for dropzone grid"
+                                )
                                 if panel.runModal() == .OK, let url = panel.url {
                                     let newItem = DropzoneItem(type: "folder", name: url.lastPathComponent, path: url.path)
                                     manager.customFolders.append(newItem)
@@ -197,7 +225,11 @@ struct DropzoneGrid: View {
                                 }
                             }) {
                                 DropzoneCoreTargetView(
-                                    title: "Add to Grid",
+                                    title: String(
+                                        localized: "dropzone.grid.add-folder.button",
+                                        defaultValue: "Add to Grid",
+                                        comment: "Button title to add selected folder to dropzone grid"
+                                    ),
                                     icon: "plus",
                                     isHovered: manager.hoveredActionKey == "addGrid",
                                     isDashed: true
@@ -218,7 +250,11 @@ struct DropzoneGrid: View {
                 // FOLDERS / APPS (Always shown, interactive when not dragging)
                 if !manager.customFolders.isEmpty {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("FOLDERS / APPS")
+                        Text(String(
+                            localized: "dropzone.grid.section.folders-apps",
+                            defaultValue: "FOLDERS / APPS",
+                            comment: "Section header for folders and apps in dropzone grid"
+                        ))
                             .font(.system(size: 8, weight: .bold, design: .rounded))
                             .foregroundColor(.secondary.opacity(0.6))
                             .padding(.horizontal, 12)
@@ -238,7 +274,11 @@ struct DropzoneGrid: View {
                 
                 // ACTIONS (Always shown, interactive when not dragging)
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("ACTIONS")
+                    Text(String(
+                        localized: "dropzone.grid.section.actions",
+                        defaultValue: "ACTIONS",
+                        comment: "Section header for action shortcuts in dropzone grid"
+                    ))
                         .font(.system(size: 8, weight: .bold, design: .rounded))
                         .foregroundColor(.secondary.opacity(0.6))
                         .padding(.horizontal, 12)
@@ -249,7 +289,11 @@ struct DropzoneGrid: View {
                             let actionKey = "action_inspectEXIF"
                             if isDraggingMode {
                                 DropzoneTargetView(
-                                    title: "Inspect EXIF",
+                                    title: String(
+                                        localized: "dropzone.grid.action.inspect-exif.button",
+                                        defaultValue: "Inspect EXIF",
+                                        comment: "Action button title for inspecting EXIF metadata"
+                                    ),
                                     icon: "magnifyingglass.circle.fill",
                                     iconColor: .purple,
                                     isHovered: manager.hoveredActionKey == actionKey,
@@ -272,7 +316,11 @@ struct DropzoneGrid: View {
                                     }
                                 }) {
                                     DropzoneTargetView(
-                                        title: "Inspect EXIF",
+                                        title: String(
+                                            localized: "dropzone.grid.action.inspect-exif.menu",
+                                            defaultValue: "Inspect EXIF",
+                                            comment: "Context menu item title for inspecting EXIF metadata"
+                                        ),
                                         icon: "magnifyingglass.circle.fill",
                                         iconColor: .purple,
                                         isHovered: manager.hoveredActionKey == actionKey,
@@ -293,7 +341,11 @@ struct DropzoneGrid: View {
                             let actionKey = "action_ocr"
                             if isDraggingMode {
                                 DropzoneTargetView(
-                                    title: "Extract OCR",
+                                    title: String(
+                                        localized: "dropzone.grid.action.extract-ocr.button",
+                                        defaultValue: "Extract OCR",
+                                        comment: "Action button title for extracting OCR text"
+                                    ),
                                     icon: "text.viewfinder",
                                     iconColor: .teal,
                                     isHovered: manager.hoveredActionKey == actionKey,
@@ -314,7 +366,11 @@ struct DropzoneGrid: View {
                                     } else {
                                         Task {
                                             if let _ = await OCRManager.shared.extractTextFromClipboard() {
-                                                manager.setProgress(.success("Copied to Clipboard!"), for: actionKey)
+                                                manager.setProgress(.success(String(
+                                                    localized: "dropzone.grid.toast.copied-to-clipboard",
+                                                    defaultValue: "Copied to Clipboard!",
+                                                    comment: "Toast message shown after copying OCR result to clipboard"
+                                                )), for: actionKey)
                                             } else {
                                                 selectFilesAndRun(actionKey: actionKey)
                                             }
@@ -322,7 +378,11 @@ struct DropzoneGrid: View {
                                     }
                                 }) {
                                     DropzoneTargetView(
-                                        title: "Extract OCR",
+                                        title: String(
+                                            localized: "dropzone.grid.action.extract-ocr.menu",
+                                            defaultValue: "Extract OCR",
+                                            comment: "Context menu item title for extracting OCR text"
+                                        ),
                                         icon: "text.viewfinder",
                                         iconColor: .teal,
                                         isHovered: manager.hoveredActionKey == actionKey,
@@ -343,7 +403,11 @@ struct DropzoneGrid: View {
                             let actionKey = "action_webp"
                             if isDraggingMode {
                                 DropzoneTargetView(
-                                    title: "To WebP",
+                                    title: String(
+                                        localized: "dropzone.grid.action.to-webp.button",
+                                        defaultValue: "To WebP",
+                                        comment: "Action button title for converting image to WebP"
+                                    ),
                                     icon: "arrow.triangle.2.circlepath.doc.on.clipboard",
                                     iconColor: .green,
                                     isHovered: manager.hoveredActionKey == actionKey,
@@ -366,7 +430,11 @@ struct DropzoneGrid: View {
                                     }
                                 }) {
                                     DropzoneTargetView(
-                                        title: "To WebP",
+                                        title: String(
+                                            localized: "dropzone.grid.action.to-webp.menu",
+                                            defaultValue: "To WebP",
+                                            comment: "Context menu item title for converting image to WebP"
+                                        ),
                                         icon: "arrow.triangle.2.circlepath.doc.on.clipboard",
                                         iconColor: .green,
                                         isHovered: manager.hoveredActionKey == actionKey,
@@ -387,7 +455,11 @@ struct DropzoneGrid: View {
                             let actionKey = "action_compress"
                             if isDraggingMode {
                                 DropzoneTargetView(
-                                    title: "Compress",
+                                    title: String(
+                                        localized: "dropzone.grid.action.compress.button",
+                                        defaultValue: "Compress",
+                                        comment: "Action button title for compressing selected files"
+                                    ),
                                     icon: "arrow.down.right.and.arrow.up.left",
                                     iconColor: .orange,
                                     isHovered: manager.hoveredActionKey == actionKey,
@@ -410,7 +482,11 @@ struct DropzoneGrid: View {
                                     }
                                 }) {
                                     DropzoneTargetView(
-                                        title: "Compress",
+                                        title: String(
+                                            localized: "dropzone.grid.action.compress.menu",
+                                            defaultValue: "Compress",
+                                            comment: "Context menu item title for compress action"
+                                        ),
                                         icon: "arrow.down.right.and.arrow.up.left",
                                         iconColor: .orange,
                                         isHovered: manager.hoveredActionKey == actionKey,
@@ -431,7 +507,11 @@ struct DropzoneGrid: View {
                             let actionKey = "action_stripMetadata"
                             if isDraggingMode {
                                 DropzoneTargetView(
-                                    title: "Strip EXIF",
+                                    title: String(
+                                        localized: "dropzone.grid.action.strip-exif.button",
+                                        defaultValue: "Strip EXIF",
+                                        comment: "Action button title for stripping EXIF metadata"
+                                    ),
                                     icon: "shield.checkerboard",
                                     iconColor: .indigo,
                                     isHovered: manager.hoveredActionKey == actionKey,
@@ -454,7 +534,11 @@ struct DropzoneGrid: View {
                                     }
                                 }) {
                                     DropzoneTargetView(
-                                        title: "Strip EXIF",
+                                        title: String(
+                                            localized: "dropzone.grid.action.strip-exif.menu",
+                                            defaultValue: "Strip EXIF",
+                                            comment: "Context menu item title for stripping EXIF metadata"
+                                        ),
                                         icon: "shield.checkerboard",
                                         iconColor: .indigo,
                                         isHovered: manager.hoveredActionKey == actionKey,
@@ -475,7 +559,11 @@ struct DropzoneGrid: View {
                             let actionKey = "action_mergePDF"
                             if isDraggingMode {
                                 DropzoneTargetView(
-                                    title: "Merge PDF",
+                                    title: String(
+                                        localized: "dropzone.grid.action.merge-pdf.button",
+                                        defaultValue: "Merge PDF",
+                                        comment: "Action button title for merging PDF files"
+                                    ),
                                     icon: "doc.on.doc.fill",
                                     iconColor: .red,
                                     isHovered: manager.hoveredActionKey == actionKey,
@@ -498,7 +586,11 @@ struct DropzoneGrid: View {
                                     }
                                 }) {
                                     DropzoneTargetView(
-                                        title: "Merge PDF",
+                                        title: String(
+                                            localized: "dropzone.grid.action.merge-pdf.menu",
+                                            defaultValue: "Merge PDF",
+                                            comment: "Context menu item title for merging PDF files"
+                                        ),
                                         icon: "doc.on.doc.fill",
                                         iconColor: .red,
                                         isHovered: manager.hoveredActionKey == actionKey,
@@ -519,7 +611,11 @@ struct DropzoneGrid: View {
                             let actionKey = "action_pickColor"
                             if isDraggingMode {
                                 DropzoneTargetView(
-                                    title: "Pick Color",
+                                    title: String(
+                                        localized: "dropzone.grid.action.pick-color.button",
+                                        defaultValue: "Pick Color",
+                                        comment: "Action button title for picking a screen color"
+                                    ),
                                     icon: "eyedropper.halffull",
                                     iconColor: .pink,
                                     isHovered: manager.hoveredActionKey == actionKey,
@@ -539,7 +635,11 @@ struct DropzoneGrid: View {
                                     }
                                 }) {
                                     DropzoneTargetView(
-                                        title: "Pick Color",
+                                        title: String(
+                                            localized: "dropzone.grid.action.pick-color.menu",
+                                            defaultValue: "Pick Color",
+                                            comment: "Context menu item title for picking a screen color"
+                                        ),
                                         icon: "eyedropper.halffull",
                                         iconColor: .pink,
                                         isHovered: manager.hoveredActionKey == actionKey,
@@ -554,7 +654,11 @@ struct DropzoneGrid: View {
                             let actionKey = "action_airdrop"
                             if isDraggingMode {
                                 DropzoneTargetView(
-                                    title: "AirDrop",
+                                    title: String(
+                                        localized: "dropzone.grid.action.airdrop.button",
+                                        defaultValue: "AirDrop",
+                                        comment: "Action button title for sharing via AirDrop"
+                                    ),
                                     icon: "antenna.radiowaves.left.and.right",
                                     iconColor: .blue,
                                     isHovered: manager.hoveredActionKey == actionKey,
@@ -577,7 +681,11 @@ struct DropzoneGrid: View {
                                     }
                                 }) {
                                     DropzoneTargetView(
-                                        title: "AirDrop",
+                                        title: String(
+                                            localized: "dropzone.grid.action.airdrop.menu",
+                                            defaultValue: "AirDrop",
+                                            comment: "Context menu item title for sharing via AirDrop"
+                                        ),
                                         icon: "antenna.radiowaves.left.and.right",
                                         iconColor: .blue,
                                         isHovered: manager.hoveredActionKey == actionKey,
@@ -598,7 +706,11 @@ struct DropzoneGrid: View {
                             let actionKey = "action_email"
                             if isDraggingMode {
                                 DropzoneTargetView(
-                                    title: "Email",
+                                    title: String(
+                                        localized: "dropzone.grid.action.email.button",
+                                        defaultValue: "Email",
+                                        comment: "Action button title for sharing via email"
+                                    ),
                                     icon: "envelope.fill",
                                     iconColor: .blue,
                                     isHovered: manager.hoveredActionKey == actionKey,
@@ -621,7 +733,11 @@ struct DropzoneGrid: View {
                                     }
                                 }) {
                                     DropzoneTargetView(
-                                        title: "Email",
+                                        title: String(
+                                            localized: "dropzone.grid.action.email.menu",
+                                            defaultValue: "Email",
+                                            comment: "Context menu item title for sharing via email"
+                                        ),
                                         icon: "envelope.fill",
                                         iconColor: .blue,
                                         isHovered: manager.hoveredActionKey == actionKey,
@@ -642,7 +758,11 @@ struct DropzoneGrid: View {
                             let actionKey = "action_imgur"
                             if isDraggingMode {
                                 DropzoneTargetView(
-                                    title: "Imgur",
+                                    title: String(
+                                        localized: "dropzone.grid.action.imgur.button",
+                                        defaultValue: "Imgur",
+                                        comment: "Action button title for uploading to Imgur"
+                                    ),
                                     icon: "photo.fill",
                                     iconColor: .green,
                                     isHovered: manager.hoveredActionKey == actionKey,
@@ -665,7 +785,11 @@ struct DropzoneGrid: View {
                                     }
                                 }) {
                                     DropzoneTargetView(
-                                        title: "Imgur",
+                                        title: String(
+                                            localized: "dropzone.grid.action.imgur.menu",
+                                            defaultValue: "Imgur",
+                                            comment: "Context menu item title for uploading to Imgur"
+                                        ),
                                         icon: "photo.fill",
                                         iconColor: .green,
                                         isHovered: manager.hoveredActionKey == actionKey,
@@ -686,7 +810,11 @@ struct DropzoneGrid: View {
                             let actionKey = "action_shortenURL"
                             if isDraggingMode {
                                 DropzoneTargetView(
-                                    title: "Shorten URL",
+                                    title: String(
+                                        localized: "dropzone.grid.action.shorten-url.button",
+                                        defaultValue: "Shorten URL",
+                                        comment: "Action button title for shortening URLs"
+                                    ),
                                     icon: "link",
                                     iconColor: .blue,
                                     isHovered: manager.hoveredActionKey == actionKey,
@@ -716,7 +844,11 @@ struct DropzoneGrid: View {
                                     }
                                 }) {
                                     DropzoneTargetView(
-                                        title: "Shorten URL",
+                                        title: String(
+                                            localized: "dropzone.grid.action.shorten-url.menu",
+                                            defaultValue: "Shorten URL",
+                                            comment: "Context menu item title for shortening URLs"
+                                        ),
                                         icon: "link",
                                         iconColor: .blue,
                                         isHovered: manager.hoveredActionKey == actionKey,
@@ -737,7 +869,11 @@ struct DropzoneGrid: View {
                             let actionKey = "action_zip"
                             if isDraggingMode {
                                 DropzoneTargetView(
-                                    title: "Zip Files",
+                                    title: String(
+                                        localized: "dropzone.grid.action.zip-files.button",
+                                        defaultValue: "Zip Files",
+                                        comment: "Action button title for creating a zip archive"
+                                    ),
                                     icon: "archivebox.fill",
                                     iconColor: .orange,
                                     isHovered: manager.hoveredActionKey == actionKey,
@@ -760,7 +896,11 @@ struct DropzoneGrid: View {
                                     }
                                 }) {
                                     DropzoneTargetView(
-                                        title: "Zip Files",
+                                        title: String(
+                                            localized: "dropzone.grid.action.zip-files.menu",
+                                            defaultValue: "Zip Files",
+                                            comment: "Context menu item title for creating a zip archive"
+                                        ),
                                         icon: "archivebox.fill",
                                         iconColor: .orange,
                                         isHovered: manager.hoveredActionKey == actionKey,
@@ -781,7 +921,11 @@ struct DropzoneGrid: View {
                             let actionKey = "action_resizeImage"
                             if isDraggingMode {
                                 DropzoneTargetView(
-                                    title: "Resize Image",
+                                    title: String(
+                                        localized: "dropzone.grid.action.resize-image.button",
+                                        defaultValue: "Resize Image",
+                                        comment: "Action button title for resizing image files"
+                                    ),
                                     icon: "arrow.up.left.and.down.right.and.arrow.up.right.and.down.left",
                                     iconColor: .green,
                                     isHovered: manager.hoveredActionKey == actionKey,
@@ -804,7 +948,11 @@ struct DropzoneGrid: View {
                                     }
                                 }) {
                                     DropzoneTargetView(
-                                        title: "Resize Image",
+                                        title: String(
+                                            localized: "dropzone.grid.action.resize-image.menu",
+                                            defaultValue: "Resize Image",
+                                            comment: "Context menu item title for resizing image files"
+                                        ),
                                         icon: "arrow.up.left.and.down.right.and.arrow.up.right.and.down.left",
                                         iconColor: .green,
                                         isHovered: manager.hoveredActionKey == actionKey,
@@ -825,7 +973,11 @@ struct DropzoneGrid: View {
                             let actionKey = "action_convertImage"
                             if isDraggingMode {
                                 DropzoneTargetView(
-                                    title: "Convert to PNG",
+                                    title: String(
+                                        localized: "dropzone.grid.action.convert-to-png.button",
+                                        defaultValue: "Convert to PNG",
+                                        comment: "Action button title for converting files to PNG format"
+                                    ),
                                     icon: "photo.on.rectangle.angled",
                                     iconColor: .green,
                                     isHovered: manager.hoveredActionKey == actionKey,
@@ -848,7 +1000,11 @@ struct DropzoneGrid: View {
                                     }
                                 }) {
                                     DropzoneTargetView(
-                                        title: "Convert to PNG",
+                                        title: String(
+                                            localized: "dropzone.grid.action.convert-to-png.menu",
+                                            defaultValue: "Convert to PNG",
+                                            comment: "Context menu item title for converting files to PNG format"
+                                        ),
                                         icon: "photo.on.rectangle.angled",
                                         iconColor: .green,
                                         isHovered: manager.hoveredActionKey == actionKey,
@@ -869,7 +1025,11 @@ struct DropzoneGrid: View {
                             let actionKey = "action_copyPath"
                             if isDraggingMode {
                                 DropzoneTargetView(
-                                    title: "Copy Path",
+                                    title: String(
+                                        localized: "dropzone.grid.action.copy-path.button",
+                                        defaultValue: "Copy Path",
+                                        comment: "Action button title for copying selected file path"
+                                    ),
                                     icon: "doc.on.doc.fill",
                                     iconColor: .purple,
                                     isHovered: manager.hoveredActionKey == actionKey,
@@ -892,7 +1052,11 @@ struct DropzoneGrid: View {
                                     }
                                 }) {
                                     DropzoneTargetView(
-                                        title: "Copy Path",
+                                        title: String(
+                                            localized: "dropzone.grid.action.copy-path.menu",
+                                            defaultValue: "Copy Path",
+                                            comment: "Context menu item title for copying selected file path"
+                                        ),
                                         icon: "doc.on.doc.fill",
                                         iconColor: .purple,
                                         isHovered: manager.hoveredActionKey == actionKey,
@@ -913,7 +1077,11 @@ struct DropzoneGrid: View {
                             let actionKey = "action_openPath"
                             if isDraggingMode {
                                 DropzoneTargetView(
-                                    title: "Open Path",
+                                    title: String(
+                                        localized: "dropzone.grid.action.open-path.button",
+                                        defaultValue: "Open Path",
+                                        comment: "Action button title for opening selected file path"
+                                    ),
                                     icon: "arrow.up.right.square",
                                     iconColor: .orange,
                                     isHovered: manager.hoveredActionKey == actionKey,
@@ -936,7 +1104,11 @@ struct DropzoneGrid: View {
                                     }
                                 }) {
                                     DropzoneTargetView(
-                                        title: "Open Path",
+                                        title: String(
+                                            localized: "dropzone.grid.action.open-path.menu",
+                                            defaultValue: "Open Path",
+                                            comment: "Context menu item title for opening selected file path"
+                                        ),
                                         icon: "arrow.up.right.square",
                                         iconColor: .orange,
                                         isHovered: manager.hoveredActionKey == actionKey,
@@ -964,8 +1136,16 @@ struct DropzoneGrid: View {
         panel.allowsMultipleSelection = true
         panel.canChooseFiles = true
         panel.canChooseDirectories = true
-        panel.prompt = "Run Action"
-        panel.message = "Select files or folders to run this action"
+        panel.prompt = String(
+            localized: "dropzone.grid.run-action.dialog.title",
+            defaultValue: "Run Action",
+            comment: "Dialog title for executing a selected action"
+        )
+        panel.message = String(
+            localized: "dropzone.grid.run-action.dialog.message",
+            defaultValue: "Select files or folders to run this action",
+            comment: "Dialog message prompting user to select input items before running action"
+        )
         
         let response = panel.runModal()
         if response == .OK {
@@ -1045,7 +1225,11 @@ struct ShelfGroupCard: View {
                     .lineLimit(1)
                     .frame(width: 62)
             } else {
-                Text("\(group.files.count) Items")
+                Text(String(format: String(
+                    localized: "dropzone.grid.shelf.group-item-count",
+                    defaultValue: "%d Items",
+                    comment: "Shelf group label showing number of files in the group"
+                ), group.files.count))
                     .font(.system(size: 8, weight: .bold, design: .rounded))
                     .foregroundColor(Color(red: 0.15, green: 0.85, blue: 0.45))
                     .frame(width: 62)
@@ -1056,18 +1240,38 @@ struct ShelfGroupCard: View {
         }
         .overlay(CardDragTrackerView(group: group))
         .contextMenu {
-            Button("QuickLook Preview") {
+            Button(String(
+                localized: "dropzone.grid.shelf.context.quicklook-preview",
+                defaultValue: "QuickLook Preview",
+                comment: "Context menu item for opening QuickLook preview"
+            )) {
                 QuickLookManager.shared.togglePreview(urls: group.files)
             }
             if group.files.count == 1, let url = group.files.first {
-                Button("Reveal in Finder") { NSWorkspace.shared.activateFileViewerSelecting([url]) }
-                Button("Copy Path") {
+                Button(String(
+                    localized: "dropzone.grid.shelf.context.reveal-in-finder",
+                    defaultValue: "Reveal in Finder",
+                    comment: "Context menu item for revealing file in Finder"
+                )) { NSWorkspace.shared.activateFileViewerSelecting([url]) }
+                Button(String(
+                    localized: "dropzone.grid.shelf.context.copy-path",
+                    defaultValue: "Copy Path",
+                    comment: "Context menu item for copying file path from shelf"
+                )) {
                     NSPasteboard.general.declareTypes([.string], owner: nil)
                     NSPasteboard.general.setString(url.path, forType: .string)
                 }
-                Button("Open") { NSWorkspace.shared.open(url) }
+                Button(String(
+                    localized: "dropzone.grid.shelf.context.open",
+                    defaultValue: "Open",
+                    comment: "Context menu item for opening selected shelf file"
+                )) { NSWorkspace.shared.open(url) }
                 Divider()
-                Button("Move to Trash") {
+                Button(String(
+                    localized: "dropzone.grid.shelf.context.move-to-trash",
+                    defaultValue: "Move to Trash",
+                    comment: "Context menu item for moving selected shelf file to trash"
+                )) {
                     try? FileManager.default.trashItem(at: url, resultingItemURL: nil)
                     manager.deleteShelfGroup(at: groupIndex)
                 }
@@ -1080,10 +1284,18 @@ struct ShelfGroupCard: View {
                 }
             }
             Divider()
-            Button("Remove from Shelf") { manager.deleteShelfGroup(at: groupIndex) }
+            Button(String(
+                localized: "dropzone.grid.shelf.context.remove-from-shelf",
+                defaultValue: "Remove from Shelf",
+                comment: "Context menu item for removing item from shelf without deleting file"
+            )) { manager.deleteShelfGroup(at: groupIndex) }
             if manager.shelvedGroups.count > 1 {
                 Divider()
-                Button("Combine with Others") { manager.combineAllGroups() }
+                Button(String(
+                    localized: "dropzone.grid.shelf.context.combine-with-others",
+                    defaultValue: "Combine with Others",
+                    comment: "Context menu item for combining selected shelf group with others"
+                )) { manager.combineAllGroups() }
             }
         }
         .onDrop(of: [.fileURL], isTargeted: .constant(false)) { providers in
@@ -1350,7 +1562,11 @@ struct CombinePopoverView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("COMBINE GROUPS")
+            Text(String(
+                localized: "dropzone.grid.combine-groups.title",
+                defaultValue: "COMBINE GROUPS",
+                comment: "Title for sheet that combines multiple shelf groups"
+            ))
                 .font(.system(size: 8, weight: .bold, design: .rounded))
                 .foregroundColor(.secondary)
                 .tracking(0.5)
@@ -1381,7 +1597,11 @@ struct CombinePopoverView: View {
                                             .foregroundColor(.primary)
                                     }
                                     if group.files.count > 1 {
-                                        Text("(+\(group.files.count - 1))")
+                                        Text(String(format: String(
+                                            localized: "dropzone.grid.combine-groups.additional-files-count",
+                                            defaultValue: "(+%d)",
+                                            comment: "Compact count badge showing additional files in group beyond the first"
+                                        ), group.files.count - 1))
                                             .font(.system(size: 7))
                                             .foregroundColor(.secondary)
                                     }
@@ -1398,7 +1618,11 @@ struct CombinePopoverView: View {
             
             HStack(spacing: 10) {
                 Button(action: onCancel) {
-                    Text("Cancel")
+                    Text(String(
+                        localized: "dropzone.grid.combine-groups.cancel",
+                        defaultValue: "Cancel",
+                        comment: "Cancel button title in combine groups sheet"
+                    ))
                         .font(.system(size: 9, weight: .medium))
                         .padding(.horizontal, 8)
                         .padding(.vertical, 3)
@@ -1410,7 +1634,11 @@ struct CombinePopoverView: View {
                 Spacer()
                 
                 Button(action: onCombine) {
-                    Text("Combine")
+                    Text(String(
+                        localized: "dropzone.grid.combine-groups.confirm",
+                        defaultValue: "Combine",
+                        comment: "Confirmation button title in combine groups sheet"
+                    ))
                         .font(.system(size: 9, weight: .semibold))
                         .padding(.horizontal, 10)
                         .padding(.vertical, 3)
@@ -1461,22 +1689,86 @@ struct DropzoneWideDropBarView: View {
 
 func actionDisplayName(_ key: String) -> String {
     switch key {
-    case "inspectEXIF": return "Inspect EXIF Metadata"
-    case "ocr": return "Extract Text (OCR)"
-    case "webp": return "Convert to Web (AVIF)"
-    case "compress": return "Compress Image"
-    case "stripMetadata": return "Strip EXIF Metadata"
-    case "mergePDF": return "Merge into PDF"
-    case "pickColor": return "Pick Screen Color"
-    case "airdrop": return "AirDrop"
-    case "email": return "Email"
-    case "imgur": return "Upload to Imgur"
-    case "shortenURL": return "Shorten URL"
-    case "zip": return "Zip Files"
-    case "resizeImage": return "Resize Image (800px)"
-    case "convertImage": return "Convert to PNG"
-    case "copyPath": return "Copy Path"
-    case "openPath": return "Open Path"
+    case "inspectEXIF": return String(
+        localized: "dropzone.grid.inspect-exif.sheet.title",
+        defaultValue: "Inspect EXIF Metadata",
+        comment: "Title for sheet displaying EXIF metadata details"
+    )
+    case "ocr": return String(
+        localized: "dropzone.grid.inspect-exif.metadata.extract-text-ocr",
+        defaultValue: "Extract Text (OCR)",
+        comment: "Metadata row label for OCR text extraction action"
+    )
+    case "webp": return String(
+        localized: "dropzone.grid.inspect-exif.metadata.convert-to-web-avif",
+        defaultValue: "Convert to Web (AVIF)",
+        comment: "Metadata row label for conversion to AVIF action"
+    )
+    case "compress": return String(
+        localized: "dropzone.grid.inspect-exif.metadata.compress-image",
+        defaultValue: "Compress Image",
+        comment: "Metadata row label for image compression action"
+    )
+    case "stripMetadata": return String(
+        localized: "dropzone.grid.inspect-exif.metadata.strip-exif-metadata",
+        defaultValue: "Strip EXIF Metadata",
+        comment: "Metadata row label for removing EXIF metadata action"
+    )
+    case "mergePDF": return String(
+        localized: "dropzone.grid.inspect-exif.metadata.merge-into-pdf",
+        defaultValue: "Merge into PDF",
+        comment: "Metadata row label for merge into PDF action"
+    )
+    case "pickColor": return String(
+        localized: "dropzone.grid.inspect-exif.metadata.pick-screen-color",
+        defaultValue: "Pick Screen Color",
+        comment: "Metadata row label for screen color picker action"
+    )
+    case "airdrop": return String(
+        localized: "dropzone.grid.inspect-exif.metadata.airdrop",
+        defaultValue: "AirDrop",
+        comment: "Metadata row label for AirDrop share action"
+    )
+    case "email": return String(
+        localized: "dropzone.grid.inspect-exif.metadata.email",
+        defaultValue: "Email",
+        comment: "Metadata row label for email share action"
+    )
+    case "imgur": return String(
+        localized: "dropzone.grid.inspect-exif.metadata.upload-to-imgur",
+        defaultValue: "Upload to Imgur",
+        comment: "Metadata row label for Imgur upload action"
+    )
+    case "shortenURL": return String(
+        localized: "dropzone.grid.inspect-exif.metadata.shorten-url",
+        defaultValue: "Shorten URL",
+        comment: "Metadata row label for URL shortening action"
+    )
+    case "zip": return String(
+        localized: "dropzone.grid.inspect-exif.metadata.zip-files",
+        defaultValue: "Zip Files",
+        comment: "Metadata row label for zip files action"
+    )
+    case "resizeImage": return String(
+        localized: "dropzone.grid.inspect-exif.metadata.resize-image-800px",
+        defaultValue: "Resize Image (800px)",
+        comment: "Metadata row label for image resize to 800 pixels action"
+    )
+    case "convertImage": return String(
+        localized: "dropzone.grid.inspect-exif.metadata.convert-to-png",
+        defaultValue: "Convert to PNG",
+        comment: "Metadata row label for conversion to PNG action"
+    )
+    case "copyPath": return String(
+        localized: "dropzone.grid.inspect-exif.metadata.copy-path",
+        defaultValue: "Copy Path",
+        comment: "Metadata row label for copy path action"
+    )
+    case "openPath": return String(
+        localized: "dropzone.grid.inspect-exif.metadata.open-path",
+        defaultValue: "Open Path",
+        comment: "Metadata row label for open path action"
+    )
     default: return key.capitalized
     }
 }

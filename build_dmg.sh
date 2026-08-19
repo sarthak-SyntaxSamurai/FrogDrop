@@ -21,6 +21,15 @@ cd "$DIR"
 swift build -c release
 mkdir -p "$APP_PATH/Contents/MacOS" "$APP_PATH/Contents/Resources"
 cp "$DIR/.build/arm64-apple-macosx/release/FrogDrop" "$APP_PATH/Contents/MacOS/FrogDrop"
+
+# Copy compiled SwiftPM resources (including localized .lproj products from .xcstrings)
+RESOURCE_BUNDLE="$(find "$DIR/.build/arm64-apple-macosx/release" -maxdepth 1 -type d -name 'FrogDrop_FrogDrop.bundle' -print -quit)"
+if [ -d "$RESOURCE_BUNDLE" ]; then
+  cp -R "$RESOURCE_BUNDLE"/* "$APP_PATH/Contents/Resources/"
+else
+  echo "⚠️ Warning: SwiftPM resource bundle not found at release build output."
+fi
+
 chmod +x "$APP_PATH/Contents/MacOS/FrogDrop"
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString 2.1.0" "$APP_PATH/Contents/Info.plist" 2>/dev/null || true
 /usr/libexec/PlistBuddy -c "Set :CFBundleVersion 2.1.0" "$APP_PATH/Contents/Info.plist" 2>/dev/null || true

@@ -93,12 +93,20 @@ struct FloatingFocusPillView: View {
                         .font(.system(size: 13, weight: .bold, design: .monospaced))
                         .foregroundColor(.white)
                     
-                    Text(timer.name.isEmpty ? "Focusing" : timer.name)
+                    Text(timer.name.isEmpty ? String(
+                        localized: "timer.floating-pill.state.focusing",
+                        defaultValue: "Focusing",
+                        comment: "Status text shown in floating focus pill when active timer has no custom name"
+                    ) : timer.name)
                         .font(.system(size: 9, weight: .medium, design: .rounded))
                         .foregroundColor(.white.opacity(0.7))
                         .lineLimit(1)
                 } else {
-                    Text("Ready to Focus")
+                    Text(String(
+                        localized: "timer.floating-pill.state.ready-to-focus",
+                        defaultValue: "Ready to Focus",
+                        comment: "Status text shown in floating focus pill when no timer is active"
+                    ))
                         .font(.system(size: 11, weight: .semibold, design: .rounded))
                         .foregroundColor(.white.opacity(0.8))
                 }

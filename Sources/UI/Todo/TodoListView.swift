@@ -8,7 +8,11 @@ struct TodoListView: View {
     var body: some View {
         VStack(spacing: 8) {
             HStack {
-                Text("To-Do List")
+                Text(String(
+                    localized: "todo.list.title",
+                    defaultValue: "To-Do List",
+                    comment: "Title shown at the top of the to-do list view"
+                ))
                     .font(.system(.headline, design: .rounded))
                     .fontWeight(.bold)
                     .foregroundColor(.secondary)
@@ -21,7 +25,11 @@ struct TodoListView: View {
                 Image(systemName: "plus")
                     .foregroundColor(.secondary)
                     .font(.system(size: 11, weight: .bold))
-                TextField("Add task...", text: $newTodoText)
+                TextField(String(
+                    localized: "todo.list.add-task.placeholder",
+                    defaultValue: "Add task...",
+                    comment: "Placeholder text for adding a new task"
+                ), text: $newTodoText)
                     .textFieldStyle(.plain)
                     .font(.system(.subheadline, design: .rounded))
                     .onSubmit {
@@ -48,7 +56,11 @@ struct TodoListView: View {
                     Image(systemName: "checklist")
                         .font(.system(size: 24))
                         .foregroundColor(.secondary.opacity(0.3))
-                    Text("No tasks yet")
+                    Text(String(
+                        localized: "todo.list.empty-state",
+                        defaultValue: "No tasks yet",
+                        comment: "Empty state text when there are no tasks"
+                    ))
                         .font(.system(.caption, design: .rounded))
                         .foregroundColor(.secondary.opacity(0.7))
                     Spacer()
@@ -121,7 +133,11 @@ struct TodoRow: View {
                             .cornerRadius(5)
                     }
                     .buttonStyle(.plain)
-                    .help("Start Focus Timer")
+                    .help(String(
+                        localized: "todo.list.action.start-focus-timer",
+                        defaultValue: "Start Focus Timer",
+                        comment: "Context menu action to start a focus timer for a task"
+                    ))
                     
                     // Stopwatch Option
                     Button(action: {
@@ -135,7 +151,11 @@ struct TodoRow: View {
                             .cornerRadius(5)
                     }
                     .buttonStyle(.plain)
-                    .help("Start Stopwatch")
+                    .help(String(
+                        localized: "todo.list.action.start-stopwatch",
+                        defaultValue: "Start Stopwatch",
+                        comment: "Context menu action to start a stopwatch for a task"
+                    ))
                     
                     // Delete Option
                     Button(action: {
@@ -149,7 +169,11 @@ struct TodoRow: View {
                             .cornerRadius(5)
                     }
                     .buttonStyle(.plain)
-                    .help("Delete Task")
+                    .help(String(
+                        localized: "todo.list.action.delete-task",
+                        defaultValue: "Delete Task",
+                        comment: "Context menu action to delete a task"
+                    ))
                 }
                 .transition(.opacity)
             }
@@ -171,11 +195,23 @@ struct TodoRow: View {
         let mins = (Int(duration) % 3600) / 60
         if hrs > 0 {
             if mins > 0 {
-                return "\(hrs)h \(mins)m"
+                return String(format: String(
+                    localized: "todo.list.duration.hours-minutes",
+                    defaultValue: "%dh %dm",
+                    comment: "Task duration display with hours and minutes"
+                ), hrs, mins)
             }
-            return "\(hrs)h"
+            return String(format: String(
+                localized: "todo.list.duration.hours-only",
+                defaultValue: "%dh",
+                comment: "Task duration display with hours only"
+            ), hrs)
         } else {
-            return "\(mins)m"
+            return String(format: String(
+                localized: "todo.list.duration.minutes-only",
+                defaultValue: "%dm",
+                comment: "Task duration display with minutes only"
+            ), mins)
         }
     }
 }
