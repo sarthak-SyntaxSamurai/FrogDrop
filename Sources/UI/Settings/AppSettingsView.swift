@@ -19,16 +19,16 @@ struct AppSettingsView: View {
     @State private var isManualAppEntry = false
 
     private let accent = Color(red: 0.22, green: 0.72, blue: 0.42)
-    private let sections = ["General", "Grid", "Rules"]
+    private let sections = [String(localized: "settings.app.tab.general", defaultValue: "General", comment: "Segment title for general settings tab"), String(localized: "settings.app.tab.grid", defaultValue: "Grid", comment: "Segment title for grid settings tab"), String(localized: "settings.app.tab.rules", defaultValue: "Rules", comment: "Segment title for rules settings tab")]
 
     var body: some View {
         VStack(spacing: 0) {
             // ── Page Header ──────────────────────────────────────────────
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Settings")
+                    Text(String(localized: "settings.app.title", defaultValue: "Settings", comment: "Main title for app settings view"))
                         .font(.system(size: 20, weight: .bold, design: .rounded))
-                    Text("Customize FrogDrop to your liking")
+                    Text(String(localized: "settings.app.subtitle.customize", defaultValue: "Customize FrogDrop to your liking", comment: "Subtitle text under settings title"))
                         .font(.system(size: 12))
                         .foregroundColor(.secondary)
                 }
@@ -201,12 +201,12 @@ private struct GeneralSettingsContent: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            SettingsSection(title: "Menu Bar Icon", icon: "face.smiling.fill") {
+            SettingsSection(title: String(localized: "settings.app.menu-bar-icon.section-title", defaultValue: "Menu Bar Icon", comment: "Section title for menu bar icon settings"), icon: "face.smiling.fill") {
                 VStack(alignment: .leading, spacing: 12) {
-                    Picker("Icon Style", selection: $menuBarIconStyle) {
-                        Text("Default Frog").tag("frog")
-                        Text("Minimal White").tag("minimal")
-                        Text("Custom Image").tag("custom")
+                    Picker(String(localized: "settings.app.menu-bar-icon.style.label", defaultValue: "Icon Style", comment: "Label for icon style picker"), selection: $menuBarIconStyle) {
+                        Text(String(localized: "settings.app.menu-bar-icon.style.default-frog", defaultValue: "Default Frog", comment: "Picker option for default frog icon style")).tag("frog")
+                        Text(String(localized: "settings.app.menu-bar-icon.style.minimal-white", defaultValue: "Minimal White", comment: "Picker option for minimal white icon style")).tag("minimal")
+                        Text(String(localized: "settings.app.menu-bar-icon.style.custom-image", defaultValue: "Custom Image", comment: "Picker option for custom image icon style")).tag("custom")
                     }
                     .pickerStyle(.segmented)
                     .labelsHidden()
@@ -214,7 +214,7 @@ private struct GeneralSettingsContent: View {
                     
                     if menuBarIconStyle == "custom" {
                         HStack {
-                            Button("Choose Image...", action: selectCustomImage)
+                            Button(String(localized: "settings.app.menu-bar-icon.choose-image", defaultValue: "Choose Image...", comment: "Button title to choose a custom menu bar icon image"), action: selectCustomImage)
                                 .font(.system(size: 11, weight: .medium))
                                 .padding(.horizontal, 10).padding(.vertical, 5)
                                 .background(Color.white.opacity(0.08)).cornerRadius(5)
@@ -233,9 +233,9 @@ private struct GeneralSettingsContent: View {
                 }
             }
             
-            SettingsSection(title: "Haptics", icon: "hand.tap.fill") {
+            SettingsSection(title: String(localized: "settings.app.haptics.section-title", defaultValue: "Haptics", comment: "Section title for haptics settings"), icon: "hand.tap.fill") {
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("Feedback intensity when interacting with FrogDrop.")
+                    Text(String(localized: "settings.app.haptics.description", defaultValue: "Feedback intensity when interacting with FrogDrop.", comment: "Description text for haptics settings section"))
                         .font(.system(size: 11))
                         .foregroundColor(.secondary)
 
@@ -262,26 +262,26 @@ private struct GeneralSettingsContent: View {
                 }
             }
 
-            SettingsSection(title: "URL Shortening", icon: "link.badge.plus") {
+            SettingsSection(title: String(localized: "settings.app.url-shortening.section-title", defaultValue: "URL Shortening", comment: "Section title for URL shortening settings"), icon: "link.badge.plus") {
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("Automatically shorten copied URLs by stripping tracking parameters locally.")
+                    Text(String(localized: "settings.app.url-shortening.description", defaultValue: "Automatically shorten copied URLs by stripping tracking parameters locally.", comment: "Description text for automatic URL shortening behavior"))
                         .font(.system(size: 11))
                         .foregroundColor(.secondary)
 
-                    Toggle("Shorten Copied Links Automatically", isOn: $autoCleanURLs)
+                    Toggle(String(localized: "settings.app.url-shortening.toggle", defaultValue: "Shorten Copied Links Automatically", comment: "Toggle label to enable automatic shortening of copied links"), isOn: $autoCleanURLs)
                         .toggleStyle(.checkbox)
                         .font(.system(size: 12))
                 }
             }
 
-            SettingsSection(title: "Clipboard Retention", icon: "clock.arrow.circlepath") {
+            SettingsSection(title: String(localized: "settings.app.clipboard-retention.section-title", defaultValue: "Clipboard Retention", comment: "Section title for clipboard retention settings"), icon: "clock.arrow.circlepath") {
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("Auto-delete old unpinned clipboard items.")
+                    Text(String(localized: "settings.app.clipboard-retention.description", defaultValue: "Auto-delete old unpinned clipboard items.", comment: "Description text for clipboard auto-delete setting"))
                         .font(.system(size: 11))
                         .foregroundColor(.secondary)
 
                     HStack {
-                        Toggle("Enable Auto-delete", isOn: Binding(
+                        Toggle(String(localized: "settings.app.clipboard-retention.enable-auto-delete", defaultValue: "Enable Auto-delete", comment: "Toggle label to enable clipboard auto-delete"), isOn: Binding(
                             get: { clipboardRetentionDays > 0 },
                             set: { isOn in
                                 if isOn && clipboardRetentionDays == 0 {
@@ -297,10 +297,10 @@ private struct GeneralSettingsContent: View {
                         if clipboardRetentionDays > 0 {
                             Spacer()
                             Picker("", selection: $clipboardRetentionDays) {
-                                Text("1 Day").tag(1)
-                                Text("7 Days").tag(7)
-                                Text("14 Days").tag(14)
-                                Text("30 Days").tag(30)
+                                Text(String(localized: "settings.app.clipboard-retention.duration.one-day", defaultValue: "1 Day", comment: "Picker option for one-day clipboard retention duration")).tag(1)
+                                Text(String(localized: "settings.app.clipboard-retention.duration.seven-days", defaultValue: "7 Days", comment: "Picker option for seven-day clipboard retention duration")).tag(7)
+                                Text(String(localized: "settings.app.clipboard-retention.duration.fourteen-days", defaultValue: "14 Days", comment: "Picker option for fourteen-day clipboard retention duration")).tag(14)
+                                Text(String(localized: "settings.app.clipboard-retention.duration.thirty-days", defaultValue: "30 Days", comment: "Picker option for thirty-day clipboard retention duration")).tag(30)
                             }
                             .pickerStyle(.menu)
                             .labelsHidden()
@@ -310,9 +310,9 @@ private struct GeneralSettingsContent: View {
                 }
             }
 
-            SettingsSection(title: "Clipboard Expiry", icon: "clock.badge.xmark") {
+            SettingsSection(title: String(localized: "settings.app.clipboard-expiry.section-title", defaultValue: "Clipboard Expiry", comment: "Section title for temporary clipboard item expiry settings"), icon: "clock.badge.xmark") {
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("Auto-delete items copied from temporary applications.")
+                    Text(String(localized: "settings.app.clipboard-expiry.description", defaultValue: "Auto-delete items copied from temporary applications.", comment: "Description for automatic deletion of clipboard items from temporary apps"))
                         .font(.system(size: 11))
                         .foregroundColor(.secondary)
 
@@ -323,7 +323,7 @@ private struct GeneralSettingsContent: View {
                                 clipboardManager.saveSettings()
                             }
 
-                        Text("\(Int(clipboardManager.tempDuration))s")
+                        Text(String(format: String(localized: "settings.app.clipboard-expiry.duration-seconds", defaultValue: "%ds", comment: "Label showing temporary clipboard expiry duration in seconds"), Int(clipboardManager.tempDuration)))
                             .font(.system(size: 12, weight: .bold, design: .monospaced))
                             .foregroundColor(.orange)
                             .frame(width: 36)
@@ -331,9 +331,9 @@ private struct GeneralSettingsContent: View {
                 }
             }
 
-            SettingsSection(title: "Daily Focus Goal", icon: "target") {
+            SettingsSection(title: String(localized: "settings.app.daily-focus-goal.section-title", defaultValue: "Daily Focus Goal", comment: "Section title for configuring daily focus goal"), icon: "target") {
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("Set your daily focus target (minimum 120 minutes).")
+                    Text(String(localized: "settings.app.daily-focus-goal.description", defaultValue: "Set your daily focus target (minimum 120 minutes).", comment: "Description for daily focus goal setting"))
                         .font(.system(size: 11))
                         .foregroundColor(.secondary)
 
@@ -346,7 +346,7 @@ private struct GeneralSettingsContent: View {
                         ), in: 120...480, step: 10)
                         .accentColor(accent)
 
-                        Text("\(dailyFocusGoal)m")
+                        Text(String(format: String(localized: "settings.app.daily-focus-goal.value-minutes", defaultValue: "%dm", comment: "Label showing configured daily focus goal in minutes"), dailyFocusGoal))
                             .font(.system(size: 12, weight: .bold, design: .monospaced))
                             .foregroundColor(.orange)
                             .frame(width: 48, alignment: .trailing)
@@ -354,10 +354,10 @@ private struct GeneralSettingsContent: View {
                 }
             }
 
-            SettingsSection(title: "Appearance", icon: "slider.horizontal.3") {
+            SettingsSection(title: String(localized: "settings.app.appearance.section-title", defaultValue: "Appearance", comment: "Section title for appearance settings"), icon: "slider.horizontal.3") {
                 VStack(alignment: .leading, spacing: 14) {
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("Adjust the darkness of the menu bar popup window.")
+                        Text(String(localized: "settings.app.appearance.darkness.description", defaultValue: "Adjust the darkness of the menu bar popup window.", comment: "Description for menu bar popup darkness control"))
                             .font(.system(size: 11))
                             .foregroundColor(.secondary)
 
@@ -372,7 +372,7 @@ private struct GeneralSettingsContent: View {
                                 .foregroundColor(.secondary)
                         }
 
-                        Text(uiDimOpacity < 0.15 ? "Fully Transparent" : uiDimOpacity < 0.45 ? "Light" : uiDimOpacity < 0.75 ? "Medium" : "Dark")
+                        Text(uiDimOpacity < 0.15 ? String(localized: "settings.app.appearance.darkness.fully-transparent", defaultValue: "Fully Transparent", comment: "Appearance option for fully transparent popup style") : uiDimOpacity < 0.45 ? String(localized: "settings.app.appearance.darkness.light", defaultValue: "Light", comment: "Appearance option for light popup darkness") : uiDimOpacity < 0.75 ? String(localized: "settings.app.appearance.darkness.medium", defaultValue: "Medium", comment: "Appearance option for medium popup darkness") : String(localized: "settings.app.appearance.darkness.dark", defaultValue: "Dark", comment: "Appearance option for dark popup darkness"))
                             .font(.system(size: 10, weight: .medium, design: .rounded))
                             .foregroundColor(.secondary)
                     }
@@ -381,18 +381,18 @@ private struct GeneralSettingsContent: View {
                         .background(Color.white.opacity(0.06))
                     
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Popup Window Style")
+                        Text(String(localized: "settings.app.appearance.popup-window-style.label", defaultValue: "Popup Window Style", comment: "Label for selecting popup window style"))
                             .font(.system(size: 12, weight: .medium))
                             .foregroundColor(.primary)
                         
                         Picker("", selection: $popupStyle) {
-                            Text("Popover (Classic)").tag("popover")
-                            Text("Panel (WiFi Style)").tag("panel")
+                            Text(String(localized: "settings.app.appearance.popup-window-style.popover-classic", defaultValue: "Popover (Classic)", comment: "Option label for classic popover window style")).tag("popover")
+                            Text(String(localized: "settings.app.appearance.popup-window-style.panel-wifi-style", defaultValue: "Panel (WiFi Style)", comment: "Option label for panel style popup window")).tag("panel")
                         }
                         .pickerStyle(.segmented)
                         .onChange(of: popupStyle) { _, _ in HapticManager.shared.click() }
                         
-                        Text(popupStyle == "popover" ? "Classic popover anchored with a pointer arrow to the status item." : "Floating window style directly below the status item, matching native system menus.")
+                        Text(popupStyle == "popover" ? String(localized: "settings.app.appearance.popup-window-style.popover-classic.description", defaultValue: "Classic popover anchored with a pointer arrow to the status item.", comment: "Description of classic popover style option") : String(localized: "settings.app.appearance.popup-window-style.panel-wifi-style.description", defaultValue: "Floating window style directly below the status item, matching native system menus.", comment: "Description of panel style popup option"))
                             .font(.system(size: 11))
                             .foregroundColor(.secondary)
                             .padding(.top, 2)
@@ -400,11 +400,11 @@ private struct GeneralSettingsContent: View {
                 }
             }
 
-            SettingsSection(title: "Updates & About", icon: "sparkles") {
+            SettingsSection(title: String(localized: "settings.app.updates-about.section-title", defaultValue: "Updates & About", comment: "Section title for updates and about information in settings"), icon: "sparkles") {
                 VStack(alignment: .leading, spacing: 12) {
-                    SettingsInfoRow(label: "Current Version", value: UpdateManager.shared.currentVersion)
-                    SettingsInfoRow(label: "Build", value: "Release (Open Source)")
-                    SettingsInfoRow(label: "Platform", value: "macOS 14+ (Apple Silicon & Intel)")
+                    SettingsInfoRow(label: String(localized: "settings.app.updates-about.current-version.label", defaultValue: "Current Version", comment: "Label for current app version row"), value: UpdateManager.shared.currentVersion)
+                    SettingsInfoRow(label: String(localized: "settings.app.updates-about.build.label", defaultValue: "Build", comment: "Label for build information row"), value: String(localized: "settings.app.updates-about.build.value.release-open-source", defaultValue: "Release (Open Source)", comment: "Build type value shown in updates and about section"))
+                    SettingsInfoRow(label: String(localized: "settings.app.updates-about.platform.label", defaultValue: "Platform", comment: "Label for platform information row"), value: String(localized: "settings.app.updates-about.platform.value.macos14-apple-silicon-intel", defaultValue: "macOS 14+ (Apple Silicon & Intel)", comment: "Platform requirement value shown in updates and about section"))
                     
                     Divider().background(Color.white.opacity(0.06))
                     
@@ -428,7 +428,7 @@ private struct DashboardUpdateView: View {
                         Image(systemName: "sparkles")
                             .foregroundColor(accent)
                             .font(.system(size: 14))
-                        Text("\(updateManager.latestVersion) Available!")
+                        Text(String(format: String(localized: "settings.app.updates-about.update-available.version", defaultValue: "%@ Available!", comment: "Update availability message with latest version number"), "\(updateManager.latestVersion)"))
                             .font(.system(size: 13, weight: .bold, design: .rounded))
                             .foregroundColor(accent)
                         Spacer()
@@ -456,7 +456,7 @@ private struct DashboardUpdateView: View {
                         }) {
                             HStack(spacing: 6) {
                                 Image(systemName: "arrow.triangle.2.circlepath.circle.fill")
-                                Text("Update & Relaunch Now")
+                                Text(String(localized: "settings.app.updates-about.update-relaunch-now.button", defaultValue: "Update & Relaunch Now", comment: "Primary action button title to install update and relaunch immediately"))
                             }
                             .font(.system(size: 11, weight: .bold, design: .rounded))
                             .foregroundColor(.black)
@@ -474,12 +474,12 @@ private struct DashboardUpdateView: View {
             } else {
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(updateManager.statusMessage.isEmpty ? "FrogDrop is up to date" : updateManager.statusMessage)
+                        Text(updateManager.statusMessage.isEmpty ? String(localized: "settings.app.updates-about.up-to-date.message", defaultValue: "FrogDrop is up to date", comment: "Status message when app is already on the latest version") : updateManager.statusMessage)
                             .font(.system(size: 12, weight: .medium, design: .rounded))
                             .foregroundColor(updateManager.errorMessage != nil ? .red : .secondary)
                         
                         if let date = updateManager.lastCheckDate {
-                            Text("Last checked: \(date.formatted(date: .abbreviated, time: .shortened))")
+                            Text(String(format: String(localized: "settings.app.updates-about.last-checked", defaultValue: "Last checked: %@", comment: "Status text showing last successful update check timestamp"), "\(date.formatted(date: .abbreviated, time: .shortened))"))
                                 .font(.system(size: 10))
                                 .foregroundColor(.secondary.opacity(0.6))
                         }
@@ -497,7 +497,7 @@ private struct DashboardUpdateView: View {
                         }) {
                             HStack(spacing: 5) {
                                 Image(systemName: "arrow.clockwise")
-                                Text("Check for Updates")
+                                Text(String(localized: "settings.app.updates-about.check-for-updates.button", defaultValue: "Check for Updates", comment: "Button title to manually check for updates"))
                             }
                             .font(.system(size: 11, weight: .semibold, design: .rounded))
                             .foregroundColor(.primary)
@@ -521,10 +521,10 @@ private struct GridSettingsContent: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            SettingsSection(title: "Folders & Apps", icon: "folder.fill") {
+            SettingsSection(title: String(localized: "settings.app.folders-apps.section-title", defaultValue: "Folders & Apps", comment: "Section title for folders and app integrations settings"), icon: "folder.fill") {
                 VStack(alignment: .leading, spacing: 8) {
                     if manager.customFolders.isEmpty {
-                        Text("No folders added yet.")
+                        Text(String(localized: "settings.app.folders-apps.empty-state", defaultValue: "No folders added yet.", comment: "Empty state message when no custom folders are configured"))
                             .font(.system(size: 11))
                             .foregroundColor(.secondary)
                     } else {
@@ -551,7 +551,7 @@ private struct GridSettingsContent: View {
                     Button(action: { selectFolder() }) {
                         HStack(spacing: 6) {
                             Image(systemName: "plus.circle.fill")
-                            Text("Add Folder...")
+                            Text(String(localized: "settings.app.folders-apps.add-folder.button", defaultValue: "Add Folder...", comment: "Button title to add a new folder to monitored list"))
                         }
                         .font(.system(size: 12, weight: .semibold, design: .rounded))
                         .foregroundColor(accent)
@@ -561,24 +561,24 @@ private struct GridSettingsContent: View {
                 }
             }
 
-            SettingsSection(title: "Built-in Actions", icon: "bolt.fill") {
+            SettingsSection(title: String(localized: "settings.app.builtin-actions.section-title", defaultValue: "Built-in Actions", comment: "Section title for built-in action toggles"), icon: "bolt.fill") {
                 VStack(spacing: 8) {
-                    ToggleActionRow(title: "Inspect EXIF", actionType: "inspectEXIF")
-                    ToggleActionRow(title: "Extract Text (OCR)", actionType: "ocr")
-                    ToggleActionRow(title: "Convert to Web (AVIF)", actionType: "webp")
-                    ToggleActionRow(title: "Compress Image", actionType: "compress")
-                    ToggleActionRow(title: "Strip EXIF Metadata", actionType: "stripMetadata")
-                    ToggleActionRow(title: "Merge PDFs", actionType: "mergePDF")
-                    ToggleActionRow(title: "Pick Screen Color", actionType: "pickColor")
-                    ToggleActionRow(title: "AirDrop", actionType: "airdrop")
-                    ToggleActionRow(title: "Send via Email", actionType: "email")
-                    ToggleActionRow(title: "Upload to Imgur", actionType: "imgur")
-                    ToggleActionRow(title: "Shorten URL", actionType: "shortenURL")
-                    ToggleActionRow(title: "Zip Files", actionType: "zip")
-                    ToggleActionRow(title: "Resize Image (800px)", actionType: "resizeImage")
-                    ToggleActionRow(title: "Convert to PNG", actionType: "convertImage")
-                    ToggleActionRow(title: "Copy File Path", actionType: "copyPath")
-                    ToggleActionRow(title: "Open Path", actionType: "openPath")
+                    ToggleActionRow(title: String(localized: "settings.app.builtin-actions.inspect-exif", defaultValue: "Inspect EXIF", comment: "Label for built-in action that inspects EXIF metadata"), actionType: "inspectEXIF")
+                    ToggleActionRow(title: String(localized: "settings.app.builtin-actions.extract-text-ocr", defaultValue: "Extract Text (OCR)", comment: "Label for built-in action that extracts text via OCR"), actionType: "ocr")
+                    ToggleActionRow(title: String(localized: "settings.app.builtin-actions.convert-to-web-avif", defaultValue: "Convert to Web (AVIF)", comment: "Label for built-in action that converts images to AVIF format"), actionType: "webp")
+                    ToggleActionRow(title: String(localized: "settings.app.builtin-actions.compress-image", defaultValue: "Compress Image", comment: "Label for built-in action that compresses an image"), actionType: "compress")
+                    ToggleActionRow(title: String(localized: "settings.app.builtin-actions.strip-exif-metadata", defaultValue: "Strip EXIF Metadata", comment: "Label for built-in action that removes EXIF metadata"), actionType: "stripMetadata")
+                    ToggleActionRow(title: String(localized: "settings.app.builtin-actions.merge-pdfs", defaultValue: "Merge PDFs", comment: "Label for built-in action that merges PDF files"), actionType: "mergePDF")
+                    ToggleActionRow(title: String(localized: "settings.app.builtin-actions.pick-screen-color", defaultValue: "Pick Screen Color", comment: "Label for built-in action that samples a color from the screen"), actionType: "pickColor")
+                    ToggleActionRow(title: String(localized: "settings.app.builtin-actions.airdrop", defaultValue: "AirDrop", comment: "Label for built-in action that shares via AirDrop"), actionType: "airdrop")
+                    ToggleActionRow(title: String(localized: "settings.app.builtin-actions.send-via-email", defaultValue: "Send via Email", comment: "Label for built-in action that sends content via email"), actionType: "email")
+                    ToggleActionRow(title: String(localized: "settings.app.builtin-actions.upload-to-imgur", defaultValue: "Upload to Imgur", comment: "Label for built-in action that uploads content to Imgur"), actionType: "imgur")
+                    ToggleActionRow(title: String(localized: "settings.app.builtin-actions.shorten-url", defaultValue: "Shorten URL", comment: "Label for built-in action that shortens a URL"), actionType: "shortenURL")
+                    ToggleActionRow(title: String(localized: "settings.app.builtin-actions.zip-files", defaultValue: "Zip Files", comment: "Label for built-in action that zips selected files"), actionType: "zip")
+                    ToggleActionRow(title: String(localized: "settings.app.builtin-actions.resize-image-800px", defaultValue: "Resize Image (800px)", comment: "Label for built-in action that resizes image to 800 pixels"), actionType: "resizeImage")
+                    ToggleActionRow(title: String(localized: "settings.app.builtin-actions.convert-to-png", defaultValue: "Convert to PNG", comment: "Label for built-in action that converts content to PNG format"), actionType: "convertImage")
+                    ToggleActionRow(title: String(localized: "settings.app.builtin-actions.copy-file-path", defaultValue: "Copy File Path", comment: "Label for built-in action that copies file path"), actionType: "copyPath")
+                    ToggleActionRow(title: String(localized: "settings.app.builtin-actions.open-path", defaultValue: "Open Path", comment: "Label for built-in action that opens a file path"), actionType: "openPath")
                 }
             }
         }
@@ -607,10 +607,10 @@ private struct RulesSettingsContent: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            SettingsSection(title: "App Preferences", icon: "app.badge.checkmark") {
+            SettingsSection(title: String(localized: "settings.app.rules.app-preferences.section-title", defaultValue: "App Preferences", comment: "Section title for app-specific rule preferences"), icon: "app.badge.checkmark") {
                 VStack(alignment: .leading, spacing: 8) {
                     if clipboardManager.customRules.isEmpty {
-                        Text("No rules yet. Add one below.")
+                        Text(String(localized: "settings.app.rules.empty-state", defaultValue: "No rules yet. Add one below.", comment: "Empty state message when no rules are configured"))
                             .font(.system(size: 11))
                             .foregroundColor(.secondary)
                     } else {
@@ -622,11 +622,11 @@ private struct RulesSettingsContent: View {
                                 Spacer()
                                 
                                 Menu {
-                                    Button("Save (Permanent)") { clipboardManager.updateRule(id: rule.id, newType: .save) }
-                                    Button("Temporary") { clipboardManager.updateRule(id: rule.id, newType: .temporary) }
-                                    Button("Ignore (Don't Save)") { clipboardManager.updateRule(id: rule.id, newType: .ignore) }
+                                    Button(String(localized: "settings.app.rules.action.save-permanent", defaultValue: "Save (Permanent)", comment: "Rule action option to save item permanently")) { clipboardManager.updateRule(id: rule.id, newType: .save) }
+                                    Button(String(localized: "settings.app.rules.action.temporary", defaultValue: "Temporary", comment: "Rule action option to save item temporarily")) { clipboardManager.updateRule(id: rule.id, newType: .temporary) }
+                                    Button(String(localized: "settings.app.rules.action.ignore-dont-save", defaultValue: "Ignore (Don't Save)", comment: "Rule action option to ignore item and not save it")) { clipboardManager.updateRule(id: rule.id, newType: .ignore) }
                                     Divider()
-                                    Button("Delete Rule", role: .destructive) { clipboardManager.removeRule(id: rule.id) }
+                                    Button(String(localized: "settings.app.rules.delete-rule.button", defaultValue: "Delete Rule", comment: "Button title to delete an existing rule"), role: .destructive) { clipboardManager.removeRule(id: rule.id) }
                                 } label: {
                                     HStack(spacing: 4) {
                                         Text(rule.ruleType.rawValue.capitalized)
@@ -652,16 +652,16 @@ private struct RulesSettingsContent: View {
             }
 
             // Fixed and improved Add Rule UI
-            SettingsSection(title: "Add Rule", icon: "plus.circle") {
+            SettingsSection(title: String(localized: "settings.app.rules.add-rule.button", defaultValue: "Add Rule", comment: "Button title to add a new rule"), icon: "plus.circle") {
                 VStack(alignment: .leading, spacing: 12) {
                     // Entry Mode Selector
                     HStack(spacing: 8) {
-                        Text("Source:")
+                        Text(String(localized: "settings.app.rules.source.label", defaultValue: "Source:", comment: "Label for rule source field"))
                             .font(.system(size: 11))
                             .foregroundColor(.secondary)
                         
                         Button(action: { isManualAppEntry = false }) {
-                            Text("Running Apps")
+                            Text(String(localized: "settings.app.rules.source.running-apps", defaultValue: "Running Apps", comment: "Source mode label for selecting currently running applications"))
                                 .font(.system(size: 10, weight: !isManualAppEntry ? .bold : .medium))
                                 .foregroundColor(!isManualAppEntry ? accent : .secondary)
                                 .padding(.horizontal, 8)
@@ -671,7 +671,7 @@ private struct RulesSettingsContent: View {
                         .buttonStyle(.plain)
 
                         Button(action: { isManualAppEntry = true }) {
-                            Text("Manual Entry")
+                            Text(String(localized: "settings.app.rules.source.manual-entry", defaultValue: "Manual Entry", comment: "Source mode label for manually entering application name"))
                                 .font(.system(size: 10, weight: isManualAppEntry ? .bold : .medium))
                                 .foregroundColor(isManualAppEntry ? accent : .secondary)
                                 .padding(.horizontal, 8)
@@ -684,7 +684,7 @@ private struct RulesSettingsContent: View {
 
                     // Input Row
                     if isManualAppEntry {
-                        TextField("Type application name (e.g. Xcode)", text: $newRuleAppName)
+                        TextField(String(localized: "settings.app.rules.source.manual-entry.placeholder", defaultValue: "Type application name (e.g. Xcode)", comment: "Placeholder text for manual app name entry field"), text: $newRuleAppName)
                             .textFieldStyle(.plain)
                             .font(.system(size: 12, design: .rounded))
                             .padding(.horizontal, 10)
@@ -698,7 +698,7 @@ private struct RulesSettingsContent: View {
                     } else {
                         Picker("", selection: $selectedRunningApp) {
                             if runningApps.isEmpty {
-                                Text("No active apps found").tag("")
+                                Text(String(localized: "settings.app.rules.source.running-apps.empty-state", defaultValue: "No active apps found", comment: "Message shown when no running applications are detected")).tag("")
                             } else {
                                 ForEach(runningApps, id: \.self) { app in
                                     Text(app).tag(app)
@@ -720,10 +720,10 @@ private struct RulesSettingsContent: View {
 
                     // Preference Row
                     HStack(spacing: 12) {
-                        Picker("Behavior", selection: $newRuleType) {
-                            Text("Temporary Expiry").tag(ClipboardPreferenceRule.RuleType.temporary)
-                            Text("Ignore (Don't Save)").tag(ClipboardPreferenceRule.RuleType.ignore)
-                            Text("Save Permanent").tag(ClipboardPreferenceRule.RuleType.save)
+                        Picker(String(localized: "settings.app.rules.behavior.label", defaultValue: "Behavior", comment: "Label for rule behavior selection control"), selection: $newRuleType) {
+                            Text(String(localized: "settings.app.rules.behavior.temporary-expiry", defaultValue: "Temporary Expiry", comment: "Behavior option label for temporary expiry action")).tag(ClipboardPreferenceRule.RuleType.temporary)
+                            Text(String(localized: "settings.app.rules.behavior.ignore-dont-save", defaultValue: "Ignore (Don't Save)", comment: "Behavior option label for ignoring and not saving items")).tag(ClipboardPreferenceRule.RuleType.ignore)
+                            Text(String(localized: "settings.app.rules.behavior.save-permanent", defaultValue: "Save Permanent", comment: "Behavior option label for permanently saving items")).tag(ClipboardPreferenceRule.RuleType.save)
                         }
                         .labelsHidden()
                         .pickerStyle(.menu)
@@ -747,7 +747,7 @@ private struct RulesSettingsContent: View {
                             newRuleAppName = ""
                             HapticManager.shared.success()
                         }) {
-                            Text("Add Rule")
+                            Text(String(localized: "settings.app.rules.add-rule.confirm-button", defaultValue: "Add Rule", comment: "Confirmation button title for adding a new app rule"))
                                 .font(.system(size: 11, weight: .bold, design: .rounded))
                                 .foregroundColor(.black)
                                 .padding(.horizontal, 16)
