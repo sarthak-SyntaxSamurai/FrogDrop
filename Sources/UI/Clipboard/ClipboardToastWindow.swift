@@ -20,7 +20,7 @@ struct ClipboardToastView: View {
                 .background(Color.orange.opacity(0.12))
                 .clipShape(Circle())
             
-            Text("Temporary Item")
+            Text(String(localized: "clipboard-toast.item-type.temporary", defaultValue: "Temporary Item", bundle: .main, comment: "Label shown for temporary clipboard items"))
                 .font(.system(size: 10, weight: .semibold, design: .rounded))
                 .foregroundColor(.white.opacity(0.9))
             
@@ -29,7 +29,7 @@ struct ClipboardToastView: View {
             Button(action: {
                 onStayClicked()
             }) {
-                Text("Stay")
+                Text(String(localized: "clipboard-toast.action.stay", defaultValue: "Stay", bundle: .main, comment: "Button title to keep a temporary clipboard item"))
                     .font(.system(size: 9, weight: .bold, design: .rounded))
                     .foregroundColor(.black)
                     .padding(.horizontal, 6)
