@@ -1,0 +1,280 @@
+name: Swift Post-Localization Build Verify (Quetzal)
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch to verify (localized changes branch)"
+        required: true
+        type: string
+      job_id:
+        description: "Apply job id (for traceability)"
+        required: false
+        default: ""
+        type: string
+      project_id:
+        description: "Project id (for traceability)"
+        required: false
+        default: ""
+        type: string
+      integration_id:
+        description: "Integration id (for traceability)"
+        required: false
+        default: ""
+        type: string
+      xcode_version:
+        description: "Xcode version (e.g. 16.4, latest, latest-stable)"
+        required: false
+        default: "latest"
+        type: string
+      scheme:
+        description: "Explicit xcodebuild scheme (optional)"
+        required: false
+        default: ""
+        type: string
+      xcode_workspace_or_project:
+        description: "Optional path to .xcworkspace or .xcodeproj from repo root"
+        required: false
+        default: ""
+        type: string
+      build_system:
+        description: "Build system: auto | xcode | spm (from Kowalski / apply job)"
+        required: false
+        default: "auto"
+        type: string
+      package_path:
+        description: "Directory containing Package.swift when build_system=spm (e.g. src)"
+        required: false
+        default: ""
+        type: string
+
+jobs:
+  verify-swift-build:
+    runs-on: macos-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout target branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Select Xcode version
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ inputs.xcode_version }}
+
+      - name: Resolve build system (Xcode vs SPM)
+        id: resolve-build
+        run: |
+          set -euo pipefail
+          echo "[verify] Starting build-system discovery"
+          echo "[verify] Inputs: branch='${{ inputs.branch }}' build_system='${{ inputs.build_system }}' package_path='${{ inputs.package_path }}' xcode_workspace_or_project='${{ inputs.xcode_workspace_or_project }}' scheme='${{ inputs.scheme }}'"
+
+          BUILD_SYSTEM_INPUT='${{ inputs.build_system }}'
+          BUILD_SYSTEM_INPUT="$(echo "$BUILD_SYSTEM_INPUT" | tr '[:upper:]' '[:lower:]' | xargs)"
+          PACKAGE_PATH_INPUT='${{ inputs.package_path }}'
+          PACKAGE_PATH_INPUT="${PACKAGE_PATH_INPUT#"${PACKAGE_PATH_INPUT%%[![:space:]]*}"}"
+          PACKAGE_PATH_INPUT="${PACKAGE_PATH_INPUT%"${PACKAGE_PATH_INPUT##*[![:space:]]}"}"
+          PATH_OVERRIDE='${{ inputs.xcode_workspace_or_project }}'
+          PATH_OVERRIDE="${PATH_OVERRIDE#"${PATH_OVERRIDE%%[![:space:]]*}"}"
+          PATH_OVERRIDE="${PATH_OVERRIDE%"${PATH_OVERRIDE##*[![:space:]]}"}"
+
+          # Ignore dependency / derived trees so Sparkle/Yams checkouts do not look like the app.
+          find_repo_xcodeproj() {
+            find . \( -name .git -o -name .build -o -name build -o -name DerivedData -o -name checkouts -o -name Pods -o -name Carthage -o -name node_modules -o -name .swiftpm \) -prune -o -name "*.xcodeproj" -type d -print 2>/dev/null | head -n 1 || true
+          }
+          find_repo_xcworkspace() {
+            find . \( -name .git -o -name .build -o -name build -o -name DerivedData -o -name checkouts -o -name Pods -o -name Carthage -o -name node_modules -o -name .swiftpm \) -prune -o -name "*.xcworkspace" -type d -print 2>/dev/null \
+              | grep -v '\.xcodeproj/project\.xcworkspace$' \
+              | head -n 1 || true
+          }
+          find_repo_package_swift() {
+            find . \( -name .git -o -name .build -o -name build -o -name DerivedData -o -name checkouts -o -name Pods -o -name Carthage -o -name node_modules -o -name .swiftpm \) -prune -o -name "Package.swift" -type f -print 2>/dev/null \
+              | awk '{
+                  depth = gsub(/\//, "/", $0);
+                  print depth "\t" $0
+                }' \
+              | sort -n \
+              | head -n 1 \
+              | cut -f2- || true
+          }
+
+          XCODE_WORKSPACE=""
+          XCODE_PROJECT=""
+          PACKAGE_SWIFT=""
+          PACKAGE_PATH=""
+          BUILD_SYSTEM=""
+
+          if [ -n "$PATH_OVERRIDE" ]; then
+            echo "[verify] Using explicit Xcode path override: $PATH_OVERRIDE"
+            BUILD_SYSTEM="xcode"
+            if [ ! -e "$PATH_OVERRIDE" ]; then
+              echo "::error::Path does not exist: $PATH_OVERRIDE"
+              exit 1
+            fi
+            case "$PATH_OVERRIDE" in
+              *.xcworkspace)
+                XCODE_WORKSPACE="$PATH_OVERRIDE"
+                if [[ "$XCODE_WORKSPACE" == *.xcodeproj/project.xcworkspace ]]; then
+                  XCODE_PROJECT="$(dirname "$XCODE_WORKSPACE")"
+                else
+                  XCODE_PROJECT=$(find_repo_xcodeproj)
+                  if [ -z "$XCODE_PROJECT" ]; then
+                    echo "::error::Could not find a .xcodeproj for workspace $XCODE_WORKSPACE"
+                    exit 1
+                  fi
+                fi
+                ;;
+              *.xcodeproj)
+                XCODE_PROJECT="$PATH_OVERRIDE"
+                if [ -d "$XCODE_PROJECT/project.xcworkspace" ]; then
+                  XCODE_WORKSPACE="$XCODE_PROJECT/project.xcworkspace"
+                fi
+                ;;
+              *)
+                echo "::error::xcode_workspace_or_project must end with .xcworkspace or .xcodeproj"
+                exit 1
+                ;;
+            esac
+          elif [ "$BUILD_SYSTEM_INPUT" = "spm" ]; then
+            BUILD_SYSTEM="spm"
+            if [ -n "$PACKAGE_PATH_INPUT" ]; then
+              PACKAGE_PATH="$PACKAGE_PATH_INPUT"
+            else
+              PACKAGE_SWIFT=$(find_repo_package_swift)
+              if [ -z "$PACKAGE_SWIFT" ]; then
+                echo "::error::build_system=spm but no Package.swift found in the repository"
+                exit 1
+              fi
+              PACKAGE_PATH="$(dirname "$PACKAGE_SWIFT")"
+              PACKAGE_PATH="${PACKAGE_PATH#./}"
+              if [ -z "$PACKAGE_PATH" ]; then PACKAGE_PATH="."; fi
+            fi
+            if [ ! -f "$PACKAGE_PATH/Package.swift" ]; then
+              echo "::error::No Package.swift at package_path='$PACKAGE_PATH'"
+              exit 1
+            fi
+          elif [ "$BUILD_SYSTEM_INPUT" = "xcode" ]; then
+            BUILD_SYSTEM="xcode"
+            XCODE_WORKSPACE=$(find_repo_xcworkspace)
+            XCODE_PROJECT=$(find_repo_xcodeproj)
+            if [ -z "$XCODE_WORKSPACE" ] && [ -z "$XCODE_PROJECT" ]; then
+              echo "::error::build_system=xcode but no .xcodeproj or .xcworkspace found"
+              exit 1
+            fi
+          else
+            # auto: prefer Xcode when present, otherwise SPM
+            XCODE_WORKSPACE=$(find_repo_xcworkspace)
+            XCODE_PROJECT=$(find_repo_xcodeproj)
+            PACKAGE_SWIFT=$(find_repo_package_swift)
+            if [ -n "$XCODE_WORKSPACE" ] || [ -n "$XCODE_PROJECT" ]; then
+              BUILD_SYSTEM="xcode"
+              echo "[verify] Auto-detected Xcode project/workspace"
+            elif [ -n "$PACKAGE_SWIFT" ]; then
+              BUILD_SYSTEM="spm"
+              PACKAGE_PATH="$(dirname "$PACKAGE_SWIFT")"
+              PACKAGE_PATH="${PACKAGE_PATH#./}"
+              if [ -z "$PACKAGE_PATH" ]; then PACKAGE_PATH="."; fi
+              echo "[verify] Auto-detected Swift package at $PACKAGE_PATH ($PACKAGE_SWIFT)"
+            else
+              echo "::error::No .xcodeproj, .xcworkspace, or Package.swift found"
+              exit 1
+            fi
+          fi
+
+          echo "build_system=$BUILD_SYSTEM" >> "$GITHUB_OUTPUT"
+
+          if [ "$BUILD_SYSTEM" = "spm" ]; then
+            echo "package_path=$PACKAGE_PATH" >> "$GITHUB_OUTPUT"
+            echo "project_path=" >> "$GITHUB_OUTPUT"
+            echo "project_type=spm" >> "$GITHUB_OUTPUT"
+            echo "scheme=" >> "$GITHUB_OUTPUT"
+            echo "[verify] Final build_system=spm package_path=$PACKAGE_PATH"
+            exit 0
+          fi
+
+          if [ -n "$XCODE_WORKSPACE" ]; then
+            echo "[verify] Resolved workspace: $XCODE_WORKSPACE"
+            echo "project_path=$XCODE_WORKSPACE" >> "$GITHUB_OUTPUT"
+            echo "project_type=workspace" >> "$GITHUB_OUTPUT"
+          elif [ -n "$XCODE_PROJECT" ]; then
+            echo "[verify] Resolved project: $XCODE_PROJECT"
+            echo "project_path=$XCODE_PROJECT" >> "$GITHUB_OUTPUT"
+            echo "project_type=project" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::No .xcodeproj or .xcworkspace found"
+            exit 1
+          fi
+
+          # Prefer embedded project.xcworkspace for xcodebuild (matches swift-strings-extraction.yml)
+          if [ -n "$XCODE_PROJECT" ] && [ -d "$XCODE_PROJECT/project.xcworkspace" ]; then
+            if [ -z "$PATH_OVERRIDE" ] || [[ "$PATH_OVERRIDE" == *.xcodeproj ]]; then
+              XCODE_WORKSPACE="$XCODE_PROJECT/project.xcworkspace"
+              echo "[verify] Using project.xcworkspace inside .xcodeproj: $XCODE_WORKSPACE"
+              echo "project_path=$XCODE_WORKSPACE" >> "$GITHUB_OUTPUT"
+              echo "project_type=workspace" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+          if [ -n "${{ inputs.scheme }}" ]; then
+            SCHEME="${{ inputs.scheme }}"
+            echo "[verify] Using explicit scheme input: $SCHEME"
+          elif [ -n "$XCODE_WORKSPACE" ]; then
+            SCHEME=$(xcodebuild -list -workspace "$XCODE_WORKSPACE" 2>/dev/null | grep -A 100 "Schemes:" | grep -v "Schemes:" | head -n 1 | xargs || true)
+            if [ -z "$SCHEME" ] && [ -n "$XCODE_PROJECT" ]; then
+              SCHEME=$(basename "$XCODE_PROJECT" .xcodeproj)
+            fi
+          else
+            SCHEME=$(xcodebuild -list -project "$XCODE_PROJECT" 2>/dev/null | grep -A 100 "Schemes:" | grep -v "Schemes:" | head -n 1 | xargs || true)
+            if [ -z "$SCHEME" ]; then
+              SCHEME=$(basename "$XCODE_PROJECT" .xcodeproj)
+            fi
+          fi
+
+          if [ -z "$SCHEME" ]; then
+            echo "::error::Failed to determine Xcode scheme"
+            exit 1
+          fi
+          echo "[verify] Final selected scheme: $SCHEME"
+          echo "scheme=$SCHEME" >> "$GITHUB_OUTPUT"
+          echo "package_path=" >> "$GITHUB_OUTPUT"
+          echo "[verify] Final build_system=xcode scheme=$SCHEME"
+
+      - name: Make build script available
+        run: |
+          set -euo pipefail
+          mkdir -p .quetzal/scripts
+          if [ ! -f ".quetzal/scripts/build_post_localization_verify.sh" ]; then
+            echo "::error::.quetzal/scripts/build_post_localization_verify.sh is missing on branch ${{ inputs.branch }}. Ensure the Quetzal workflow bootstrap ran on the default branch, then merge or cherry-pick that commit."
+            exit 1
+          fi
+          chmod +x .quetzal/scripts/build_post_localization_verify.sh
+
+      - name: Run full build verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          BUILD_SYSTEM='${{ steps.resolve-build.outputs.build_system }}'
+          if [ "$BUILD_SYSTEM" = "spm" ]; then
+            bash ./.quetzal/scripts/build_post_localization_verify.sh \
+              spm \
+              "${{ steps.resolve-build.outputs.package_path }}" \
+              "Debug"
+          else
+            bash ./.quetzal/scripts/build_post_localization_verify.sh \
+              xcode \
+              "${{ steps.resolve-build.outputs.project_path }}" \
+              "${{ steps.resolve-build.outputs.scheme }}" \
+              "Debug"
+          fi
+
+      - name: Upload build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: post-localization-build-verify-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            build_output_post_localization.log
+          retention-days: 30
+          if-no-files-found: warn
