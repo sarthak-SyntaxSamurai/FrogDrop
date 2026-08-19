@@ -432,7 +432,11 @@ struct EXIFInspectorView: View {
                         localized: "exif.inspector.action.done",
                         defaultValue: "Done",
                         comment: "Confirmation button title after finishing metadata cleanup."
-                    ) : "Exit")
+                    ) : String(
+                        localized: "exif.inspector.action.close",
+                        defaultValue: "Close",
+                        comment: "Button title to close the metadata cleanup UI."
+                    ))
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundColor(.primary)
                         .padding(.horizontal, 16)
