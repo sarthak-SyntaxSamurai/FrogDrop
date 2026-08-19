@@ -179,12 +179,36 @@ enum TimerDuration: Int, CaseIterable {
     
     var label: String {
         switch self {
-        case .cancel: return String(localized: "timer.duration.cancel", defaultValue: "Cancel", comment: "Label for cancelling timer selection in tongue overlay")
-        case .min5: return String(localized: "timer.duration.minutes-5", defaultValue: "5m", comment: "Label for five-minute timer duration")
-        case .min15: return String(localized: "timer.duration.minutes-15", defaultValue: "15m", comment: "Label for fifteen-minute timer duration")
-        case .min30: return String(localized: "timer.duration.minutes-30", defaultValue: "30m", comment: "Label for thirty-minute timer duration")
-        case .hour1: return String(localized: "timer.duration.hours-1", defaultValue: "1h", comment: "Label for one-hour timer duration")
-        case .hour2: return String(localized: "timer.duration.hours-2", defaultValue: "2h", comment: "Label for two-hour timer duration")
+        case .cancel: return String(
+            localized: "timer.duration.cancel",
+            defaultValue: "Cancel",
+            comment: "Label for cancelling timer selection in tongue overlay"
+        )
+        case .min5: return String(
+            localized: "timer.duration.minutes-5",
+            defaultValue: "5m",
+            comment: "Label for five-minute timer duration"
+        )
+        case .min15: return String(
+            localized: "timer.duration.minutes-15",
+            defaultValue: "15m",
+            comment: "Label for fifteen-minute timer duration"
+        )
+        case .min30: return String(
+            localized: "timer.duration.minutes-30",
+            defaultValue: "30m",
+            comment: "Label for thirty-minute timer duration"
+        )
+        case .hour1: return String(
+            localized: "timer.duration.hours-1",
+            defaultValue: "1h",
+            comment: "Label for one-hour timer duration"
+        )
+        case .hour2: return String(
+            localized: "timer.duration.hours-2",
+            defaultValue: "2h",
+            comment: "Label for two-hour timer duration"
+        )
         }
     }
     
