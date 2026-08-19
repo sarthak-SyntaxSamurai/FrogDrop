@@ -126,11 +126,19 @@ class TimerManager: ObservableObject {
                     timer.isBreakActive = true
                     timer.secondsRemaining = timer.breakDuration
                     timer.totalSeconds = timer.breakDuration
-                    sendSessionCompleteNotification(title: String(localized: "timer.notification.focus-session-finished.title", defaultValue: "Focus Session Finished! ☕", comment: "Title for notification when a pomodoro focus session ends and break starts."), body: "Time for a \(Int(timer.breakDuration / 60)) min break. Great job!")
+                    sendSessionCompleteNotification(title: String(
+                        localized: "timer.notification.focus-session-finished.title",
+                        defaultValue: "Focus Session Finished! ☕",
+                        comment: "Title for notification when a pomodoro focus session ends and break starts."
+                    ), body: "Time for a \(Int(timer.breakDuration / 60)) min break. Great job!")
                     updatedTimers.append(timer)
                 } else {
                     // All cycles finished
-                    sendSessionCompleteNotification(title: String(localized: "timer.notification.pomodoro-finished.title", defaultValue: "Pomodoro Finished! 🏆", comment: "Title for notification when all pomodoro cycles are completed."), body: "All \(timer.totalCycles) cycles completed! You earned golden flies.")
+                    sendSessionCompleteNotification(title: String(
+                        localized: "timer.notification.pomodoro-finished.title",
+                        defaultValue: "Pomodoro Finished! 🏆",
+                        comment: "Title for notification when all pomodoro cycles are completed."
+                    ), body: "All \(timer.totalCycles) cycles completed! You earned golden flies.")
                 }
             } else {
                 // Break session finished
@@ -138,14 +146,22 @@ class TimerManager: ObservableObject {
                 timer.currentCycle += 1
                 timer.secondsRemaining = timer.focusDuration
                 timer.totalSeconds = timer.focusDuration
-                sendSessionCompleteNotification(title: String(localized: "timer.notification.break-finished.title", defaultValue: "Break Finished! 🐸", comment: "Title for notification when a pomodoro break ends and next focus cycle begins."), body: "Time to focus on: \(timer.name). Cycle \(timer.currentCycle) of \(timer.totalCycles).")
+                sendSessionCompleteNotification(title: String(
+                    localized: "timer.notification.break-finished.title",
+                    defaultValue: "Break Finished! 🐸",
+                    comment: "Title for notification when a pomodoro break ends and next focus cycle begins."
+                ), body: "Time to focus on: \(timer.name). Cycle \(timer.currentCycle) of \(timer.totalCycles).")
                 updatedTimers.append(timer)
             }
         } else {
             // Regular timer finished
             HistoryStore.shared.logSession(name: timer.name, duration: timer.totalSeconds, isPomodoro: false)
             FocusGamificationManager.shared.recordCompletedSession(minutes: max(1, Int(timer.totalSeconds / 60)))
-            sendSessionCompleteNotification(title: String(localized: "timer.notification.timer-finished.title", defaultValue: "Timer Finished! ⏰", comment: "Title for notification when a regular timer completes."), body: "Your timer for \"\(timer.name)\" has completed.")
+            sendSessionCompleteNotification(title: String(
+                localized: "timer.notification.timer-finished.title",
+                defaultValue: "Timer Finished! ⏰",
+                comment: "Title for notification when a regular timer completes."
+            ), body: "Your timer for \"\(timer.name)\" has completed.")
         }
     }
     
@@ -180,7 +196,11 @@ class TimerManager: ObservableObject {
         let newTimer = ActiveTimer(
             id: UUID(),
             todoId: todoId,
-            name: name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? String(localized: "timer.kind.stopwatch.display-name", defaultValue: "Stopwatch", comment: "Display name for stopwatch timer mode.") : name,
+            name: name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? String(
+                localized: "timer.kind.stopwatch.display-name",
+                defaultValue: "Stopwatch",
+                comment: "Display name for stopwatch timer mode."
+            ) : name,
             totalSeconds: 0,
             secondsRemaining: 0,
             secondsElapsed: 0,
@@ -195,7 +215,11 @@ class TimerManager: ObservableObject {
     }
     
     func startPomodoro(taskName: String, focusDuration: TimeInterval, breakDuration: TimeInterval, cycles: Int, todoId: UUID? = nil) {
-        let name = taskName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? String(localized: "timer.template.focus-session.title", defaultValue: "Focus Session", comment: "Preset title for the focus session timer template.") : taskName
+        let name = taskName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? String(
+            localized: "timer.template.focus-session.title",
+            defaultValue: "Focus Session",
+            comment: "Preset title for the focus session timer template."
+        ) : taskName
         let newTimer = ActiveTimer(
             id: UUID(),
             todoId: todoId,
@@ -219,20 +243,36 @@ class TimerManager: ObservableObject {
         triggerWink()
     }
     
-    func startPomodoroPreset(taskName: String = String(localized: "timer.template.pomodoro.title", defaultValue: "Pomodoro", comment: "Preset title for the pomodoro timer template.")) {
+    func startPomodoroPreset(taskName: String = String(
+        localized: "timer.template.pomodoro.title",
+        defaultValue: "Pomodoro",
+        comment: "Preset title for the pomodoro timer template."
+    )) {
         startPomodoro(taskName: taskName, focusDuration: 25 * 60, breakDuration: 5 * 60, cycles: 4)
     }
     
-    func startDeepWorkPreset(taskName: String = String(localized: "timer.template.deep-work.title", defaultValue: "Deep Work", comment: "Preset title for the deep work timer template.")) {
+    func startDeepWorkPreset(taskName: String = String(
+        localized: "timer.template.deep-work.title",
+        defaultValue: "Deep Work",
+        comment: "Preset title for the deep work timer template."
+    )) {
         startPomodoro(taskName: taskName, focusDuration: 50 * 60, breakDuration: 10 * 60, cycles: 2)
     }
     
-    func startSprintPreset(taskName: String = String(localized: "timer.template.sprint.title", defaultValue: "Sprint", comment: "Preset title for the sprint timer template.")) {
+    func startSprintPreset(taskName: String = String(
+        localized: "timer.template.sprint.title",
+        defaultValue: "Sprint",
+        comment: "Preset title for the sprint timer template."
+    )) {
         startTimer(duration: 15 * 60, name: taskName)
     }
     
     func startQuickBreakPreset() {
-        startTimer(duration: 5 * 60, name: String(localized: "timer.template.power-break.title", defaultValue: "Power Break ☕", comment: "Preset title for the power break timer template."))
+        startTimer(duration: 5 * 60, name: String(
+            localized: "timer.template.power-break.title",
+            defaultValue: "Power Break ☕",
+            comment: "Preset title for the power break timer template."
+        ))
     }
     
     func addTime(timerId: UUID, minutes: TimeInterval) {
@@ -302,14 +342,46 @@ class TimerManager: ObservableObject {
         guard Bundle.main.bundleIdentifier != nil else { return }
         let content = UNMutableNotificationContent()
         if timer.isStopwatch {
-            content.title = String(localized: "timer.notification.stopwatch-started.title", defaultValue: "Stopwatch Started", comment: "Notification title shown when stopwatch starts.")
-            content.body = String(format: String(localized: "timer.notification.stopwatch-started.message", defaultValue: "Tracking time for: %@", comment: "Notification message showing the name of the stopwatch being tracked."), "\(timer.name)")
+            content.title = String(
+                localized: "timer.notification.stopwatch-started.title",
+                defaultValue: "Stopwatch Started",
+                comment: "Notification title shown when stopwatch starts."
+            )
+            content.body = String(format: String(
+                localized: "timer.notification.stopwatch-started.message",
+                defaultValue: "Tracking time for: %@",
+                comment: "Notification message showing the name of the stopwatch being tracked."
+            ), "\(timer.name)")
         } else if timer.isPomodoro {
-            content.title = timer.isBreakActive ? String(localized: "timer.notification.session-state.break-time", defaultValue: "Break Time!", comment: "Short status text indicating break time in timer notifications.") : String(localized: "timer.notification.session-state.focus-time", defaultValue: "Focus Time!", comment: "Short status text indicating focus time in timer notifications.")
-            content.body = timer.isBreakActive ? String(format: String(localized: "timer.notification.break-started.message", defaultValue: "Take a breath. Break for %d mins.", comment: "Notification message when a break starts and shows break duration in minutes."), Int(timer.breakDuration / 60)) : String(format: String(localized: "timer.notification.focus-started.message", defaultValue: "Focusing on: %@. Cycle %d of %d.", comment: "Notification message when focus resumes showing timer name and cycle progress."), "\(timer.name)", timer.currentCycle, timer.totalCycles)
+            content.title = timer.isBreakActive ? String(
+                localized: "timer.notification.session-state.break-time",
+                defaultValue: "Break Time!",
+                comment: "Short status text indicating break time in timer notifications."
+            ) : String(
+                localized: "timer.notification.session-state.focus-time",
+                defaultValue: "Focus Time!",
+                comment: "Short status text indicating focus time in timer notifications."
+            )
+            content.body = timer.isBreakActive ? String(format: String(
+                localized: "timer.notification.break-started.message",
+                defaultValue: "Take a breath. Break for %d mins.",
+                comment: "Notification message when a break starts and shows break duration in minutes."
+            ), Int(timer.breakDuration / 60)) : String(format: String(
+                localized: "timer.notification.focus-started.message",
+                defaultValue: "Focusing on: %@. Cycle %d of %d.",
+                comment: "Notification message when focus resumes showing timer name and cycle progress."
+            ), "\(timer.name)", timer.currentCycle, timer.totalCycles)
         } else {
-            content.title = String(localized: "timer.notification.timer-started.title", defaultValue: "Timer Started", comment: "Notification title when a standard timer starts.")
-            content.body = String(format: String(localized: "timer.notification.timer-started.message", defaultValue: "Timer set for %d mins.", comment: "Notification message showing timer duration in minutes."), Int(timer.totalSeconds / 60))
+            content.title = String(
+                localized: "timer.notification.timer-started.title",
+                defaultValue: "Timer Started",
+                comment: "Notification title when a standard timer starts."
+            )
+            content.body = String(format: String(
+                localized: "timer.notification.timer-started.message",
+                defaultValue: "Timer set for %d mins.",
+                comment: "Notification message showing timer duration in minutes."
+            ), Int(timer.totalSeconds / 60))
         }
         content.sound = .default
         
