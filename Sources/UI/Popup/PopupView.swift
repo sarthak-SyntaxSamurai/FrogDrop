@@ -77,17 +77,17 @@ struct PopupView: View {
             VStack(spacing: 0) {
                 // Header Tab Bar
                 HStack(spacing: 2) {
-                    TabButton(title: "Timer", icon: "timer", isActive: activeTab == .timer, namespace: tabNamespace) {
+                    TabButton(title: String(localized: "popup.quick-access.timer", defaultValue: "Timer", comment: "Quick access item title for timer in popup"), icon: "timer", isActive: activeTab == .timer, namespace: tabNamespace) {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
                             activeTab = .timer
                         }
                     }
-                    TabButton(title: "Clipboard", icon: "paperclip", isActive: activeTab == .clipboard, namespace: tabNamespace) {
+                    TabButton(title: String(localized: "popup.quick-access.clipboard", defaultValue: "Clipboard", comment: "Quick access item title for clipboard in popup"), icon: "paperclip", isActive: activeTab == .clipboard, namespace: tabNamespace) {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
                             activeTab = .clipboard
                         }
                     }
-                    TabButton(title: "Dropzone", icon: "square.and.arrow.down", isActive: activeTab == .dropzone, namespace: tabNamespace) {
+                    TabButton(title: String(localized: "popup.quick-access.dropzone", defaultValue: "Dropzone", comment: "Quick access item title for dropzone in popup"), icon: "square.and.arrow.down", isActive: activeTab == .dropzone, namespace: tabNamespace) {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
                             activeTab = .dropzone
                         }
@@ -152,7 +152,7 @@ struct PopupView: View {
                             MenuBarSettingsView()
                         }
                         
-                        Text("FrogDrop • Premium 3-in-1")
+                        Text(String(localized: "popup.header.premium-tagline", defaultValue: "FrogDrop • Premium 3-in-1", comment: "Header tagline shown in popup"))
                             .font(.system(.caption2, design: .rounded))
                             .foregroundColor(.secondary)
                     }
@@ -233,7 +233,7 @@ struct QuitButton: View {
         Button(action: {
             NSApplication.shared.terminate(nil)
         }) {
-            Text("Quit")
+            Text(String(localized: "popup.action.quit", defaultValue: "Quit", comment: "Quit action label in popup"))
                 .font(.system(size: 10, weight: .semibold, design: .rounded))
                 .foregroundColor(isHovered ? .red : .red.opacity(0.6))
                 .padding(.horizontal, 8)
@@ -303,7 +303,7 @@ struct PresetButton: View {
     
     var body: some View {
         Button(action: action) {
-            Text("\(Int(seconds / 60))m")
+            Text(String(format: String(localized: "popup.timer.remaining-minutes-short", defaultValue: "%dm", comment: "Short timer duration in minutes in popup"), Int(seconds / 60)))
                 .font(.system(.subheadline, design: .rounded))
                 .fontWeight(.bold)
                 .foregroundColor(.primary)
