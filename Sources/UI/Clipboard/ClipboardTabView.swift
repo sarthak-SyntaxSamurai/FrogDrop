@@ -55,7 +55,7 @@ struct ClipboardTabView: View {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.secondary)
                         .font(.system(size: 12))
-                    TextField("Search history...", text: $searchQuery)
+                    TextField(String(localized: "clipboard.tab.search-history.placeholder", defaultValue: "Search history...", comment: "Placeholder text for searching clipboard history"), text: $searchQuery)
                         .textFieldStyle(.plain)
                         .font(.system(.subheadline, design: .rounded))
                 }
@@ -76,7 +76,7 @@ struct ClipboardTabView: View {
                     clipboardManager.clearAll()
                     HapticManager.shared.success()
                 }
-                .help("Clear History")
+                .help(String(localized: "clipboard.tab.clear-history.button", defaultValue: "Clear History", comment: "Button title to clear clipboard history"))
             }
             .padding(.horizontal, 14)
             
@@ -88,7 +88,7 @@ struct ClipboardTabView: View {
                         .font(.system(size: 28))
                         .foregroundColor(.secondary.opacity(0.4))
                         .padding(.bottom, 6)
-                    Text("Clipboard is empty")
+                    Text(String(localized: "clipboard.tab.empty-state.message", defaultValue: "Clipboard is empty", comment: "Empty state message when no clipboard items exist"))
                         .font(.system(.subheadline, design: .rounded))
                         .foregroundColor(.secondary)
                     Spacer()
@@ -208,7 +208,7 @@ struct ClipboardRow: View {
                         ClipboardManager.shared.makePermanent(item)
                         HapticManager.shared.success()
                     }) {
-                        Text("Stay")
+                        Text(String(localized: "clipboard.tab.pin-state.stay", defaultValue: "Stay", comment: "Context action to keep clipboard item pinned or persistent"))
                             .font(.system(size: 9, weight: .bold, design: .rounded))
                             .foregroundColor(.black)
                             .padding(.horizontal, 6)
@@ -233,7 +233,7 @@ struct ClipboardRow: View {
                                     .cornerRadius(5)
                             }
                             .buttonStyle(.plain)
-                            .help("Open Link or Path")
+                            .help(String(localized: "clipboard.tab.context.open-link-or-path", defaultValue: "Open Link or Path", comment: "Context menu action to open detected link or file path"))
                         }
                         
                         Button(action: {
@@ -247,7 +247,7 @@ struct ClipboardRow: View {
                                 .cornerRadius(5)
                         }
                         .buttonStyle(.plain)
-                        .help("Edit Item")
+                        .help(String(localized: "clipboard.tab.context.edit-item", defaultValue: "Edit Item", comment: "Context menu action to edit a clipboard item"))
                         
                         Button(action: {
                             ClipboardManager.shared.togglePin(item)
@@ -261,7 +261,7 @@ struct ClipboardRow: View {
                                 .cornerRadius(5)
                         }
                         .buttonStyle(.plain)
-                        .help(item.isPinned ? "Unpin Item" : "Pin Item")
+                        .help(item.isPinned ? String(localized: "clipboard.tab.context.unpin-item", defaultValue: "Unpin Item", comment: "Context menu action to unpin a clipboard item") : String(localized: "clipboard.tab.context.pin-item", defaultValue: "Pin Item", comment: "Context menu action to pin a clipboard item"))
                         
                         Button(action: onDelete) {
                             Image(systemName: "trash")
@@ -272,10 +272,10 @@ struct ClipboardRow: View {
                                 .cornerRadius(5)
                         }
                         .buttonStyle(.plain)
-                        .help("Delete Item")
+                        .help(String(localized: "clipboard.tab.context.delete-item", defaultValue: "Delete Item", comment: "Context menu action to delete a clipboard item"))
                     }
                 } else if index < 10 {
-                    Text("⌘\(index)")
+                    Text(String(format: String(localized: "clipboard.tab.context.shortcut-command-index", defaultValue: "⌘%d", comment: "Keyboard shortcut hint showing command key plus numeric index"), index))
                         .font(.system(size: 9, weight: .semibold, design: .monospaced))
                         .foregroundColor(.secondary.opacity(0.7))
                         .padding(.horizontal, 4)
@@ -417,7 +417,7 @@ struct EditClipboardView: View {
     
     var body: some View {
         VStack(spacing: 12) {
-            Text("Edit Clipboard Item")
+            Text(String(localized: "clipboard.tab.edit-sheet.title", defaultValue: "Edit Clipboard Item", comment: "Title of sheet used to edit clipboard item content"))
                 .font(.system(size: 13, weight: .bold, design: .rounded))
                 .foregroundColor(.primary)
                 .padding(.top, 14)
@@ -438,7 +438,7 @@ struct EditClipboardView: View {
                     isPresented = false
                     HapticManager.shared.click()
                 }) {
-                    Text("Cancel")
+                    Text(String(localized: "clipboard.tab.edit-sheet.cancel", defaultValue: "Cancel", comment: "Cancel button title in edit clipboard item sheet"))
                         .font(.system(size: 11, weight: .semibold, design: .rounded))
                         .foregroundColor(.primary)
                         .frame(maxWidth: .infinity)
@@ -453,7 +453,7 @@ struct EditClipboardView: View {
                     isPresented = false
                     HapticManager.shared.success()
                 }) {
-                    Text("Save")
+                    Text(String(localized: "clipboard.tab.edit-sheet.save", defaultValue: "Save", comment: "Save button title in edit clipboard item sheet"))
                         .font(.system(size: 11, weight: .bold, design: .rounded))
                         .foregroundColor(.black)
                         .frame(maxWidth: .infinity)
