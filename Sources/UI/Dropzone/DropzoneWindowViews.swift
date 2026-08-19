@@ -106,7 +106,7 @@ struct CollapsedPanelView: View {
             Image(systemName: "arrow.down")
                 .font(.system(size: 11, weight: .bold))
                 .foregroundColor(Color(red: 0.22, green: 0.72, blue: 0.42))
-            Text("DROP")
+            Text(String(localized: "dropzone.window.collapsed.title", defaultValue: "DROP", comment: "Title shown in collapsed dropzone panel"))
                 .font(.system(size: 11, weight: .bold, design: .rounded))
                 .foregroundColor(.primary)
                 .tracking(1.0)
