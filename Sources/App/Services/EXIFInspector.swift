@@ -86,7 +86,11 @@ enum EXIFExtractor {
         
         var focal: String? = nil
         if let f = exifDict?[kCGImagePropertyExifFocalLength] as? Double {
-            focal = String(format: String(localized: "exif.inspector.focal-length.mm", defaultValue: "%dmm", comment: "Formatted focal length value in millimeters"), Int(round(f)))
+            focal = String(format: String(
+                localized: "exif.inspector.focal-length.mm",
+                defaultValue: "%dmm",
+                comment: "Formatted focal length value in millimeters"
+            ), Int(round(f)))
         }
         
         var fNumber: String? = nil
@@ -96,13 +100,21 @@ enum EXIFExtractor {
         
         var iso: String? = nil
         if let isoRatings = exifDict?[kCGImagePropertyExifISOSpeedRatings] as? [Int], let first = isoRatings.first {
-            iso = String(format: String(localized: "exif.inspector.iso.value", defaultValue: "ISO %@", comment: "Formatted ISO sensitivity value"), "\(first)")
+            iso = String(format: String(
+                localized: "exif.inspector.iso.value",
+                defaultValue: "ISO %@",
+                comment: "Formatted ISO sensitivity value"
+            ), "\(first)")
         }
         
         var shutter: String? = nil
         if let expTime = exifDict?[kCGImagePropertyExifExposureTime] as? Double {
             if expTime < 1.0 && expTime > 0 {
-                shutter = String(format: String(localized: "exif.inspector.exposure-time.fraction-seconds", defaultValue: "1/%ds", comment: "Formatted exposure time as reciprocal seconds"), Int(round(1.0 / expTime)))
+                shutter = String(format: String(
+                    localized: "exif.inspector.exposure-time.fraction-seconds",
+                    defaultValue: "1/%ds",
+                    comment: "Formatted exposure time as reciprocal seconds"
+                ), Int(round(1.0 / expTime)))
             } else {
                 shutter = String(format: "%.1fs", expTime)
             }
@@ -159,7 +171,11 @@ struct EXIFInspectorView: View {
                     .foregroundColor(.purple)
                 
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(String(localized: "exif.inspector.title", defaultValue: "EXIF & Privacy Inspector", comment: "Title of the EXIF and privacy inspection panel"))
+                    Text(String(
+                        localized: "exif.inspector.title",
+                        defaultValue: "EXIF & Privacy Inspector",
+                        comment: "Title of the EXIF and privacy inspection panel"
+                    ))
                         .font(.system(size: 12, weight: .bold, design: .rounded))
                         .foregroundColor(.primary)
                     Text(report.fileURL.lastPathComponent)
@@ -193,11 +209,27 @@ struct EXIFInspectorView: View {
                             .foregroundColor(report.isClean ? .green : .orange)
                         
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(report.isClean ? String(localized: "exif.inspector.privacy-status.clean-image", defaultValue: "100% Clean Image", comment: "Badge text indicating image has no sensitive metadata") : String(localized: "exif.inspector.privacy-status.sensitive-detected", defaultValue: "Sensitive Metadata Detected", comment: "Badge text indicating sensitive metadata was found"))
+                            Text(report.isClean ? String(
+                                localized: "exif.inspector.privacy-status.clean-image",
+                                defaultValue: "100% Clean Image",
+                                comment: "Badge text indicating image has no sensitive metadata"
+                            ) : String(
+                                localized: "exif.inspector.privacy-status.sensitive-detected",
+                                defaultValue: "Sensitive Metadata Detected",
+                                comment: "Badge text indicating sensitive metadata was found"
+                            ))
                                 .font(.system(size: 12, weight: .bold, design: .rounded))
                                 .foregroundColor(report.isClean ? .green : .orange)
                             
-                            Text(report.isClean ? String(localized: "exif.inspector.privacy-status.clean-description", defaultValue: "No GPS location, camera serial, or sensitive tags found.", comment: "Description shown when no sensitive metadata exists") : String(localized: "exif.inspector.privacy-status.sensitive-description", defaultValue: "Contains location or camera information that can identify where & when it was taken.", comment: "Description shown when sensitive metadata exists"))
+                            Text(report.isClean ? String(
+                                localized: "exif.inspector.privacy-status.clean-description",
+                                defaultValue: "No GPS location, camera serial, or sensitive tags found.",
+                                comment: "Description shown when no sensitive metadata exists"
+                            ) : String(
+                                localized: "exif.inspector.privacy-status.sensitive-description",
+                                defaultValue: "Contains location or camera information that can identify where & when it was taken.",
+                                comment: "Description shown when sensitive metadata exists"
+                            ))
                                 .font(.system(size: 10, weight: .regular))
                                 .foregroundColor(.secondary)
                                 .fixedSize(horizontal: false, vertical: true)
@@ -217,7 +249,11 @@ struct EXIFInspectorView: View {
                     // Location Card (if GPS present)
                     if let gps = report.gpsFormatted, let lat = report.gpsLatitude, let lon = report.gpsLongitude {
                         VStack(alignment: .leading, spacing: 6) {
-                            Label(String(localized: "exif.inspector.section.gps-location", defaultValue: "GPS Location", comment: "Section title for GPS metadata details"), systemImage: "location.fill")
+                            Label(String(
+                                localized: "exif.inspector.section.gps-location",
+                                defaultValue: "GPS Location",
+                                comment: "Section title for GPS metadata details"
+                            ), systemImage: "location.fill")
                                 .font(.system(size: 10, weight: .bold))
                                 .foregroundColor(.red)
                             
@@ -235,7 +271,11 @@ struct EXIFInspectorView: View {
                                 }) {
                                     HStack(spacing: 3) {
                                         Image(systemName: "map.fill")
-                                        Text(String(localized: "exif.inspector.gps.open-maps", defaultValue: "Open Maps", comment: "Button title to open detected coordinates in Maps"))
+                                        Text(String(
+                                            localized: "exif.inspector.gps.open-maps",
+                                            defaultValue: "Open Maps",
+                                            comment: "Button title to open detected coordinates in Maps"
+                                        ))
                                     }
                                     .font(.system(size: 10, weight: .semibold))
                                     .padding(.horizontal, 8)
@@ -256,18 +296,34 @@ struct EXIFInspectorView: View {
                     // Camera & Settings Card
                     if report.cameraModel != nil || report.cameraMake != nil || report.lensModel != nil {
                         VStack(alignment: .leading, spacing: 6) {
-                            Label(String(localized: "exif.inspector.section.camera-optics", defaultValue: "Camera & Optics", comment: "Section title for camera and lens metadata"), systemImage: "camera.fill")
+                            Label(String(
+                                localized: "exif.inspector.section.camera-optics",
+                                defaultValue: "Camera & Optics",
+                                comment: "Section title for camera and lens metadata"
+                            ), systemImage: "camera.fill")
                                 .font(.system(size: 10, weight: .bold))
                                 .foregroundColor(.blue)
                             
                             if let make = report.cameraMake, let model = report.cameraModel {
-                                MetaRow(label: String(localized: "exif.inspector.camera.device.header", defaultValue: "Device", comment: "Header label for device metadata in camera section"), value: "\(make) \(model)")
+                                MetaRow(label: String(
+                                    localized: "exif.inspector.camera.device.header",
+                                    defaultValue: "Device",
+                                    comment: "Header label for device metadata in camera section"
+                                ), value: "\(make) \(model)")
                             } else if let model = report.cameraModel {
-                                MetaRow(label: String(localized: "exif.inspector.camera.device.row-label", defaultValue: "Device", comment: "Row label for device metadata value"), value: model)
+                                MetaRow(label: String(
+                                    localized: "exif.inspector.camera.device.row-label",
+                                    defaultValue: "Device",
+                                    comment: "Row label for device metadata value"
+                                ), value: model)
                             }
                             
                             if let lens = report.lensModel {
-                                MetaRow(label: String(localized: "exif.inspector.camera.lens.row-label", defaultValue: "Lens", comment: "Row label for lens metadata value"), value: lens)
+                                MetaRow(label: String(
+                                    localized: "exif.inspector.camera.lens.row-label",
+                                    defaultValue: "Lens",
+                                    comment: "Row label for lens metadata value"
+                                ), value: lens)
                             }
                             
                             HStack(spacing: 8) {
@@ -286,19 +342,43 @@ struct EXIFInspectorView: View {
                     
                     // File Details Card
                     VStack(alignment: .leading, spacing: 6) {
-                        Label(String(localized: "exif.inspector.section.file-resolution", defaultValue: "File & Resolution", comment: "Section title for file and resolution metadata"), systemImage: "doc.fill")
+                        Label(String(
+                            localized: "exif.inspector.section.file-resolution",
+                            defaultValue: "File & Resolution",
+                            comment: "Section title for file and resolution metadata"
+                        ), systemImage: "doc.fill")
                             .font(.system(size: 10, weight: .bold))
                             .foregroundColor(.secondary)
                         
                         if let w = report.pixelWidth, let h = report.pixelHeight {
-                            MetaRow(label: String(localized: "exif.inspector.file.dimensions.label", defaultValue: "Dimensions", comment: "Row label for image dimensions"), value: String(format: String(localized: "exif.inspector.file.dimensions.value", defaultValue: "%d × %d px", comment: "Formatted image dimensions in pixels"), w, h))
+                            MetaRow(label: String(
+                                localized: "exif.inspector.file.dimensions.label",
+                                defaultValue: "Dimensions",
+                                comment: "Row label for image dimensions"
+                            ), value: String(format: String(
+                                localized: "exif.inspector.file.dimensions.value",
+                                defaultValue: "%d × %d px",
+                                comment: "Formatted image dimensions in pixels"
+                            ), w, h))
                         }
-                        MetaRow(label: String(localized: "exif.inspector.file.size.label", defaultValue: "File Size", comment: "Row label for file size metadata"), value: report.fileSizeString)
+                        MetaRow(label: String(
+                            localized: "exif.inspector.file.size.label",
+                            defaultValue: "File Size",
+                            comment: "Row label for file size metadata"
+                        ), value: report.fileSizeString)
                         if let date = report.dateTimeOriginal {
-                            MetaRow(label: String(localized: "exif.inspector.file.captured.label", defaultValue: "Captured", comment: "Row label for capture timestamp metadata"), value: date)
+                            MetaRow(label: String(
+                                localized: "exif.inspector.file.captured.label",
+                                defaultValue: "Captured",
+                                comment: "Row label for capture timestamp metadata"
+                            ), value: date)
                         }
                         if let profile = report.colorProfile {
-                            MetaRow(label: String(localized: "exif.inspector.file.color-profile.label", defaultValue: "Color Profile", comment: "Row label for color profile metadata"), value: profile)
+                            MetaRow(label: String(
+                                localized: "exif.inspector.file.color-profile.label",
+                                defaultValue: "Color Profile",
+                                comment: "Row label for color profile metadata"
+                            ), value: profile)
                         }
                     }
                     .padding(10)
@@ -326,7 +406,15 @@ struct EXIFInspectorView: View {
                     }) {
                         HStack(spacing: 6) {
                             Image(systemName: stripSuccess ? "checkmark.circle.fill" : "shield.checkerboard")
-                            Text(stripSuccess ? String(localized: "exif.inspector.clean-copy-saved-downloads", defaultValue: "Clean Copy Saved in Downloads!", comment: "Success title after saving a cleaned image copy to Downloads.") : String(localized: "exif.inspector.strip-metadata-clean", defaultValue: "Strip Metadata & Clean", comment: "Button title for stripping metadata and producing a clean copy."))
+                            Text(stripSuccess ? String(
+                                localized: "exif.inspector.clean-copy-saved-downloads",
+                                defaultValue: "Clean Copy Saved in Downloads!",
+                                comment: "Success title after saving a cleaned image copy to Downloads."
+                            ) : String(
+                                localized: "exif.inspector.strip-metadata-clean",
+                                defaultValue: "Strip Metadata & Clean",
+                                comment: "Button title for stripping metadata and producing a clean copy."
+                            ))
                         }
                         .font(.system(size: 11, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
@@ -340,7 +428,15 @@ struct EXIFInspectorView: View {
                 }
                 
                 Button(action: onClose) {
-                    Text(report.isClean ? String(localized: "exif.inspector.action.done", defaultValue: "Done", comment: "Confirmation button title after finishing metadata cleanup.") : String(localized: "exif.inspector.action.close", defaultValue: "Close", comment: "Button title to close the metadata cleanup UI."))
+                    Text(report.isClean ? String(
+                        localized: "exif.inspector.action.done",
+                        defaultValue: "Done",
+                        comment: "Confirmation button title after finishing metadata cleanup."
+                    ) : String(
+                        localized: "exif.inspector.action.close",
+                        defaultValue: "Close",
+                        comment: "Button title to close the metadata cleanup UI."
+                    ))
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundColor(.primary)
                         .padding(.horizontal, 16)
