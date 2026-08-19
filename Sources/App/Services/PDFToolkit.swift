@@ -40,7 +40,10 @@ class PDFToolkit {
         
         if mergedDocument.write(to: destURL) {
             HapticManager.shared.success()
-            notifyUser(title: "PDFs Merged", body: "Combined \(pageIndex) pages into \(destURL.lastPathComponent)")
+            notifyUser(
+                title: String(localized: "pdf-toolkit.merge-complete.title", defaultValue: "PDFs Merged", bundle: .main, comment: "Notification subtitle when PDF merge completes"),
+                body: String(format: String(localized: "pdf-toolkit.merge-complete.body", defaultValue: "Combined %d pages into %@", bundle: .main, comment: "Notification body showing merged page count and output filename"), pageIndex, destURL.lastPathComponent)
+            )
             NSWorkspace.shared.activateFileViewerSelecting([destURL])
             return destURL
         }
