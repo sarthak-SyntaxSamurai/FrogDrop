@@ -174,11 +174,11 @@ class TimerManager: ObservableObject {
         }
     }
     
-    func startTimer(duration: TimeInterval, name: String = String(localized: "popup.quick-access.timer"timer", defaultValue: "Timer", comment: "Default name for a newly started timer when no custom name is provided."), todoId: UUID? = nil) {
+    func startTimer(duration: TimeInterval, name: String = String(localized: "popup.quick-access.timer", defaultValue: "Timer", comment: "Default name for a newly started timer when no custom name is provided."), todoId: UUID? = nil) {
         let newTimer = ActiveTimer(
             id: UUID(),
             todoId: todoId,
-            name: name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? String(localized: "popup.quick-access.timer"timer", defaultValue: "Timer", comment: "Default name used when the provided timer name is empty after trimming.") : name,
+            name: name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? String(localized: "popup.quick-access.timer", defaultValue: "Timer", comment: "Default name used when the provided timer name is empty after trimming.") : name,
             totalSeconds: duration,
             secondsRemaining: duration,
             secondsElapsed: 0,
