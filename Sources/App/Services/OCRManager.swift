@@ -31,9 +31,19 @@ class OCRManager {
         
         HapticManager.shared.success()
         notifyUser(
-            title: String(localized: "ocr.notification.title.text-extracted", defaultValue: "Text Extracted (OCR)", bundle: .main, comment: "Title for OCR success notification"),
+            title: String(
+                localized: "ocr.notification.title.text-extracted",
+                defaultValue: "Text Extracted (OCR)",
+                bundle: .main,
+                comment: "Title for OCR success notification"
+            ),
             body: String(
-                format: String(localized: "ocr.notification.body.images-processed", defaultValue: "%d image(s) processed. Text copied to clipboard!", bundle: .main, comment: "Body for OCR success notification after processing multiple images"),
+                format: String(
+                    localized: "ocr.notification.body.images-processed",
+                    defaultValue: "%d image(s) processed. Text copied to clipboard!",
+                    bundle: .main,
+                    comment: "Body for OCR success notification after processing multiple images"
+                ),
                 combinedText.count
             )
         )
@@ -57,8 +67,18 @@ class OCRManager {
         
         HapticManager.shared.success()
         notifyUser(
-            title: String(localized: "ocr.notification.title.text-extracted", defaultValue: "Text Extracted (OCR)", bundle: .main, comment: "Title for OCR success notification"),
-            body: String(localized: "ocr.notification.body.extracted-text-copied", defaultValue: "Extracted text copied to clipboard!", bundle: .main, comment: "Body for OCR success notification after clipboard extraction")
+            title: String(
+                localized: "ocr.notification.title.text-extracted",
+                defaultValue: "Text Extracted (OCR)",
+                bundle: .main,
+                comment: "Title for OCR success notification"
+            ),
+            body: String(
+                localized: "ocr.notification.body.extracted-text-copied",
+                defaultValue: "Extracted text copied to clipboard!",
+                bundle: .main,
+                comment: "Body for OCR success notification after clipboard extraction"
+            )
         )
         return text
     }
