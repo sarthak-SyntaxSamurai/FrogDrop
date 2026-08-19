@@ -1,0 +1,5988 @@
+{
+  "version": "1.0",
+  "sourceLanguage": "en",
+  "strings": {
+    "pdf-toolkit.merge-complete.title": {
+      "comment": "Notification subtitle when PDF merge completes",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PDFs Merged"
+          }
+        }
+      }
+    },
+    "pdf-toolkit.merge-complete.body": {
+      "comment": "Notification body showing merged page count and output filename",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Combined %d pages into %@"
+          }
+        }
+      }
+    },
+    "screen-color-sampler.color-picked.title": {
+      "comment": "Notification subtitle when a screen color is sampled",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Color Picked"
+          }
+        }
+      }
+    },
+    "screen-color-sampler.color-picked.body": {
+      "comment": "Notification body showing copied hex color",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ copied to clipboard!"
+          }
+        }
+      }
+    },
+    "clipboard-manager.default-rule.keychain-access": {
+      "comment": "Default clipboard rule app name for Keychain Access",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keychain Access"
+          }
+        }
+      }
+    },
+    "clipboard-manager.source-app.unknown": {
+      "comment": "Fallback source app name when clipboard source is unavailable",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unknown"
+          }
+        }
+      }
+    },
+    "clipboard-toast.item-type.temporary": {
+      "comment": "Label shown for temporary clipboard items",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Temporary Item"
+          }
+        }
+      }
+    },
+    "clipboard-toast.action.stay": {
+      "comment": "Button title to keep a temporary clipboard item",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stay"
+          }
+        }
+      }
+    },
+    "dropzone.tab.header.title": {
+      "comment": "Title text shown at top of dropzone tab",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "FROG DROP"
+          }
+        }
+      }
+    },
+    "dropzone.tab.drop-target.title": {
+      "comment": "Instruction shown while dragging files over dropzone",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drop files here"
+          }
+        }
+      }
+    },
+    "dropzone.tab.drop-target.subtitle": {
+      "comment": "Instruction shown when not dragging files over dropzone",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drag files here to store"
+          }
+        }
+      }
+    },
+    "timer.history.default-name.focus-session": {
+      "comment": "Default session name used when pomodoro session name is empty",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Focus Session"
+          }
+        }
+      }
+    },
+    "dropzone.window.collapsed.title": {
+      "comment": "Title shown in collapsed dropzone panel",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DROP"
+          }
+        }
+      }
+    },
+    "timer.floating-pill.state.focusing": {
+      "comment": "Status text shown in floating focus pill when active timer has no custom name",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Focusing"
+          }
+        }
+      }
+    },
+    "timer.floating-pill.state.ready-to-focus": {
+      "comment": "Status text shown in floating focus pill when no timer is active",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ready to Focus"
+          }
+        }
+      }
+    },
+    "ocr.notification.title.text-extracted": {
+      "comment": "Title for OCR success notification",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Text Extracted (OCR)"
+          }
+        }
+      }
+    },
+    "ocr.notification.body.images-processed": {
+      "comment": "Body for OCR success notification after processing multiple images",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d image(s) processed. Text copied to clipboard!"
+          }
+        }
+      }
+    },
+    "ocr.notification.body.extracted-text-copied": {
+      "comment": "Body for OCR success notification after clipboard extraction",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extracted text copied to clipboard!"
+          }
+        }
+      }
+    },
+    "timer.duration.cancel": {
+      "comment": "Label for cancelling timer selection in tongue overlay",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        }
+      }
+    },
+    "timer.duration.minutes-5": {
+      "comment": "Label for five-minute timer duration",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5m"
+          }
+        }
+      }
+    },
+    "timer.duration.minutes-15": {
+      "comment": "Label for fifteen-minute timer duration",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "15m"
+          }
+        }
+      }
+    },
+    "timer.duration.minutes-30": {
+      "comment": "Label for thirty-minute timer duration",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "30m"
+          }
+        }
+      }
+    },
+    "timer.duration.hours-1": {
+      "comment": "Label for one-hour timer duration",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1h"
+          }
+        }
+      }
+    },
+    "timer.duration.hours-2": {
+      "comment": "Label for two-hour timer duration",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "2h"
+          }
+        }
+      }
+    },
+    "image-optimizer.web-conversion.title": {
+      "comment": "Title for notification after converting images to web format",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Converted to Web Format"
+          }
+        }
+      }
+    },
+    "image-optimizer.web-conversion.saved-summary": {
+      "comment": "Summary for notification showing how many images were saved after web conversion",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d image(s) saved to Downloads."
+          }
+        }
+      }
+    },
+    "image-optimizer.compression.title": {
+      "comment": "Title for notification after compressing images",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Images Compressed"
+          }
+        }
+      }
+    },
+    "image-optimizer.compression.saved-summary": {
+      "comment": "Summary for notification showing how many images were compressed and saved",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d image(s) compressed & saved to Downloads."
+          }
+        }
+      }
+    },
+    "image-optimizer.metadata-strip.title": {
+      "comment": "Title for notification after removing metadata",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Metadata Stripped"
+          }
+        }
+      }
+    },
+    "image-optimizer.metadata-strip.summary": {
+      "comment": "Summary for notification after removing EXIF and GPS metadata",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EXIF & GPS location removed. Saved to Downloads."
+          }
+        }
+      }
+    },
+    "dashboard.sidebar.app-name": {
+      "comment": "Application name shown in dashboard sidebar",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "FrogDrop"
+          }
+        }
+      }
+    },
+    "popup.quick-access.timer": {
+      "comment": "Quick access item title for timer in popup",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timer"
+          }
+        }
+      }
+    },
+    "popup.quick-access.clipboard": {
+      "comment": "Quick access item title for clipboard in popup",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clipboard"
+          }
+        }
+      }
+    },
+    "popup.quick-access.dropzone": {
+      "comment": "Quick access item title for dropzone in popup",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dropzone"
+          }
+        }
+      }
+    },
+    "popup.header.premium-tagline": {
+      "comment": "Header tagline shown in popup",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "FrogDrop • Premium 3-in-1"
+          }
+        }
+      }
+    },
+    "popup.action.quit": {
+      "comment": "Quit action label in popup",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quit"
+          }
+        }
+      }
+    },
+    "popup.timer.remaining-minutes-short": {
+      "comment": "Short timer duration in minutes in popup",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%dm"
+          }
+        }
+      }
+    },
+    "app.delegate.menu.icon-style.unknown": {
+      "comment": "Fallback icon style label in the app menu",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unknown"
+          }
+        }
+      }
+    },
+    "app.delegate.menu.icon-style.title": {
+      "comment": "Title of the icon style submenu in the app menu",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Icon Style"
+          }
+        }
+      }
+    },
+    "app.delegate.menu.icon-style.default-frog": {
+      "comment": "Menu item for selecting the default frog icon style",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Default Frog"
+          }
+        }
+      }
+    },
+    "app.delegate.menu.icon-style.minimal-white": {
+      "comment": "Menu item for selecting the minimal white icon style",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Minimal White"
+          }
+        }
+      }
+    },
+    "app.delegate.menu.icon-style.custom-image": {
+      "comment": "Menu item for selecting a custom image icon style",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Custom Image"
+          }
+        }
+      }
+    },
+    "app.delegate.menu.check-for-updates": {
+      "comment": "App menu item to manually check for software updates",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check for Updates..."
+          }
+        }
+      }
+    },
+    "app.delegate.menu.open-dashboard": {
+      "comment": "App menu item to open the main dashboard window",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Dashboard"
+          }
+        }
+      }
+    },
+    "app.delegate.menu.quit-app": {
+      "comment": "App menu item to quit the application",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quit FrogDrop"
+          }
+        }
+      }
+    },
+    "todo.list.title": {
+      "comment": "Title shown at the top of the to-do list view",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To-Do List"
+          }
+        }
+      }
+    },
+    "todo.list.add-task.placeholder": {
+      "comment": "Placeholder text for adding a new task",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add task..."
+          }
+        }
+      }
+    },
+    "todo.list.empty-state": {
+      "comment": "Empty state text when there are no tasks",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No tasks yet"
+          }
+        }
+      }
+    },
+    "todo.list.action.start-focus-timer": {
+      "comment": "Context menu action to start a focus timer for a task",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start Focus Timer"
+          }
+        }
+      }
+    },
+    "todo.list.action.start-stopwatch": {
+      "comment": "Context menu action to start a stopwatch for a task",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start Stopwatch"
+          }
+        }
+      }
+    },
+    "todo.list.action.delete-task": {
+      "comment": "Context menu action to delete a task",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete Task"
+          }
+        }
+      }
+    },
+    "todo.list.duration.hours-minutes": {
+      "comment": "Task duration display with hours and minutes",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%dh %dm"
+          }
+        }
+      }
+    },
+    "todo.list.duration.hours-only": {
+      "comment": "Task duration display with hours only",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%dh"
+          }
+        }
+      }
+    },
+    "todo.list.duration.minutes-only": {
+      "comment": "Task duration display with minutes only",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%dm"
+          }
+        }
+      }
+    },
+    "dashboard.welcome.title": {
+      "comment": "Main welcome heading on dashboard",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Welcome Back!"
+          }
+        }
+      }
+    },
+    "dashboard.welcome.subtitle": {
+      "comment": "Welcome subtitle encouraging focus on dashboard",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep your focus game sharp today."
+          }
+        }
+      }
+    },
+    "dashboard.stats.daily-goal-progress": {
+      "comment": "Daily focus goal progress with current and target minutes",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Daily Goal: %dm / %dm"
+          }
+        }
+      }
+    },
+    "dashboard.stats.focused-today.label": {
+      "comment": "Label for focused minutes statistic on dashboard",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Focused Today"
+          }
+        }
+      }
+    },
+    "dashboard.stats.focused-today.value": {
+      "comment": "Focused minutes value shown in dashboard stats",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%dm"
+          }
+        }
+      }
+    },
+    "dashboard.stats.completed-tasks.label": {
+      "comment": "Label for completed tasks statistic on dashboard",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Completed Tasks"
+          }
+        }
+      }
+    },
+    "dashboard.stats.completed-tasks.value": {
+      "comment": "Completed tasks count value shown in dashboard stats",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d"
+          }
+        }
+      }
+    },
+    "dashboard.pending-tasks.section-title": {
+      "comment": "Section header for today's pending tasks on dashboard",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TODAY'S PENDING TASKS"
+          }
+        }
+      }
+    },
+    "dashboard.pending-tasks.empty-state": {
+      "comment": "Empty state message when no pending tasks remain",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All caught up!"
+          }
+        }
+      }
+    },
+    "dashboard.pending-tasks.start-focus-session": {
+      "comment": "Button title to start a focus session from dashboard tasks",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start Focus Session"
+          }
+        }
+      }
+    },
+    "clipboard.tab.search-history.placeholder": {
+      "comment": "Placeholder text for searching clipboard history",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search history..."
+          }
+        }
+      }
+    },
+    "clipboard.tab.clear-history.button": {
+      "comment": "Button title to clear clipboard history",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear History"
+          }
+        }
+      }
+    },
+    "clipboard.tab.empty-state.message": {
+      "comment": "Empty state message when no clipboard items exist",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clipboard is empty"
+          }
+        }
+      }
+    },
+    "clipboard.tab.pin-state.stay": {
+      "comment": "Context action to keep clipboard item pinned or persistent",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stay"
+          }
+        }
+      }
+    },
+    "clipboard.tab.context.open-link-or-path": {
+      "comment": "Context menu action to open detected link or file path",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Link or Path"
+          }
+        }
+      }
+    },
+    "clipboard.tab.context.edit-item": {
+      "comment": "Context menu action to edit a clipboard item",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit Item"
+          }
+        }
+      }
+    },
+    "clipboard.tab.context.unpin-item": {
+      "comment": "Context menu action to unpin a clipboard item",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unpin Item"
+          }
+        }
+      }
+    },
+    "clipboard.tab.context.pin-item": {
+      "comment": "Context menu action to pin a clipboard item",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pin Item"
+          }
+        }
+      }
+    },
+    "clipboard.tab.context.delete-item": {
+      "comment": "Context menu action to delete a clipboard item",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete Item"
+          }
+        }
+      }
+    },
+    "clipboard.tab.context.shortcut-command-index": {
+      "comment": "Keyboard shortcut hint showing command key plus numeric index",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌘%d"
+          }
+        }
+      }
+    },
+    "clipboard.tab.edit-sheet.title": {
+      "comment": "Title of sheet used to edit clipboard item content",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit Clipboard Item"
+          }
+        }
+      }
+    },
+    "clipboard.tab.edit-sheet.cancel": {
+      "comment": "Cancel button title in edit clipboard item sheet",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        }
+      }
+    },
+    "clipboard.tab.edit-sheet.save": {
+      "comment": "Save button title in edit clipboard item sheet",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save"
+          }
+        }
+      }
+    },
+    "update-manager.error.offline": {
+      "comment": "Error message shown when update check fails due to offline state",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not check updates (offline)"
+          }
+        }
+      }
+    },
+    "update-manager.error.invalid-server-response": {
+      "comment": "Error message shown when update server response is malformed",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Invalid response from server"
+          }
+        }
+      }
+    },
+    "update-manager.error.no-releases-published": {
+      "comment": "Error message shown when repository has no published releases",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No releases published yet on GitHub"
+          }
+        }
+      }
+    },
+    "update-manager.error.github-rate-limit": {
+      "comment": "Error message shown when GitHub API rate limit is exceeded",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GitHub API rate limit reached. Please try again later."
+          }
+        }
+      }
+    },
+    "update-manager.error.server-http-status": {
+      "comment": "Error message including HTTP status code when update server returns an error",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server error (HTTP %d)"
+          }
+        }
+      }
+    },
+    "update-manager.release-notes.fallback": {
+      "comment": "Fallback release notes text when no release body is available",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New performance improvements and bug fixes."
+          }
+        }
+      }
+    },
+    "update-manager.status.update-available": {
+      "comment": "Status text shown when a newer version is available",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ is available!"
+          }
+        }
+      }
+    },
+    "update-manager.status.up-to-date": {
+      "comment": "Status text shown when app is already on the latest version",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "FrogDrop is up to date (%@)"
+          }
+        }
+      }
+    },
+    "update-manager.error.parse-release-info": {
+      "comment": "Error message shown when release metadata cannot be decoded",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed to parse release information"
+          }
+        }
+      }
+    },
+    "update-manager.progress.downloading-version": {
+      "comment": "Progress message while downloading update for a specific version",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloading %@..."
+          }
+        }
+      }
+    },
+    "update-manager.error.download-failed-with-reason": {
+      "comment": "Error message with underlying reason when update download fails",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download failed: %@"
+          }
+        }
+      }
+    },
+    "update-manager.error.update-failed.download": {
+      "comment": "Title text shown when update download process fails",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update failed"
+          }
+        }
+      }
+    },
+    "update-manager.error.downloaded-file-missing": {
+      "comment": "Error message shown when expected downloaded update file is missing",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloaded file not found"
+          }
+        }
+      }
+    },
+    "update-manager.progress.installing-and-restarting": {
+      "comment": "Progress message while installing update and restarting app",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installing update & restarting..."
+          }
+        }
+      }
+    },
+    "update-manager.error.installation-with-reason": {
+      "comment": "Error message with underlying reason when update installation fails",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installation error: %@"
+          }
+        }
+      }
+    },
+    "update-manager.error.update-failed.installation": {
+      "comment": "Title text shown when update installation process fails",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update failed"
+          }
+        }
+      }
+    },
+    "settings.app.tab.general": {
+      "comment": "Segment title for general settings tab",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "General"
+          }
+        }
+      }
+    },
+    "settings.app.tab.grid": {
+      "comment": "Segment title for grid settings tab",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grid"
+          }
+        }
+      }
+    },
+    "settings.app.tab.rules": {
+      "comment": "Segment title for rules settings tab",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rules"
+          }
+        }
+      }
+    },
+    "settings.app.title": {
+      "comment": "Main title for app settings view",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings"
+          }
+        }
+      }
+    },
+    "settings.app.subtitle.customize": {
+      "comment": "Subtitle text under settings title",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Customize FrogDrop to your liking"
+          }
+        }
+      }
+    },
+    "settings.app.menu-bar-icon.section-title": {
+      "comment": "Section title for menu bar icon settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menu Bar Icon"
+          }
+        }
+      }
+    },
+    "settings.app.menu-bar-icon.style.label": {
+      "comment": "Label for icon style picker",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Icon Style"
+          }
+        }
+      }
+    },
+    "settings.app.menu-bar-icon.style.default-frog": {
+      "comment": "Picker option for default frog icon style",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Default Frog"
+          }
+        }
+      }
+    },
+    "settings.app.menu-bar-icon.style.minimal-white": {
+      "comment": "Picker option for minimal white icon style",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Minimal White"
+          }
+        }
+      }
+    },
+    "settings.app.menu-bar-icon.style.custom-image": {
+      "comment": "Picker option for custom image icon style",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Custom Image"
+          }
+        }
+      }
+    },
+    "settings.app.menu-bar-icon.choose-image": {
+      "comment": "Button title to choose a custom menu bar icon image",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose Image..."
+          }
+        }
+      }
+    },
+    "settings.app.haptics.section-title": {
+      "comment": "Section title for haptics settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Haptics"
+          }
+        }
+      }
+    },
+    "settings.app.haptics.description": {
+      "comment": "Description text for haptics settings section",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feedback intensity when interacting with FrogDrop."
+          }
+        }
+      }
+    },
+    "settings.app.url-shortening.section-title": {
+      "comment": "Section title for URL shortening settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "URL Shortening"
+          }
+        }
+      }
+    },
+    "settings.app.url-shortening.description": {
+      "comment": "Description text for automatic URL shortening behavior",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatically shorten copied URLs by stripping tracking parameters locally."
+          }
+        }
+      }
+    },
+    "settings.app.url-shortening.toggle": {
+      "comment": "Toggle label to enable automatic shortening of copied links",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shorten Copied Links Automatically"
+          }
+        }
+      }
+    },
+    "settings.app.clipboard-retention.section-title": {
+      "comment": "Section title for clipboard retention settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clipboard Retention"
+          }
+        }
+      }
+    },
+    "settings.app.clipboard-retention.description": {
+      "comment": "Description text for clipboard auto-delete setting",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auto-delete old unpinned clipboard items."
+          }
+        }
+      }
+    },
+    "settings.app.clipboard-retention.enable-auto-delete": {
+      "comment": "Toggle label to enable clipboard auto-delete",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enable Auto-delete"
+          }
+        }
+      }
+    },
+    "settings.app.clipboard-retention.duration.one-day": {
+      "comment": "Picker option for one-day clipboard retention duration",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 Day"
+          }
+        }
+      }
+    },
+    "settings.app.clipboard-retention.duration.seven-days": {
+      "comment": "Picker option for seven-day clipboard retention duration",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "7 Days"
+          }
+        }
+      }
+    },
+    "settings.app.clipboard-retention.duration.fourteen-days": {
+      "comment": "Picker option for fourteen-day clipboard retention duration",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "14 Days"
+          }
+        }
+      }
+    },
+    "settings.app.clipboard-retention.duration.thirty-days": {
+      "comment": "Picker option for thirty-day clipboard retention duration",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "30 Days"
+          }
+        }
+      }
+    },
+    "settings.app.clipboard-expiry.section-title": {
+      "comment": "Section title for temporary clipboard item expiry settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clipboard Expiry"
+          }
+        }
+      }
+    },
+    "settings.app.clipboard-expiry.description": {
+      "comment": "Description for automatic deletion of clipboard items from temporary apps",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auto-delete items copied from temporary applications."
+          }
+        }
+      }
+    },
+    "settings.app.clipboard-expiry.duration-seconds": {
+      "comment": "Label showing temporary clipboard expiry duration in seconds",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%ds"
+          }
+        }
+      }
+    },
+    "settings.app.daily-focus-goal.section-title": {
+      "comment": "Section title for configuring daily focus goal",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Daily Focus Goal"
+          }
+        }
+      }
+    },
+    "settings.app.daily-focus-goal.description": {
+      "comment": "Description for daily focus goal setting",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set your daily focus target (minimum 120 minutes)."
+          }
+        }
+      }
+    },
+    "settings.app.daily-focus-goal.value-minutes": {
+      "comment": "Label showing configured daily focus goal in minutes",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%dm"
+          }
+        }
+      }
+    },
+    "settings.app.appearance.section-title": {
+      "comment": "Section title for appearance settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appearance"
+          }
+        }
+      }
+    },
+    "settings.app.appearance.darkness.description": {
+      "comment": "Description for menu bar popup darkness control",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adjust the darkness of the menu bar popup window."
+          }
+        }
+      }
+    },
+    "settings.app.appearance.darkness.fully-transparent": {
+      "comment": "Appearance option for fully transparent popup style",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fully Transparent"
+          }
+        }
+      }
+    },
+    "settings.app.appearance.darkness.light": {
+      "comment": "Appearance option for light popup darkness",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Light"
+          }
+        }
+      }
+    },
+    "settings.app.appearance.darkness.medium": {
+      "comment": "Appearance option for medium popup darkness",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medium"
+          }
+        }
+      }
+    },
+    "settings.app.appearance.darkness.dark": {
+      "comment": "Appearance option for dark popup darkness",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dark"
+          }
+        }
+      }
+    },
+    "settings.app.appearance.popup-window-style.label": {
+      "comment": "Label for selecting popup window style",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Popup Window Style"
+          }
+        }
+      }
+    },
+    "settings.app.appearance.popup-window-style.popover-classic": {
+      "comment": "Option label for classic popover window style",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Popover (Classic)"
+          }
+        }
+      }
+    },
+    "settings.app.appearance.popup-window-style.panel-wifi-style": {
+      "comment": "Option label for panel style popup window",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Panel (WiFi Style)"
+          }
+        }
+      }
+    },
+    "settings.app.appearance.popup-window-style.popover-classic.description": {
+      "comment": "Description of classic popover style option",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Classic popover anchored with a pointer arrow to the status item."
+          }
+        }
+      }
+    },
+    "settings.app.appearance.popup-window-style.panel-wifi-style.description": {
+      "comment": "Description of panel style popup option",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Floating window style directly below the status item, matching native system menus."
+          }
+        }
+      }
+    },
+    "settings.app.updates-about.section-title": {
+      "comment": "Section title for updates and about information in settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Updates & About"
+          }
+        }
+      }
+    },
+    "settings.app.updates-about.current-version.label": {
+      "comment": "Label for current app version row",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Current Version"
+          }
+        }
+      }
+    },
+    "settings.app.updates-about.build.label": {
+      "comment": "Label for build information row",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Build"
+          }
+        }
+      }
+    },
+    "settings.app.updates-about.build.value.release-open-source": {
+      "comment": "Build type value shown in updates and about section",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Release (Open Source)"
+          }
+        }
+      }
+    },
+    "settings.app.updates-about.platform.label": {
+      "comment": "Label for platform information row",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Platform"
+          }
+        }
+      }
+    },
+    "settings.app.updates-about.platform.value.macos14-apple-silicon-intel": {
+      "comment": "Platform requirement value shown in updates and about section",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS 14+ (Apple Silicon & Intel)"
+          }
+        }
+      }
+    },
+    "settings.app.updates-about.update-available.version": {
+      "comment": "Update availability message with latest version number",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ Available!"
+          }
+        }
+      }
+    },
+    "settings.app.updates-about.update-relaunch-now.button": {
+      "comment": "Primary action button title to install update and relaunch immediately",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update & Relaunch Now"
+          }
+        }
+      }
+    },
+    "settings.app.updates-about.up-to-date.message": {
+      "comment": "Status message when app is already on the latest version",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "FrogDrop is up to date"
+          }
+        }
+      }
+    },
+    "settings.app.updates-about.last-checked": {
+      "comment": "Status text showing last successful update check timestamp",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last checked: %@"
+          }
+        }
+      }
+    },
+    "settings.app.updates-about.check-for-updates.button": {
+      "comment": "Button title to manually check for updates",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check for Updates"
+          }
+        }
+      }
+    },
+    "settings.app.folders-apps.section-title": {
+      "comment": "Section title for folders and app integrations settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Folders & Apps"
+          }
+        }
+      }
+    },
+    "settings.app.folders-apps.empty-state": {
+      "comment": "Empty state message when no custom folders are configured",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No folders added yet."
+          }
+        }
+      }
+    },
+    "settings.app.folders-apps.add-folder.button": {
+      "comment": "Button title to add a new folder to monitored list",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Folder..."
+          }
+        }
+      }
+    },
+    "settings.app.builtin-actions.section-title": {
+      "comment": "Section title for built-in action toggles",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Built-in Actions"
+          }
+        }
+      }
+    },
+    "settings.app.builtin-actions.inspect-exif": {
+      "comment": "Label for built-in action that inspects EXIF metadata",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inspect EXIF"
+          }
+        }
+      }
+    },
+    "settings.app.builtin-actions.extract-text-ocr": {
+      "comment": "Label for built-in action that extracts text via OCR",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extract Text (OCR)"
+          }
+        }
+      }
+    },
+    "settings.app.builtin-actions.convert-to-web-avif": {
+      "comment": "Label for built-in action that converts images to AVIF format",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Convert to Web (AVIF)"
+          }
+        }
+      }
+    },
+    "settings.app.builtin-actions.compress-image": {
+      "comment": "Label for built-in action that compresses an image",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compress Image"
+          }
+        }
+      }
+    },
+    "settings.app.builtin-actions.strip-exif-metadata": {
+      "comment": "Label for built-in action that removes EXIF metadata",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strip EXIF Metadata"
+          }
+        }
+      }
+    },
+    "settings.app.builtin-actions.merge-pdfs": {
+      "comment": "Label for built-in action that merges PDF files",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Merge PDFs"
+          }
+        }
+      }
+    },
+    "settings.app.builtin-actions.pick-screen-color": {
+      "comment": "Label for built-in action that samples a color from the screen",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pick Screen Color"
+          }
+        }
+      }
+    },
+    "settings.app.builtin-actions.airdrop": {
+      "comment": "Label for built-in action that shares via AirDrop",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirDrop"
+          }
+        }
+      }
+    },
+    "settings.app.builtin-actions.send-via-email": {
+      "comment": "Label for built-in action that sends content via email",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send via Email"
+          }
+        }
+      }
+    },
+    "settings.app.builtin-actions.upload-to-imgur": {
+      "comment": "Label for built-in action that uploads content to Imgur",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upload to Imgur"
+          }
+        }
+      }
+    },
+    "settings.app.builtin-actions.shorten-url": {
+      "comment": "Label for built-in action that shortens a URL",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shorten URL"
+          }
+        }
+      }
+    },
+    "settings.app.builtin-actions.zip-files": {
+      "comment": "Label for built-in action that zips selected files",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zip Files"
+          }
+        }
+      }
+    },
+    "settings.app.builtin-actions.resize-image-800px": {
+      "comment": "Label for built-in action that resizes image to 800 pixels",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resize Image (800px)"
+          }
+        }
+      }
+    },
+    "settings.app.builtin-actions.convert-to-png": {
+      "comment": "Label for built-in action that converts content to PNG format",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Convert to PNG"
+          }
+        }
+      }
+    },
+    "settings.app.builtin-actions.copy-file-path": {
+      "comment": "Label for built-in action that copies file path",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy File Path"
+          }
+        }
+      }
+    },
+    "settings.app.builtin-actions.open-path": {
+      "comment": "Label for built-in action that opens a file path",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Path"
+          }
+        }
+      }
+    },
+    "settings.app.rules.app-preferences.section-title": {
+      "comment": "Section title for app-specific rule preferences",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App Preferences"
+          }
+        }
+      }
+    },
+    "settings.app.rules.empty-state": {
+      "comment": "Empty state message when no rules are configured",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No rules yet. Add one below."
+          }
+        }
+      }
+    },
+    "settings.app.rules.action.save-permanent": {
+      "comment": "Rule action option to save item permanently",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save (Permanent)"
+          }
+        }
+      }
+    },
+    "settings.app.rules.action.temporary": {
+      "comment": "Rule action option to save item temporarily",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Temporary"
+          }
+        }
+      }
+    },
+    "settings.app.rules.action.ignore-dont-save": {
+      "comment": "Rule action option to ignore item and not save it",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ignore (Don't Save)"
+          }
+        }
+      }
+    },
+    "settings.app.rules.delete-rule.button": {
+      "comment": "Button title to delete an existing rule",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete Rule"
+          }
+        }
+      }
+    },
+    "settings.app.rules.add-rule.button": {
+      "comment": "Button title to add a new rule",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Rule"
+          }
+        }
+      }
+    },
+    "settings.app.rules.source.label": {
+      "comment": "Label for rule source field",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source:"
+          }
+        }
+      }
+    },
+    "settings.app.rules.source.running-apps": {
+      "comment": "Source mode label for selecting currently running applications",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Running Apps"
+          }
+        }
+      }
+    },
+    "settings.app.rules.source.manual-entry": {
+      "comment": "Source mode label for manually entering application name",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manual Entry"
+          }
+        }
+      }
+    },
+    "settings.app.rules.source.manual-entry.placeholder": {
+      "comment": "Placeholder text for manual app name entry field",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Type application name (e.g. Xcode)"
+          }
+        }
+      }
+    },
+    "settings.app.rules.source.running-apps.empty-state": {
+      "comment": "Message shown when no running applications are detected",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No active apps found"
+          }
+        }
+      }
+    },
+    "settings.app.rules.behavior.label": {
+      "comment": "Label for rule behavior selection control",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Behavior"
+          }
+        }
+      }
+    },
+    "settings.app.rules.behavior.temporary-expiry": {
+      "comment": "Behavior option label for temporary expiry action",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Temporary Expiry"
+          }
+        }
+      }
+    },
+    "settings.app.rules.behavior.ignore-dont-save": {
+      "comment": "Behavior option label for ignoring and not saving items",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ignore (Don't Save)"
+          }
+        }
+      }
+    },
+    "settings.app.rules.behavior.save-permanent": {
+      "comment": "Behavior option label for permanently saving items",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save Permanent"
+          }
+        }
+      }
+    },
+    "settings.app.rules.add-rule.confirm-button": {
+      "comment": "Confirmation button title for adding a new app rule",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Rule"
+          }
+        }
+      }
+    },
+    "dropzone.grid.title": {
+      "comment": "Primary title shown at top of dropzone grid view",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "FROG DROP"
+          }
+        }
+      }
+    },
+    "dropzone.grid.shelf.summary": {
+      "comment": "Shelf header showing counts of shelved groups and files",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SHELF (%#@groups@, %#@files@)"
+          },
+          "substitutions": {
+            "groups": {
+              "argNum": 1,
+              "formatSpecifier": "d",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%d group"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%d groups"
+                    }
+                  }
+                }
+              }
+            },
+            "files": {
+              "argNum": 2,
+              "formatSpecifier": "d",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%d file"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%d files"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "dropzone.grid.shelf.combine.button": {
+      "comment": "Button title to combine shelved items",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Combine"
+          }
+        }
+      }
+    },
+    "dropzone.grid.shelf.clear.button": {
+      "comment": "Button title to clear shelved items",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear"
+          }
+        }
+      }
+    },
+    "dropzone.grid.shelf.drop-target": {
+      "comment": "Drop target hint text for shelving files",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drop here to Shelve"
+          }
+        }
+      }
+    },
+    "dropzone.grid.add-folder.dialog.title": {
+      "comment": "Dialog title for adding folder to dropzone grid",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add to Grid"
+          }
+        }
+      }
+    },
+    "dropzone.grid.add-folder.dialog.message": {
+      "comment": "Dialog message prompting user to choose folder for dropzone grid",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a folder to add to your Dropzone grid"
+          }
+        }
+      }
+    },
+    "dropzone.grid.add-folder.button": {
+      "comment": "Button title to add selected folder to dropzone grid",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add to Grid"
+          }
+        }
+      }
+    },
+    "dropzone.grid.section.folders-apps": {
+      "comment": "Section header for folders and apps in dropzone grid",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "FOLDERS / APPS"
+          }
+        }
+      }
+    },
+    "dropzone.grid.section.actions": {
+      "comment": "Section header for action shortcuts in dropzone grid",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ACTIONS"
+          }
+        }
+      }
+    },
+    "dropzone.grid.action.inspect-exif.button": {
+      "comment": "Action button title for inspecting EXIF metadata",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inspect EXIF"
+          }
+        }
+      }
+    },
+    "dropzone.grid.action.inspect-exif.menu": {
+      "comment": "Context menu item title for inspecting EXIF metadata",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inspect EXIF"
+          }
+        }
+      }
+    },
+    "dropzone.grid.action.extract-ocr.button": {
+      "comment": "Action button title for extracting OCR text",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extract OCR"
+          }
+        }
+      }
+    },
+    "dropzone.grid.toast.copied-to-clipboard": {
+      "comment": "Toast message shown after copying OCR result to clipboard",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copied to Clipboard!"
+          }
+        }
+      }
+    },
+    "dropzone.grid.action.extract-ocr.menu": {
+      "comment": "Context menu item title for extracting OCR text",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extract OCR"
+          }
+        }
+      }
+    },
+    "dropzone.grid.action.to-webp.button": {
+      "comment": "Action button title for converting image to WebP",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To WebP"
+          }
+        }
+      }
+    },
+    "dropzone.grid.action.to-webp.menu": {
+      "comment": "Context menu item title for converting image to WebP",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To WebP"
+          }
+        }
+      }
+    },
+    "dropzone.grid.action.compress.button": {
+      "comment": "Action button title for compressing selected files",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compress"
+          }
+        }
+      }
+    },
+    "dropzone.grid.action.compress.menu": {
+      "comment": "Context menu item title for compress action",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compress"
+          }
+        }
+      }
+    },
+    "dropzone.grid.action.strip-exif.button": {
+      "comment": "Action button title for stripping EXIF metadata",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strip EXIF"
+          }
+        }
+      }
+    },
+    "dropzone.grid.action.strip-exif.menu": {
+      "comment": "Context menu item title for stripping EXIF metadata",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strip EXIF"
+          }
+        }
+      }
+    },
+    "dropzone.grid.action.merge-pdf.button": {
+      "comment": "Action button title for merging PDF files",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Merge PDF"
+          }
+        }
+      }
+    },
+    "dropzone.grid.action.merge-pdf.menu": {
+      "comment": "Context menu item title for merging PDF files",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Merge PDF"
+          }
+        }
+      }
+    },
+    "dropzone.grid.action.pick-color.button": {
+      "comment": "Action button title for picking a screen color",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pick Color"
+          }
+        }
+      }
+    },
+    "dropzone.grid.action.pick-color.menu": {
+      "comment": "Context menu item title for picking a screen color",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pick Color"
+          }
+        }
+      }
+    },
+    "dropzone.grid.action.airdrop.button": {
+      "comment": "Action button title for sharing via AirDrop",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirDrop"
+          }
+        }
+      }
+    },
+    "dropzone.grid.action.airdrop.menu": {
+      "comment": "Context menu item title for sharing via AirDrop",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirDrop"
+          }
+        }
+      }
+    },
+    "dropzone.grid.action.email.button": {
+      "comment": "Action button title for sharing via email",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Email"
+          }
+        }
+      }
+    },
+    "dropzone.grid.action.email.menu": {
+      "comment": "Context menu item title for sharing via email",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Email"
+          }
+        }
+      }
+    },
+    "dropzone.grid.action.imgur.button": {
+      "comment": "Action button title for uploading to Imgur",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imgur"
+          }
+        }
+      }
+    },
+    "dropzone.grid.action.imgur.menu": {
+      "comment": "Context menu item title for uploading to Imgur",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imgur"
+          }
+        }
+      }
+    },
+    "dropzone.grid.action.shorten-url.button": {
+      "comment": "Action button title for shortening URLs",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shorten URL"
+          }
+        }
+      }
+    },
+    "dropzone.grid.action.shorten-url.menu": {
+      "comment": "Context menu item title for shortening URLs",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shorten URL"
+          }
+        }
+      }
+    },
+    "dropzone.grid.action.zip-files.button": {
+      "comment": "Action button title for creating a zip archive",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zip Files"
+          }
+        }
+      }
+    },
+    "dropzone.grid.action.zip-files.menu": {
+      "comment": "Context menu item title for creating a zip archive",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zip Files"
+          }
+        }
+      }
+    },
+    "dropzone.grid.action.resize-image.button": {
+      "comment": "Action button title for resizing image files",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resize Image"
+          }
+        }
+      }
+    },
+    "dropzone.grid.action.resize-image.menu": {
+      "comment": "Context menu item title for resizing image files",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resize Image"
+          }
+        }
+      }
+    },
+    "dropzone.grid.action.convert-to-png.button": {
+      "comment": "Action button title for converting files to PNG format",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Convert to PNG"
+          }
+        }
+      }
+    },
+    "dropzone.grid.action.convert-to-png.menu": {
+      "comment": "Context menu item title for converting files to PNG format",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Convert to PNG"
+          }
+        }
+      }
+    },
+    "dropzone.grid.action.copy-path.button": {
+      "comment": "Action button title for copying selected file path",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy Path"
+          }
+        }
+      }
+    },
+    "dropzone.grid.action.copy-path.menu": {
+      "comment": "Context menu item title for copying selected file path",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy Path"
+          }
+        }
+      }
+    },
+    "dropzone.grid.action.open-path.button": {
+      "comment": "Action button title for opening selected file path",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Path"
+          }
+        }
+      }
+    },
+    "dropzone.grid.action.open-path.menu": {
+      "comment": "Context menu item title for opening selected file path",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Path"
+          }
+        }
+      }
+    },
+    "dropzone.grid.run-action.dialog.title": {
+      "comment": "Dialog title for executing a selected action",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Run Action"
+          }
+        }
+      }
+    },
+    "dropzone.grid.run-action.dialog.message": {
+      "comment": "Dialog message prompting user to select input items before running action",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select files or folders to run this action"
+          }
+        }
+      }
+    },
+    "dropzone.grid.shelf.group-item-count": {
+      "comment": "Shelf group label showing number of files in the group",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d Items"
+          }
+        }
+      }
+    },
+    "dropzone.grid.shelf.context.quicklook-preview": {
+      "comment": "Context menu item for opening QuickLook preview",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuickLook Preview"
+          }
+        }
+      }
+    },
+    "dropzone.grid.shelf.context.reveal-in-finder": {
+      "comment": "Context menu item for revealing file in Finder",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reveal in Finder"
+          }
+        }
+      }
+    },
+    "dropzone.grid.shelf.context.copy-path": {
+      "comment": "Context menu item for copying file path from shelf",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy Path"
+          }
+        }
+      }
+    },
+    "dropzone.grid.shelf.context.open": {
+      "comment": "Context menu item for opening selected shelf file",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open"
+          }
+        }
+      }
+    },
+    "dropzone.grid.shelf.context.move-to-trash": {
+      "comment": "Context menu item for moving selected shelf file to trash",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move to Trash"
+          }
+        }
+      }
+    },
+    "dropzone.grid.shelf.context.remove-from-shelf": {
+      "comment": "Context menu item for removing item from shelf without deleting file",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove from Shelf"
+          }
+        }
+      }
+    },
+    "dropzone.grid.shelf.context.combine-with-others": {
+      "comment": "Context menu item for combining selected shelf group with others",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Combine with Others"
+          }
+        }
+      }
+    },
+    "dropzone.grid.combine-groups.title": {
+      "comment": "Title for sheet that combines multiple shelf groups",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "COMBINE GROUPS"
+          }
+        }
+      }
+    },
+    "dropzone.grid.combine-groups.additional-files-count": {
+      "comment": "Compact count badge showing additional files in group beyond the first",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(+%d)"
+          }
+        }
+      }
+    },
+    "dropzone.grid.combine-groups.cancel": {
+      "comment": "Cancel button title in combine groups sheet",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        }
+      }
+    },
+    "dropzone.grid.combine-groups.confirm": {
+      "comment": "Confirmation button title in combine groups sheet",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Combine"
+          }
+        }
+      }
+    },
+    "dropzone.grid.inspect-exif.sheet.title": {
+      "comment": "Title for sheet displaying EXIF metadata details",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inspect EXIF Metadata"
+          }
+        }
+      }
+    },
+    "dropzone.grid.inspect-exif.metadata.extract-text-ocr": {
+      "comment": "Metadata row label for OCR text extraction action",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extract Text (OCR)"
+          }
+        }
+      }
+    },
+    "dropzone.grid.inspect-exif.metadata.convert-to-web-avif": {
+      "comment": "Metadata row label for conversion to AVIF action",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Convert to Web (AVIF)"
+          }
+        }
+      }
+    },
+    "dropzone.grid.inspect-exif.metadata.compress-image": {
+      "comment": "Metadata row label for image compression action",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compress Image"
+          }
+        }
+      }
+    },
+    "dropzone.grid.inspect-exif.metadata.strip-exif-metadata": {
+      "comment": "Metadata row label for removing EXIF metadata action",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strip EXIF Metadata"
+          }
+        }
+      }
+    },
+    "dropzone.grid.inspect-exif.metadata.merge-into-pdf": {
+      "comment": "Metadata row label for merge into PDF action",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Merge into PDF"
+          }
+        }
+      }
+    },
+    "dropzone.grid.inspect-exif.metadata.pick-screen-color": {
+      "comment": "Metadata row label for screen color picker action",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pick Screen Color"
+          }
+        }
+      }
+    },
+    "dropzone.grid.inspect-exif.metadata.airdrop": {
+      "comment": "Metadata row label for AirDrop share action",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirDrop"
+          }
+        }
+      }
+    },
+    "dropzone.grid.inspect-exif.metadata.email": {
+      "comment": "Metadata row label for email share action",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Email"
+          }
+        }
+      }
+    },
+    "dropzone.grid.inspect-exif.metadata.upload-to-imgur": {
+      "comment": "Metadata row label for Imgur upload action",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upload to Imgur"
+          }
+        }
+      }
+    },
+    "dropzone.grid.inspect-exif.metadata.shorten-url": {
+      "comment": "Metadata row label for URL shortening action",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shorten URL"
+          }
+        }
+      }
+    },
+    "dropzone.grid.inspect-exif.metadata.zip-files": {
+      "comment": "Metadata row label for zip files action",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zip Files"
+          }
+        }
+      }
+    },
+    "dropzone.grid.inspect-exif.metadata.resize-image-800px": {
+      "comment": "Metadata row label for image resize to 800 pixels action",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resize Image (800px)"
+          }
+        }
+      }
+    },
+    "dropzone.grid.inspect-exif.metadata.convert-to-png": {
+      "comment": "Metadata row label for conversion to PNG action",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Convert to PNG"
+          }
+        }
+      }
+    },
+    "dropzone.grid.inspect-exif.metadata.copy-path": {
+      "comment": "Metadata row label for copy path action",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy Path"
+          }
+        }
+      }
+    },
+    "dropzone.grid.inspect-exif.metadata.open-path": {
+      "comment": "Metadata row label for open path action",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Path"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.tab.general": {
+      "comment": "Tab title for general menu bar settings section",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "General"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.tab.grid": {
+      "comment": "Tab title for dropzone grid settings section",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grid"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.tab.rules": {
+      "comment": "Tab title for app rules settings section",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rules"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.menu-bar-icon.section-title": {
+      "comment": "Section header for menu bar icon settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MENU BAR ICON"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.menu-bar-icon.style.frog": {
+      "comment": "Picker option for frog icon style",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frog"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.menu-bar-icon.style.minimal": {
+      "comment": "Picker option for minimal icon style",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Minimal"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.menu-bar-icon.style.custom": {
+      "comment": "Picker option for custom icon style",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Custom"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.menu-bar-icon.choose-image": {
+      "comment": "Button title to choose a custom menu bar icon image",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose Image..."
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.haptics.section-title": {
+      "comment": "Section header for haptics settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HAPTICS"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.keep-history.section-title": {
+      "comment": "Section header for clipboard history retention settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KEEP HISTORY"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.keep-history.option.forever": {
+      "comment": "Retention option to keep history forever",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forever"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.keep-history.option.one-day": {
+      "comment": "Retention option to keep history for one day",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 Day"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.keep-history.option.seven-days": {
+      "comment": "Retention option to keep history for seven days",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "7 Days"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.keep-history.option.fourteen-days": {
+      "comment": "Retention option to keep history for fourteen days",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "14 Days"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.keep-history.option.thirty-days": {
+      "comment": "Retention option to keep history for thirty days",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "30 Days"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.shorten-url.section-title": {
+      "comment": "Section header for automatic URL shortening settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SHORTEN URL"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.shorten-url.option.auto": {
+      "comment": "Option label for automatic URL shortening mode",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auto"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.temp-expiration.section-title": {
+      "comment": "Section header for temporary clipboard expiration settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TEMP EXPIRATION"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.temp-expiration.duration-seconds": {
+      "comment": "Label showing temporary clipboard expiration duration in seconds",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%ds"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.temp-expiration.description": {
+      "comment": "Description explaining temporary app clipboard auto-delete behavior",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auto-delete items copied from temporary applications."
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.startup.section-title": {
+      "comment": "Section header for startup behavior settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "STARTUP"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.startup.launch-at-login": {
+      "comment": "Toggle label for launching the app automatically at login",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Launch automatically at login"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.appearance.section-title": {
+      "comment": "Section header for appearance settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "APPEARANCE"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.appearance.popup-darkness.label": {
+      "comment": "Label for popup darkness selection control",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Popup darkness"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.appearance.popup-darkness.glass-fully-transparent": {
+      "comment": "Appearance option for fully transparent glass popup style",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Glass (Fully Transparent)"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.appearance.popup-darkness.light": {
+      "comment": "Appearance option for light popup darkness",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Light"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.appearance.popup-darkness.medium": {
+      "comment": "Appearance option for medium popup darkness",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medium"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.appearance.popup-darkness.dark": {
+      "comment": "Appearance option for dark popup darkness",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dark"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.appearance.popup-window-style.label": {
+      "comment": "Label for selecting popup window style",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Popup window style"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.appearance.popup-window-style.popover": {
+      "comment": "Option label for classic popover window style",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Popover"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.appearance.popup-window-style.panel-wifi": {
+      "comment": "Option label for panel style popup window",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Panel (WiFi)"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.appearance.popup-window-style.popover.description": {
+      "comment": "Description text for classic popover style option",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Classic popover with pointer arrow."
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.appearance.popup-window-style.panel-wifi.description": {
+      "comment": "Description text for floating panel style option",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Floating window style like WiFi/Battery menus."
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.updates.section-title": {
+      "comment": "Section header for update status and actions",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "UPDATES"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.updates.available-version": {
+      "comment": "Update status message showing available version number",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ Available!"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.updates.update-relaunch.button": {
+      "comment": "Primary action button title to update and relaunch app",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update & Relaunch"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.updates.checking-github": {
+      "comment": "Status text displayed while checking GitHub for updates",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Checking GitHub for updates..."
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.updates.up-to-date": {
+      "comment": "Status text shown when app is already on latest version",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "FrogDrop is up to date"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.updates.last-checked": {
+      "comment": "Status text showing last update check time",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Checked %@"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.updates.check-for-new-releases.title": {
+      "comment": "Title text prompting user to check for new releases",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check for new releases"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.updates.check-for-new-releases.subtitle": {
+      "comment": "Subtitle text explaining update check action against GitHub",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Click button to query GitHub"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.general.updates.check.button": {
+      "comment": "Button title to manually check for updates",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.grid.folders-apps.section-title": {
+      "comment": "Section header for folders and apps configuration in grid tab",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "FOLDERS & APPS"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.grid.folders-apps.add-folder.button": {
+      "comment": "Button title to add a folder to grid settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Folder..."
+          }
+        }
+      }
+    },
+    "settings.menu-bar.grid.builtin-actions.section-title": {
+      "comment": "Section header for built-in grid actions",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BUILT-IN ACTIONS"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.grid.builtin-actions.inspect-exif": {
+      "comment": "Built-in action label for inspecting EXIF metadata",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inspect EXIF"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.grid.builtin-actions.extract-text-ocr": {
+      "comment": "Built-in action label for extracting text using OCR",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extract Text (OCR)"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.grid.builtin-actions.convert-to-web-avif": {
+      "comment": "Built-in action label for converting images to AVIF",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Convert to Web (AVIF)"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.grid.builtin-actions.compress-image": {
+      "comment": "Built-in action label for image compression",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compress Image"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.grid.builtin-actions.strip-exif-metadata": {
+      "comment": "Built-in action label for removing EXIF metadata",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strip EXIF Metadata"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.grid.builtin-actions.merge-pdfs": {
+      "comment": "Built-in action label for merging PDF files",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Merge PDFs"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.grid.builtin-actions.pick-screen-color": {
+      "comment": "Built-in action label for picking a screen color",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pick Screen Color"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.grid.builtin-actions.airdrop": {
+      "comment": "Built-in action label for sharing via AirDrop",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirDrop"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.grid.builtin-actions.email": {
+      "comment": "Built-in action label for sharing via email",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Email"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.grid.builtin-actions.upload-to-imgur": {
+      "comment": "Built-in action label for uploading to Imgur",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upload to Imgur"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.grid.builtin-actions.shorten-url": {
+      "comment": "Built-in action label for shortening URLs",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shorten URL"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.grid.builtin-actions.zip-files": {
+      "comment": "Built-in action label for zipping files",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zip Files"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.grid.builtin-actions.resize-image-800px": {
+      "comment": "Built-in action label for resizing image to 800 pixels",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resize Image (800px)"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.grid.builtin-actions.convert-to-png": {
+      "comment": "Built-in action label for converting to PNG format",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Convert to PNG"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.grid.builtin-actions.copy-path": {
+      "comment": "Built-in action label for copying file path",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy Path"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.grid.builtin-actions.open-path": {
+      "comment": "Built-in action label for opening file path",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Path"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.rules.app-preferences.section-title": {
+      "comment": "Section header for app-specific preference rules",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "APP PREFERENCES"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.rules.behavior.save-permanent": {
+      "comment": "Rule behavior option to save items permanently",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save (Permanent)"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.rules.behavior.temporary": {
+      "comment": "Rule behavior option to keep items temporarily",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Temporary"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.rules.behavior.ignore-dont-save": {
+      "comment": "Rule behavior option to ignore items and not save them",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ignore (Don't Save)"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.rules.add-new-preference.section-title": {
+      "comment": "Section header for creating a new app preference rule",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ADD NEW PREFERENCE"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.rules.add-new-preference.app-name.placeholder": {
+      "comment": "Placeholder text for entering app name when creating new preference",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App Name..."
+          }
+        }
+      }
+    },
+    "settings.menu-bar.rules.add-new-preference.behavior.temp": {
+      "comment": "Short behavior option label for temporary save in new preference form",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Temp"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.rules.add-new-preference.behavior.ignore": {
+      "comment": "Short behavior option label for ignore action in new preference form",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ignore"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.rules.add-new-preference.done.button": {
+      "comment": "Button title to complete adding a new app preference",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Done"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.opening": {
+      "comment": "Toast status shown while opening a file or folder path",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opening..."
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.opened.path": {
+      "comment": "Toast status shown after successfully opening a path",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opened!"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.error.open-path": {
+      "comment": "Toast title shown when opening a path fails",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Error"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.reading": {
+      "comment": "Toast status shown while reading path contents",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reading..."
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.opened.file": {
+      "comment": "Toast status shown after successfully opening a file",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opened!"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.invalid-path": {
+      "comment": "Toast status shown when provided path is invalid",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Invalid Path"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.copying": {
+      "comment": "Toast status shown while copying files",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copying..."
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.copied": {
+      "comment": "Toast status shown after files are copied",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copied!"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.moving": {
+      "comment": "Toast status shown while moving files",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moving..."
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.moved-files-count": {
+      "comment": "Toast status showing how many files were moved",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moved %d files"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.files-moved-success-title": {
+      "comment": "Success alert title after moving files",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Files Moved Successfully"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.files-moved-success-message": {
+      "comment": "Success alert message with file count and destination folder name",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d file(s) moved to %@."
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.error.move-files": {
+      "comment": "Error alert title when moving files fails",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Error"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.airdrop.sending": {
+      "comment": "Toast status shown while sending files via AirDrop",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirDrop..."
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.airdrop.sent": {
+      "comment": "Toast status shown after sending via AirDrop",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sent!"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.email.composing": {
+      "comment": "Toast status shown while composing email share",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Email..."
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.email.composed": {
+      "comment": "Toast status shown after email compose is prepared",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Composed!"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.no-file": {
+      "comment": "Toast status shown when no file is available for the requested action",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No file"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.uploading": {
+      "comment": "Toast status shown while uploading to external service",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uploading..."
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.uploaded": {
+      "comment": "Toast status shown after upload completes successfully",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uploaded!"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.imgur-upload-successful.title": {
+      "comment": "Success alert title shown after uploading to Imgur",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imgur Upload Successful"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.imgur-upload-successful.message": {
+      "comment": "Success alert message shown after Imgur link is copied",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Link copied to clipboard!"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.error.imgur-upload": {
+      "comment": "Error alert title shown when Imgur upload fails",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Error"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.error.imgur-link-copy": {
+      "comment": "Error alert title shown when copying Imgur link fails",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Error"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.no-url": {
+      "comment": "Status text shown when no URL is available for shortening",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No URL"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.shortening": {
+      "comment": "Status text shown while URL shortening is in progress",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shortening..."
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.shortened": {
+      "comment": "Status text shown when URL shortening completes",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shortened!"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.url-shortened.title": {
+      "comment": "Success alert title shown after URL is shortened",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "URL Shortened"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.url-shortened.message": {
+      "comment": "Success alert message shown after shortened URL is copied",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shortened URL copied to clipboard!"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.copied-name": {
+      "comment": "Status text shown when file name is copied",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copied Name"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.no-files": {
+      "comment": "Status text shown when no files are available for zipping",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No files"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.zipping": {
+      "comment": "Status text shown while files are being zipped",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zipping..."
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.compressed-to-downloads": {
+      "comment": "Status text shown after zip archive is saved to Downloads",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compressed! → Downloads"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.error.zip-files": {
+      "comment": "Error alert title shown when zipping files fails",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Error"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.error.copy-name": {
+      "comment": "Error alert title shown when copying file name fails",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Error"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.no-images.resize": {
+      "comment": "Status text shown when no images are available for resize action",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No images"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.resizing": {
+      "comment": "Status text shown while images are being resized",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resizing..."
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.resized-to-downloads": {
+      "comment": "Status text shown after resized image is saved to Downloads",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resized → Downloads"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.failed.resize": {
+      "comment": "Status text shown when image resize action fails",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.no-images.convert": {
+      "comment": "Status text shown when no images are available for conversion action",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No images"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.converting.png": {
+      "comment": "Status text shown while converting images to PNG",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Converting..."
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.converted-to-downloads.png": {
+      "comment": "Status text shown after PNG conversion output is saved to Downloads",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Converted → Downloads"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.failed.convert-png": {
+      "comment": "Status text shown when PNG conversion fails",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.no-files.inspect-exif": {
+      "comment": "Status text shown when no files are available for EXIF inspection",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No files"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.inspected-exif": {
+      "comment": "Status text shown after EXIF metadata inspection completes",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inspected!"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.no-files.extract-ocr": {
+      "comment": "Status text shown when no files are available for OCR extraction",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No files"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.extracting-ocr": {
+      "comment": "Status text shown while OCR text extraction is in progress",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extracting..."
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.copied-to-clipboard.ocr": {
+      "comment": "Status text shown after extracted OCR text is copied to clipboard",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copied to Clipboard!"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.no-text-found": {
+      "comment": "Status text shown when OCR finds no text in the selected file",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Text Found"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.no-images.convert-webp": {
+      "comment": "Status text shown when no images are available for WebP conversion",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No images"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.converting.webp": {
+      "comment": "Status text shown while converting images to WebP",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Converting..."
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.converted-to-webp": {
+      "comment": "Status text shown after WebP conversion succeeds",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Converted to WebP!"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.failed.convert-webp": {
+      "comment": "Status text shown when WebP conversion fails",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.no-images.compress": {
+      "comment": "Status text shown when no images are available for compression",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No images"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.compressing": {
+      "comment": "Status text shown while image compression is in progress",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compressing..."
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.compressed": {
+      "comment": "Status text shown after image compression succeeds",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compressed!"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.failed.compress": {
+      "comment": "Status text shown when image compression fails",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.no-images.strip-exif": {
+      "comment": "Status text shown when no images are available for EXIF stripping",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No images"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.stripping-exif": {
+      "comment": "Status text shown while stripping EXIF metadata",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stripping..."
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.stripped-exif": {
+      "comment": "Status text shown after EXIF metadata is removed",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stripped!"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.failed.strip-exif": {
+      "comment": "Status text shown when EXIF stripping fails",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.no-files.merge-pdf": {
+      "comment": "Status text shown when no files are available for PDF merge",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No files"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.merging-pdf": {
+      "comment": "Status text shown while PDF files are being merged",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Merging..."
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.pdfs-merged": {
+      "comment": "Status text shown after PDF merge succeeds",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PDFs Merged!"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.failed.merge-pdf": {
+      "comment": "Status text shown when PDF merge fails",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed"
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.picking-color": {
+      "comment": "Status text shown while screen color picking is in progress",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Picking..."
+          }
+        }
+      }
+    },
+    "dropzone.manager.status.copied-color-hex": {
+      "comment": "Status text shown after picked color hex value is copied",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copied %@"
+          }
+        }
+      }
+    },
+    "timer.tab.focus-input.placeholder": {
+      "comment": "Placeholder text for focus task input field",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What are you focusing on?"
+          }
+        }
+      }
+    },
+    "timer.tab.gamification.streak-days": {
+      "comment": "Streak label showing number of consecutive days",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%dd streak"
+          }
+        }
+      }
+    },
+    "timer.tab.gamification.golden-flies-count": {
+      "comment": "Displayed count of earned golden flies",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d"
+          }
+        }
+      }
+    },
+    "timer.tab.hud.toggle.on": {
+      "comment": "Label for HUD enabled state",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HUD On"
+          }
+        }
+      }
+    },
+    "timer.tab.hud.toggle.off": {
+      "comment": "Label for HUD disabled state",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HUD"
+          }
+        }
+      }
+    },
+    "timer.tab.daily-goal.progress-minutes": {
+      "comment": "Daily goal progress showing elapsed and target minutes",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d/%dm"
+          }
+        }
+      }
+    },
+    "timer.tab.mode.break": {
+      "comment": "Mode label for break session preset",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "☕ Break"
+          }
+        }
+      }
+    },
+    "timer.tab.mode.focus": {
+      "comment": "Mode label for focus session preset",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "🐸 Focus"
+          }
+        }
+      }
+    },
+    "timer.tab.adjust-time.plus-one-minute": {
+      "comment": "Button label to add one minute",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+1m"
+          }
+        }
+      }
+    },
+    "timer.tab.adjust-time.plus-five-minutes": {
+      "comment": "Button label to add five minutes",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+5m"
+          }
+        }
+      }
+    },
+    "timer.tab.preset.pomodoro.twenty-five-minutes": {
+      "comment": "Timer preset label for 25 minute Pomodoro session",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "25m Pomodoro"
+          }
+        }
+      }
+    },
+    "timer.tab.preset.pomodoro.title": {
+      "comment": "Short preset title for Pomodoro mode",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pomodoro"
+          }
+        }
+      }
+    },
+    "timer.tab.preset.deep-work.fifty-minutes": {
+      "comment": "Timer preset label for 50 minute deep work session",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "50m Deep Work"
+          }
+        }
+      }
+    },
+    "timer.tab.preset.deep-work.title": {
+      "comment": "Short preset title for deep work mode",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deep Work"
+          }
+        }
+      }
+    },
+    "timer.tab.preset.sprint.fifteen-minutes": {
+      "comment": "Timer preset label for 15 minute sprint session",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "15m Sprint"
+          }
+        }
+      }
+    },
+    "timer.tab.preset.sprint.title": {
+      "comment": "Short preset title for sprint mode",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprint"
+          }
+        }
+      }
+    },
+    "timer.tab.preset.break.five-minutes": {
+      "comment": "Timer preset label for 5 minute break session",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5m Break"
+          }
+        }
+      }
+    },
+    "timer.tab.preset.stopwatch.title": {
+      "comment": "Preset title for stopwatch mode",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stopwatch"
+          }
+        }
+      }
+    },
+    "timer.tab.preset.flow.title": {
+      "comment": "Preset title for flow mode",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flow"
+          }
+        }
+      }
+    },
+    "timer.tab.ambient-audio.section-title": {
+      "comment": "Section header for ambient focus audio controls",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AMBIENT FOCUS AUDIO"
+          }
+        }
+      }
+    },
+    "timer.tab.custom-duration.hours-label": {
+      "comment": "Unit label for hour input in custom timer settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "hours"
+          }
+        }
+      }
+    },
+    "timer.tab.custom-duration.minutes-label": {
+      "comment": "Unit label for minute input in custom timer settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "min"
+          }
+        }
+      }
+    },
+    "timer.tab.session.ends-at-time": {
+      "comment": "Label showing session end time",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ends at %@"
+          }
+        }
+      }
+    },
+    "timer.tab.task-name.section-title": {
+      "comment": "Section header for task name input",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TASK NAME"
+          }
+        }
+      }
+    },
+    "timer.tab.task-name.placeholder": {
+      "comment": "Placeholder for task name input field",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What are you working on?"
+          }
+        }
+      }
+    },
+    "timer.tab.pomodoro.mode.label": {
+      "comment": "Label for pomodoro mode toggle",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pomodoro Mode"
+          }
+        }
+      }
+    },
+    "timer.tab.pomodoro.break-duration.label": {
+      "comment": "Label for configuring pomodoro break duration",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Break Duration"
+          }
+        }
+      }
+    },
+    "timer.tab.pomodoro.break-duration.value": {
+      "comment": "Displayed pomodoro break duration in minutes",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d min"
+          }
+        }
+      }
+    },
+    "timer.tab.pomodoro.cycles.label": {
+      "comment": "Label for number of pomodoro cycles",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cycles"
+          }
+        }
+      }
+    },
+    "timer.tab.pomodoro.cycles.value": {
+      "comment": "Displayed number of configured pomodoro cycles",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d"
+          }
+        }
+      }
+    },
+    "timer.tab.session-setup.cancel": {
+      "comment": "Cancel button title in timer setup panel",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        }
+      }
+    },
+    "timer.tab.session-setup.start-focus": {
+      "comment": "Primary button title to start focus session",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start Focus"
+          }
+        }
+      }
+    },
+    "timer.tab.history.title": {
+      "comment": "Title for focus session history section",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Focus History"
+          }
+        }
+      }
+    },
+    "timer.tab.history.clear": {
+      "comment": "Button title to clear focus history",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear"
+          }
+        }
+      }
+    },
+    "timer.tab.history.empty-state": {
+      "comment": "Empty state text when no focus sessions are logged",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No sessions logged yet"
+          }
+        }
+      }
+    },
+    "timer.tab.history.duration.minutes": {
+      "comment": "Session duration text showing whole minutes",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%dm"
+          }
+        }
+      }
+    },
+    "timer.tab.history.duration.seconds": {
+      "comment": "Session duration text showing seconds when under a minute",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%ds"
+          }
+        }
+      }
+    },
+    "floating-shelf.window.drop-target.title": {
+      "comment": "Drop target title shown in floating shelf window",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drop Files"
+          }
+        }
+      }
+    },
+    "floating-shelf.window.toolbar.collapse": {
+      "comment": "Toolbar button title to collapse floating shelf window",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Collapse"
+          }
+        }
+      }
+    },
+    "floating-shelf.window.quicklook.preview-with-shortcut": {
+      "comment": "Label for QuickLook preview action including space key hint",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuickLook Preview (Space)"
+          }
+        }
+      }
+    },
+    "floating-shelf.window.quicklook.index-counter": {
+      "comment": "QuickLook item position counter showing current index and total count",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d/%d"
+          }
+        }
+      }
+    },
+    "floating-shelf.window.context.quicklook-preview": {
+      "comment": "Context menu item title for QuickLook preview",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuickLook Preview"
+          }
+        }
+      }
+    },
+    "floating-shelf.window.context.reveal-in-finder": {
+      "comment": "Context menu item title to reveal selected item in Finder",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reveal in Finder"
+          }
+        }
+      }
+    },
+    "floating-shelf.window.context.copy-paths": {
+      "comment": "Context menu item title to copy one or more selected file paths",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy Path(s)"
+          }
+        }
+      }
+    },
+    "floating-shelf.window.context.move-to-folder": {
+      "comment": "Context menu item title to move selected items to another folder",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move to Folder"
+          }
+        }
+      }
+    },
+    "floating-shelf.window.context.clear-all": {
+      "comment": "Context menu item title to clear all items from floating shelf",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear All"
+          }
+        }
+      }
+    },
+    "floating-shelf.window.context.inspect-exif-metadata": {
+      "comment": "Context menu item title to inspect EXIF metadata for selected images",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inspect EXIF Metadata"
+          }
+        }
+      }
+    },
+    "floating-shelf.window.context.extract-text-ocr": {
+      "comment": "Context menu item title to extract text using OCR",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extract Text (OCR)"
+          }
+        }
+      }
+    },
+    "floating-shelf.window.context.convert-to-web-avif": {
+      "comment": "Context menu item title to convert selected images to AVIF",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Convert to Web (AVIF)"
+          }
+        }
+      }
+    },
+    "floating-shelf.window.context.compress-image": {
+      "comment": "Context menu item title to compress selected image files",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compress Image"
+          }
+        }
+      }
+    },
+    "floating-shelf.window.context.strip-exif-metadata": {
+      "comment": "Context menu item title to remove EXIF metadata from selected images",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strip EXIF Metadata"
+          }
+        }
+      }
+    },
+    "floating-shelf.window.context.merge-into-pdf": {
+      "comment": "Context menu item title to merge selected files into a single PDF",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Merge into PDF"
+          }
+        }
+      }
+    },
+    "floating-shelf.window.context.pick-screen-color": {
+      "comment": "Context menu item title to pick a color from the screen",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pick Screen Color"
+          }
+        }
+      }
+    },
+    "floating-shelf.window.context.airdrop": {
+      "comment": "Context menu item title to share selected items via AirDrop",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirDrop"
+          }
+        }
+      }
+    },
+    "floating-shelf.window.context.email": {
+      "comment": "Context menu item title to share selected items by email",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Email"
+          }
+        }
+      }
+    },
+    "floating-shelf.window.context.upload-to-imgur": {
+      "comment": "Context menu item title to upload selected content to Imgur",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upload to Imgur"
+          }
+        }
+      }
+    },
+    "floating-shelf.window.context.shorten-url": {
+      "comment": "Context menu item title to shorten URL from selected content",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shorten URL"
+          }
+        }
+      }
+    },
+    "floating-shelf.window.context.zip-files": {
+      "comment": "Context menu item title to zip selected files",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zip Files"
+          }
+        }
+      }
+    },
+    "floating-shelf.window.context.resize-image-800px": {
+      "comment": "Context menu item title to resize selected images to 800 pixels",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resize Image (800px)"
+          }
+        }
+      }
+    },
+    "floating-shelf.window.context.convert-to-png": {
+      "comment": "Context menu item title to convert selected files to PNG",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Convert to PNG"
+          }
+        }
+      }
+    },
+    "floating-shelf.window.context.copy-path": {
+      "comment": "Context menu item title to copy selected file path",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy Path"
+          }
+        }
+      }
+    },
+    "floating-shelf.window.context.open-path": {
+      "comment": "Context menu item title to open selected file path",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Path"
+          }
+        }
+      }
+    },
+    "exif.inspector.focal-length.mm": {
+      "comment": "Formatted focal length value in millimeters",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%dmm"
+          }
+        }
+      }
+    },
+    "exif.inspector.iso.value": {
+      "comment": "Formatted ISO sensitivity value",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ISO %@"
+          }
+        }
+      }
+    },
+    "exif.inspector.exposure-time.fraction-seconds": {
+      "comment": "Formatted exposure time as reciprocal seconds",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1/%ds"
+          }
+        }
+      }
+    },
+    "exif.inspector.title": {
+      "comment": "Title of the EXIF and privacy inspection panel",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EXIF & Privacy Inspector"
+          }
+        }
+      }
+    },
+    "exif.inspector.privacy-status.clean-image": {
+      "comment": "Badge text indicating image has no sensitive metadata",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "100% Clean Image"
+          }
+        }
+      }
+    },
+    "exif.inspector.privacy-status.sensitive-detected": {
+      "comment": "Badge text indicating sensitive metadata was found",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sensitive Metadata Detected"
+          }
+        }
+      }
+    },
+    "exif.inspector.privacy-status.clean-description": {
+      "comment": "Description shown when no sensitive metadata exists",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No GPS location, camera serial, or sensitive tags found."
+          }
+        }
+      }
+    },
+    "exif.inspector.privacy-status.sensitive-description": {
+      "comment": "Description shown when sensitive metadata exists",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contains location or camera information that can identify where & when it was taken."
+          }
+        }
+      }
+    },
+    "exif.inspector.section.gps-location": {
+      "comment": "Section title for GPS metadata details",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GPS Location"
+          }
+        }
+      }
+    },
+    "exif.inspector.gps.open-maps": {
+      "comment": "Button title to open detected coordinates in Maps",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Maps"
+          }
+        }
+      }
+    },
+    "exif.inspector.section.camera-optics": {
+      "comment": "Section title for camera and lens metadata",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Camera & Optics"
+          }
+        }
+      }
+    },
+    "exif.inspector.camera.device.header": {
+      "comment": "Header label for device metadata in camera section",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Device"
+          }
+        }
+      }
+    },
+    "exif.inspector.camera.device.row-label": {
+      "comment": "Row label for device metadata value",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Device"
+          }
+        }
+      }
+    },
+    "exif.inspector.camera.lens.row-label": {
+      "comment": "Row label for lens metadata value",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lens"
+          }
+        }
+      }
+    },
+    "exif.inspector.section.file-resolution": {
+      "comment": "Section title for file and resolution metadata",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "File & Resolution"
+          }
+        }
+      }
+    },
+    "exif.inspector.file.dimensions.label": {
+      "comment": "Row label for image dimensions",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dimensions"
+          }
+        }
+      }
+    },
+    "exif.inspector.file.dimensions.value": {
+      "comment": "Formatted image dimensions in pixels",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d × %d px"
+          }
+        }
+      }
+    },
+    "exif.inspector.file.size.label": {
+      "comment": "Row label for file size metadata",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "File Size"
+          }
+        }
+      }
+    },
+    "exif.inspector.file.captured.label": {
+      "comment": "Row label for capture timestamp metadata",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Captured"
+          }
+        }
+      }
+    },
+    "exif.inspector.file.color-profile.label": {
+      "comment": "Row label for color profile metadata",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Color Profile"
+          }
+        }
+      }
+    },
+    "exif.inspector.clean-copy-saved-downloads": {
+      "comment": "Success title after saving a cleaned image copy to Downloads.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clean Copy Saved in Downloads!"
+          }
+        }
+      }
+    },
+    "exif.inspector.strip-metadata-clean": {
+      "comment": "Button title for stripping metadata and producing a clean copy.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strip Metadata & Clean"
+          }
+        }
+      }
+    },
+    "exif.inspector.action.done": {
+      "comment": "Confirmation button title after finishing metadata cleanup.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Done"
+          }
+        }
+      }
+    },
+    "exif.inspector.action.close": {
+      "comment": "Button title to close the metadata cleanup UI.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close"
+          }
+        }
+      }
+    },
+    "timer.notification.break-started.message": {
+      "comment": "Notification message when a break starts and shows break duration in minutes.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Take a breath. Break for %d mins."
+          }
+        }
+      }
+    },
+    "timer.notification.focus-started.message": {
+      "comment": "Notification message when focus resumes showing timer name and cycle progress.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Focusing on: %@. Cycle %d of %d."
+          }
+        }
+      }
+    },
+    "timer.notification.timer-started.title": {
+      "comment": "Notification title when a standard timer starts.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timer Started"
+          }
+        }
+      }
+    },
+    "timer.notification.timer-started.message": {
+      "comment": "Notification message showing timer duration in minutes.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timer set for %d mins."
+          }
+        }
+      }
+    },
+    "timer.kind.stopwatch.display-name": {
+      "comment": "Display name for stopwatch timer mode.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stopwatch"
+          }
+        }
+      }
+    },
+    "timer.template.focus-session.title": {
+      "comment": "Preset title for the focus session timer template.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Focus Session"
+          }
+        }
+      }
+    },
+    "timer.template.pomodoro.title": {
+      "comment": "Preset title for the pomodoro timer template.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pomodoro"
+          }
+        }
+      }
+    },
+    "timer.template.deep-work.title": {
+      "comment": "Preset title for the deep work timer template.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deep Work"
+          }
+        }
+      }
+    },
+    "timer.template.sprint.title": {
+      "comment": "Preset title for the sprint timer template.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprint"
+          }
+        }
+      }
+    },
+    "timer.template.power-break.title": {
+      "comment": "Preset title for the power break timer template.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Power Break ☕"
+          }
+        }
+      }
+    },
+    "timer.notification.stopwatch-started.title": {
+      "comment": "Notification title shown when stopwatch starts.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stopwatch Started"
+          }
+        }
+      }
+    },
+    "timer.notification.stopwatch-started.message": {
+      "comment": "Notification message showing the name of the stopwatch being tracked.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tracking time for: %@"
+          }
+        }
+      }
+    },
+    "timer.notification.session-state.break-time": {
+      "comment": "Short status text indicating break time in timer notifications.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Break Time!"
+          }
+        }
+      }
+    },
+    "timer.notification.session-state.focus-time": {
+      "comment": "Short status text indicating focus time in timer notifications.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Focus Time!"
+          }
+        }
+      }
+    },
+    "timer.notification.focus-session-finished.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Focus Session Finished! ☕"
+          }
+        }
+      },
+      "comment": "Title for notification when a pomodoro focus session ends and break starts."
+    },
+    "timer.notification.pomodoro-finished.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pomodoro Finished! 🏆"
+          }
+        }
+      },
+      "comment": "Title for notification when all pomodoro cycles are completed."
+    },
+    "timer.notification.break-finished.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Break Finished! 🐸"
+          }
+        }
+      },
+      "comment": "Title for notification when a pomodoro break ends and next focus cycle begins."
+    },
+    "timer.notification.timer-finished.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timer Finished! ⏰"
+          }
+        }
+      },
+      "comment": "Title for notification when a regular timer completes."
+    }
+  }
+}
