@@ -24,13 +24,21 @@ struct DashboardView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 8) {
-                        Text(String(localized: "dashboard.welcome.title", defaultValue: "Welcome Back!", comment: "Main welcome heading on dashboard"))
+                        Text(String(
+                            localized: "dashboard.welcome.title",
+                            defaultValue: "Welcome Back!",
+                            comment: "Main welcome heading on dashboard"
+                        ))
                         Image(systemName: "sparkles")
                             .foregroundColor(.yellow)
                     }
                     .font(.system(.title, design: .rounded))
                     .fontWeight(.bold)
-                    Text(String(localized: "dashboard.welcome.subtitle", defaultValue: "Keep your focus game sharp today.", comment: "Welcome subtitle encouraging focus on dashboard"))
+                    Text(String(
+                        localized: "dashboard.welcome.subtitle",
+                        defaultValue: "Keep your focus game sharp today.",
+                        comment: "Welcome subtitle encouraging focus on dashboard"
+                    ))
                         .font(.system(.subheadline, design: .rounded))
                         .foregroundColor(.secondary)
                 }
@@ -78,7 +86,11 @@ struct DashboardView: View {
                     .frame(height: 230)
                     
                     // Daily Goal
-                    Text(String(format: String(localized: "dashboard.stats.daily-goal-progress", defaultValue: "Daily Goal: %dm / %dm", comment: "Daily focus goal progress with current and target minutes"), todayFocusMinutes, dailyFocusGoal))
+                    Text(String(format: String(
+                        localized: "dashboard.stats.daily-goal-progress",
+                        defaultValue: "Daily Goal: %dm / %dm",
+                        comment: "Daily focus goal progress with current and target minutes"
+                    ), todayFocusMinutes, dailyFocusGoal))
                         .font(.system(.subheadline, design: .rounded))
                         .fontWeight(.bold)
                         .foregroundColor(todayFocusMinutes >= dailyFocusGoal ? .green : .secondary)
@@ -89,13 +101,33 @@ struct DashboardView: View {
                 VStack(spacing: 16) {
                     // Quick Stats Grid
                     HStack(spacing: 12) {
-                        StatCard(title: String(localized: "dashboard.stats.focused-today.label", defaultValue: "Focused Today", comment: "Label for focused minutes statistic on dashboard"), value: String(format: String(localized: "dashboard.stats.focused-today.value", defaultValue: "%dm", comment: "Focused minutes value shown in dashboard stats"), todayFocusMinutes), icon: "flame.fill", color: .orange)
-                        StatCard(title: String(localized: "dashboard.stats.completed-tasks.label", defaultValue: "Completed Tasks", comment: "Label for completed tasks statistic on dashboard"), value: String(format: String(localized: "dashboard.stats.completed-tasks.value", defaultValue: "%d", comment: "Completed tasks count value shown in dashboard stats"), todoManager.items.filter { $0.isCompleted }.count), icon: "checklist", color: .green)
+                        StatCard(title: String(
+                            localized: "dashboard.stats.focused-today.label",
+                            defaultValue: "Focused Today",
+                            comment: "Label for focused minutes statistic on dashboard"
+                        ), value: String(format: String(
+                            localized: "dashboard.stats.focused-today.value",
+                            defaultValue: "%dm",
+                            comment: "Focused minutes value shown in dashboard stats"
+                        ), todayFocusMinutes), icon: "flame.fill", color: .orange)
+                        StatCard(title: String(
+                            localized: "dashboard.stats.completed-tasks.label",
+                            defaultValue: "Completed Tasks",
+                            comment: "Label for completed tasks statistic on dashboard"
+                        ), value: String(format: String(
+                            localized: "dashboard.stats.completed-tasks.value",
+                            defaultValue: "%d",
+                            comment: "Completed tasks count value shown in dashboard stats"
+                        ), todoManager.items.filter { $0.isCompleted }.count), icon: "checklist", color: .green)
                     }
                     
                     // Pending Tasks
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(String(localized: "dashboard.pending-tasks.section-title", defaultValue: "TODAY'S PENDING TASKS", comment: "Section header for today's pending tasks on dashboard"))
+                        Text(String(
+                            localized: "dashboard.pending-tasks.section-title",
+                            defaultValue: "TODAY'S PENDING TASKS",
+                            comment: "Section header for today's pending tasks on dashboard"
+                        ))
                             .font(.system(size: 9, weight: .bold))
                             .foregroundColor(.secondary.opacity(0.8))
                             .tracking(1.2)
@@ -106,7 +138,11 @@ struct DashboardView: View {
                                 Image(systemName: "checkmark.seal.fill")
                                     .font(.system(size: 24))
                                     .foregroundColor(.green.opacity(0.85))
-                                Text(String(localized: "dashboard.pending-tasks.empty-state", defaultValue: "All caught up!", comment: "Empty state message when no pending tasks remain"))
+                                Text(String(
+                                    localized: "dashboard.pending-tasks.empty-state",
+                                    defaultValue: "All caught up!",
+                                    comment: "Empty state message when no pending tasks remain"
+                                ))
                                     .font(.system(.caption, design: .rounded))
                                     .foregroundColor(.secondary)
                             }
@@ -139,7 +175,11 @@ struct DashboardView: View {
                     }) {
                         HStack {
                             Image(systemName: "play.fill")
-                            Text(String(localized: "dashboard.pending-tasks.start-focus-session", defaultValue: "Start Focus Session", comment: "Button title to start a focus session from dashboard tasks"))
+                            Text(String(
+                                localized: "dashboard.pending-tasks.start-focus-session",
+                                defaultValue: "Start Focus Session",
+                                comment: "Button title to start a focus session from dashboard tasks"
+                            ))
                                 .fontWeight(.bold)
                         }
                         .font(.system(.subheadline, design: .rounded))
