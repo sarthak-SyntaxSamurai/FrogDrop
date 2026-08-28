@@ -69,7 +69,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             object: nil,
             queue: .main
         ) { [weak self] notification in
-            Task { @MainActor in
+            Task { @MainActor [weak self] in
                 guard let self = self, let item = notification.object as? ClipboardItem else { return }
                 let frame = self.statusItem?.button?.window?.frame ?? .zero
                 ClipboardToastPanelWindow.shared.show(
@@ -133,7 +133,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
                 object: nil,
                 queue: .main
             ) { [weak self] _ in
-                Task { @MainActor in
+                Task { @MainActor [weak self] in
                     self?.updateMenuBarTitle()
                 }
             }

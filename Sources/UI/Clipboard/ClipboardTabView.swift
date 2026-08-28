@@ -383,6 +383,7 @@ struct ClipboardRow: View {
         return urls
     }
     
+    @MainActor
     private func openItemLinksAndPaths() {
         let targets = pathsAndURLs
         guard !targets.isEmpty else { return }

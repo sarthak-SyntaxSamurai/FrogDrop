@@ -157,10 +157,12 @@ class DropzonePanelWindow: NSWindow {
             context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
             self.animator().setFrame(targetRect, display: true)
         } completionHandler: { [weak self] in
-            guard let self = self else { return }
-            self.collapsedHostingView.isHidden = false
-            self.expandedContainer.isHidden = true
-            self.orderOut(nil)
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                self.collapsedHostingView.isHidden = false
+                self.expandedContainer.isHidden = true
+                self.orderOut(nil)
+            }
         }
     }
     

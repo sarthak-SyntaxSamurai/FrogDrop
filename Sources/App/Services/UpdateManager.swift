@@ -112,7 +112,7 @@ class UpdateManager: NSObject, ObservableObject {
         request.timeoutInterval = 12.0
         
         URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            Task { @MainActor in
+            Task { @MainActor [weak self] in
                 guard let self = self else { return }
                 self.isChecking = false
                 self.lastCheckDate = Date()
@@ -208,7 +208,7 @@ class UpdateManager: NSObject, ObservableObject {
         
         let session = URLSession(configuration: .default)
         let task = session.downloadTask(with: url) { [weak self] tempLocalURL, response, error in
-            Task { @MainActor in
+            Task { @MainActor [weak self] in
                 guard let self = self else { return }
                 
                 if let error = error {

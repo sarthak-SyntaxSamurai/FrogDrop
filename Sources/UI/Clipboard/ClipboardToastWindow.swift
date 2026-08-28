@@ -75,7 +75,6 @@ class ClipboardToastPanelWindow: NSWindow {
         self.ignoresMouseEvents = false // Allow clicking the Stay button
         
         let view = ClipboardToastView(model: model) { [weak self] in
-            guard let self = self else { return }
             Task { @MainActor in
                 // Find and make the active temporary item permanent
                 if let firstTemp = ClipboardManager.shared.items.first(where: { $0.isTemporary }) {
@@ -83,7 +82,7 @@ class ClipboardToastPanelWindow: NSWindow {
                     HapticManager.shared.success()
                 }
             }
-            self.hide()
+            self?.hide()
         }
         let hostingView = NSHostingView(rootView: view)
         hostingView.frame = self.contentView?.bounds ?? .zero

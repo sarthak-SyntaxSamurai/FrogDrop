@@ -224,13 +224,16 @@ struct FloatingShelfView: View {
         .frame(width: 150, height: 185)
         .onDrop(of: [.fileURL], isTargeted: $isTargeted) { providers in
             let group = DispatchGroup()
+            let lock = NSLock()
             var urls: [URL] = []
             
             for provider in providers {
                 group.enter()
                 _ = provider.loadObject(ofClass: NSURL.self) { object, _ in
                     if let nsUrl = object as? NSURL, let url = nsUrl as URL? {
+                        lock.lock()
                         urls.append(url)
+                        lock.unlock()
                     }
                     group.leave()
                 }
