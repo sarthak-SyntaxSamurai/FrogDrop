@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-v2.1.0-22c55e?style=flat-square&logo=github" alt="Version 2.1.0">
+  <img src="https://img.shields.io/badge/version-v2.2.0-22c55e?style=flat-square&logo=github" alt="Version 2.2.0">
   <a href="https://github.com/sarthak-SyntaxSamurai/FrogDrop/actions/workflows/build.yml">
     <img src="https://github.com/sarthak-SyntaxSamurai/FrogDrop/actions/workflows/build.yml/badge.svg" alt="Build Status">
   </a>

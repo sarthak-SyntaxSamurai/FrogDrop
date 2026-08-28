@@ -24,8 +24,8 @@ swift build -c release
 mkdir -p "$APP_PATH/Contents/MacOS" "$APP_PATH/Contents/Resources"
 cp "$PROJECT_ROOT/.build/arm64-apple-macosx/release/FrogDrop" "$APP_PATH/Contents/MacOS/FrogDrop"
 chmod +x "$APP_PATH/Contents/MacOS/FrogDrop"
-/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString 2.1.0" "$APP_PATH/Contents/Info.plist" 2>/dev/null || true
-/usr/libexec/PlistBuddy -c "Set :CFBundleVersion 2.1.0" "$APP_PATH/Contents/Info.plist" 2>/dev/null || true
+/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString 2.2.0" "$APP_PATH/Contents/Info.plist" 2>/dev/null || true
+/usr/libexec/PlistBuddy -c "Set :CFBundleVersion 2.2.0" "$APP_PATH/Contents/Info.plist" 2>/dev/null || true
 codesign --force --deep --sign - "$APP_PATH" 2>/dev/null || true
 
 # 3. Clean previous build artifacts
