@@ -4,23 +4,25 @@
 
 set -e
 
-DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-APP_PATH="$DIR/FrogDrop.app"
-BG_TIFF="$DIR/dmg_bg.tiff"
-OUTPUT_DMG="$DIR/FrogDrop.dmg"
-TEMP_DMG_DIR="$DIR/.tmp/dmg_source"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+APP_PATH="$PROJECT_ROOT/FrogDrop.app"
+BG_TIFF="$PROJECT_ROOT/assets/dmg/dmg_bg.tiff"
+ICON_PNG="$PROJECT_ROOT/assets/branding/FrogDropIcon.png"
+OUTPUT_DMG="$PROJECT_ROOT/FrogDrop.dmg"
+TEMP_DMG_DIR="$PROJECT_ROOT/.tmp/dmg_source"
 
 echo "🐸 Starting FrogDrop Retina DMG Packaging..."
 
 # 1. Regenerate background TIFF
-python3 "$DIR/generate_dmg_bg.py"
+python3 "$SCRIPT_DIR/generate_dmg_bg.py"
 
 # 2. Build release binary and update FrogDrop.app bundle
 echo "🔨 Building latest FrogDrop release binary..."
-cd "$DIR"
+cd "$PROJECT_ROOT"
 swift build -c release
 mkdir -p "$APP_PATH/Contents/MacOS" "$APP_PATH/Contents/Resources"
-cp "$DIR/.build/arm64-apple-macosx/release/FrogDrop" "$APP_PATH/Contents/MacOS/FrogDrop"
+cp "$PROJECT_ROOT/.build/arm64-apple-macosx/release/FrogDrop" "$APP_PATH/Contents/MacOS/FrogDrop"
 chmod +x "$APP_PATH/Contents/MacOS/FrogDrop"
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString 2.1.0" "$APP_PATH/Contents/Info.plist" 2>/dev/null || true
 /usr/libexec/PlistBuddy -c "Set :CFBundleVersion 2.1.0" "$APP_PATH/Contents/Info.plist" 2>/dev/null || true
@@ -33,15 +35,18 @@ mkdir -p "$TEMP_DMG_DIR"
 # Copy FrogDrop.app into temporary staging directory
 cp -R "$APP_PATH" "$TEMP_DMG_DIR/"
 
-# 4. Use create-dmg to assemble the final disk image
+# 4. Locate create-dmg
+CREATE_DMG_BIN="$(command -v create-dmg || echo "/opt/homebrew/bin/create-dmg")"
+
+# 5. Use create-dmg to assemble the final disk image
 # Window Size: 500 x 300
 # Icon Size: 96
 # FrogDrop.app position: 130 170
 # Applications symlink position: 370 170
 echo "📦 Packaging DMG with create-dmg..."
-/opt/homebrew/bin/create-dmg \
+"$CREATE_DMG_BIN" \
   --volname "FrogDrop" \
-  --volicon "$DIR/media/FrogDropIcon.png" \
+  --volicon "$ICON_PNG" \
   --background "$BG_TIFF" \
   --window-pos 240 160 \
   --window-size 500 300 \
@@ -54,7 +59,7 @@ echo "📦 Packaging DMG with create-dmg..."
   "$OUTPUT_DMG" \
   "$TEMP_DMG_DIR" || true
 
-# 5. Clean up temporary staging directory
+# 6. Clean up temporary staging directory
 rm -rf "$TEMP_DMG_DIR"
 
 if [ -f "$OUTPUT_DMG" ]; then

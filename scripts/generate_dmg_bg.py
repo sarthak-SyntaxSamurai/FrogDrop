@@ -2,6 +2,11 @@ import os
 import subprocess
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+ICON_PATH = os.path.join(PROJECT_ROOT, "assets", "branding", "FrogDropIcon.png")
+DEFAULT_OUTPUT_DIR = os.path.join(PROJECT_ROOT, "assets", "dmg")
+
 def render_background_layer(scale=1):
     w = int(500 * scale)
     h = int(300 * scale)
@@ -125,8 +130,7 @@ def render_background_layer(scale=1):
 
     # Mascot frog icon
     try:
-        icon_path = "/Users/sarthakanand/Projects/new app/FrogDrop/media/FrogDropIcon.png"
-        frog = Image.open(icon_path).convert("RGBA")
+        frog = Image.open(ICON_PATH).convert("RGBA")
         isize = int(32 * scale)
         frog = frog.resize((isize, isize), Image.Resampling.LANCZOS)
         # Position centered above title
@@ -148,7 +152,9 @@ def render_background_layer(scale=1):
 
     return img
 
-def generate_all_backgrounds(output_dir):
+def generate_all_backgrounds(output_dir=None):
+    if output_dir is None:
+        output_dir = DEFAULT_OUTPUT_DIR
     os.makedirs(output_dir, exist_ok=True)
     
     img_1x = render_background_layer(scale=1)
@@ -174,4 +180,4 @@ def generate_all_backgrounds(output_dir):
         img_2x.save(ptiff, format="TIFF")
 
 if __name__ == "__main__":
-    generate_all_backgrounds("/Users/sarthakanand/Projects/new app/FrogDrop")
+    generate_all_backgrounds()

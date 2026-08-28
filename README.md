@@ -1,7 +1,7 @@
 # 🐸 FrogDrop
 
 <p align="center">
-  <img src="media/FrogDropIcon.png" width="120" height="120" alt="FrogDrop">
+  <img src="assets/branding/FrogDropIcon.png" width="120" height="120" alt="FrogDrop">
 </p>
 
 <p align="center">
@@ -27,12 +27,12 @@
 
 <p align="center">
   <a href="https://www.youtube.com/watch?v=uHfZnFQXAdY">
-    <img src="media/video_thumbnail.png" alt="Watch FrogDrop Video Demo on YouTube" width="100%">
+    <img src="assets/branding/video_thumbnail.png" alt="Watch FrogDrop Video Demo on YouTube" width="100%">
   </a>
 </p>
 
 <p align="center">
-  ▶️ <a href="https://www.youtube.com/watch?v=uHfZnFQXAdY"><strong>Watch Full 1080p 60fps Video Demo on YouTube →</strong></a> &nbsp;•&nbsp; 📸 <a href="media"><strong>Explore Screenshots →</strong></a>
+  ▶️ <a href="https://www.youtube.com/watch?v=uHfZnFQXAdY"><strong>Watch Full 1080p 60fps Video Demo on YouTube →</strong></a>
 </p>
 
 ---

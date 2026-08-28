@@ -1,0 +1,22 @@
+# Auto detect text files and perform LF normalization
+* text=auto eol=lf
+
+# Explicitly set text files
+*.swift text eol=lf
+*.md text eol=lf
+*.sh text eol=lf
+*.py text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.plist text eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.tiff binary
+*.icns binary
+*.dmg binary
+*.zip binary
+*.app binary

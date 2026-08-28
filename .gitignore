@@ -1,14 +1,21 @@
-.build/
+# macOS
 .DS_Store
+.AppleDouble
+.LSOverride
+Icon\r\r
+
+# Swift Package Manager
+.build/
+.swiftpm/
 Packages/
+
+# Build & Release Outputs
 FrogDrop.app/
 FrogDrop.zip
 FrogDrop.dmg
-*.icns
-*.png
-!AppIcon.png
-!media/
-!media/*.png
-!install.sh
-*.json
-.swiftpm/
+dist/
+.tmp/
+
+# Packaging intermediate caches
+assets/dmg/dmg_bg_1x.png
+assets/dmg/dmg_bg_2x.png
