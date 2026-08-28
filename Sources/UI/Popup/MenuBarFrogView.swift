@@ -312,6 +312,7 @@ struct EyeView: View {
         .frame(width: eyeSize, height: eyeSize)
     }
     
+    @MainActor
     private func pupilOffset() -> CGSize {
         guard let appDelegate = NSApplication.shared.delegate as? AppDelegate,
               let statusItem = appDelegate.statusItem,
