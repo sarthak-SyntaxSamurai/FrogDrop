@@ -11,6 +11,9 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/version-v2.1.0-22c55e?style=flat-square&logo=github" alt="Version 2.1.0">
+  <a href="https://github.com/sarthak-SyntaxSamurai/FrogDrop/actions/workflows/build.yml">
+    <img src="https://github.com/sarthak-SyntaxSamurai/FrogDrop/actions/workflows/build.yml/badge.svg" alt="Build Status">
+  </a>
   <img src="https://img.shields.io/badge/macOS-14.0%2B-black?style=flat-square&logo=apple" alt="macOS 14+">
   <img src="https://img.shields.io/badge/Swift-5.9-F05138?style=flat-square&logo=swift&logoColor=white" alt="Swift 5.9">
   <img src="https://img.shields.io/badge/Architecture-Apple%20Silicon%20%7C%20Intel-blue?style=flat-square" alt="Universal">
@@ -27,12 +30,8 @@
 
 <p align="center">
   <a href="https://www.youtube.com/watch?v=uHfZnFQXAdY">
-    <img src="assets/branding/video_thumbnail.png" alt="Watch FrogDrop Video Demo on YouTube" width="100%">
+    <img src="assets/branding/preview.png" alt="FrogDrop Native macOS Suite Preview" width="100%">
   </a>
-</p>
-
-<p align="center">
-  ▶️ <a href="https://www.youtube.com/watch?v=uHfZnFQXAdY"><strong>Watch Full 1080p 60fps Video Demo on YouTube →</strong></a>
 </p>
 
 ---
