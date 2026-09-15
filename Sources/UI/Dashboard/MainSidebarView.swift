@@ -41,7 +41,7 @@ struct MainSidebarView: View {
                             Image(systemName: "circle.grid.3x3.fill")
                                 .font(.system(size: 14))
                                 .foregroundColor(Color.brandGreenEnd)
-                            Text("FrogDrop")
+                            Text("FrogStudio")
                                 .font(.system(.body, design: .rounded))
                                 .fontWeight(.bold)
                             Spacer()

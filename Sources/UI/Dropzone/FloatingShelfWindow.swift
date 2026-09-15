@@ -2,8 +2,9 @@ import AppKit
 import SwiftUI
 import UniformTypeIdentifiers
 
-// MARK: - FloatingShelfManager
-
+// MARK: - FrogShelf (`FloatingShelfManager` & `FloatingShelfWindow`)
+/// Cursor-anchored quick shelf spawned by shaking the mouse during a drag gesture.
+/// Acts as an ephemeral parking station for files while switching Desktops, Finder windows, or apps.
 @MainActor
 class FloatingShelfManager: ObservableObject {
     static let shared = FloatingShelfManager()

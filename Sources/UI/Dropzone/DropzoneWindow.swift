@@ -1,6 +1,9 @@
 import AppKit
 import SwiftUI
 
+/// **DropDock** (`DropzonePanelWindow`):
+/// Top-edge slide-down action tray that reveals when files are dragged toward the menu bar or notch.
+/// Houses rapid transform actions (OCR, WebP/AVIF, EXIF strip, PDF combine) and folder targets.
 class DropzonePanelWindow: NSWindow {
     private var statusItemFrame: NSRect
     private let collapsedHostingView: NSHostingView<CollapsedPanelView>

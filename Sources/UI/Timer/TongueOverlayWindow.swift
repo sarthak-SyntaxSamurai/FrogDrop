@@ -1,6 +1,9 @@
 import SwiftUI
 import AppKit
 
+// MARK: - TongueSnap (`TongueOverlayWindow` & `TongueOverlayView`)
+/// Interactive elastic radial gesture launcher.
+/// Stretches a physics-based tongue from the menu bar mascot to initiate quick timers (15m, 25m, 50m).
 @MainActor
 class TongueOverlayWindow: NSWindow {
     private let hostingView: NSHostingView<TongueOverlayView>

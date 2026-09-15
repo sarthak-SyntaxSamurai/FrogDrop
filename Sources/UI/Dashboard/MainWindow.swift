@@ -1,6 +1,8 @@
 import AppKit
 import SwiftUI
 
+// MARK: - FrogStudio (`MainWindow` / `MainSidebarView`)
+/// The expanded desktop workstation window for analytics, clipboard vault, bulk tools, and preferences.
 class MainWindow: NSWindow {
     static var shared: MainWindow?
     private let windowDelegate = MainWindowDelegate()

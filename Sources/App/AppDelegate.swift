@@ -16,6 +16,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     private var lastSelectedDuration: TimerDuration = .cancel
     var dropzonePanel: DropzonePanelWindow?
     var popupPanel: PopupPanelWindow?
+    
+    // MARK: - Standard Nomenclature Accessors (FrogDrop 5-Layer UI Architecture)
+    var frogHubPanel: FrogHubPanelWindow? {
+        get { popupPanel }
+        set { popupPanel = newValue }
+    }
+    var dropDockPanel: DropDockPanelWindow? {
+        get { dropzonePanel }
+        set { dropzonePanel = newValue }
+    }
     private var panelCloseMonitor: Any?
     private var localCloseMonitor: Any?
     private var activity: NSObjectProtocol?
@@ -504,7 +514,7 @@ class InteractiveFrogView: NSHostingView<MenuBarFrogView> {
         menu.addItem(NSMenuItem.separator())
         
         menu.addItem(NSMenuItem(title: "Check for Updates...", action: #selector(AppDelegate.checkForUpdates), keyEquivalent: "u"))
-        menu.addItem(NSMenuItem(title: "Open Dashboard", action: #selector(AppDelegate.openDashboard), keyEquivalent: "d"))
+        menu.addItem(NSMenuItem(title: "Open FrogStudio Dashboard", action: #selector(AppDelegate.openDashboard), keyEquivalent: "d"))
         menu.addItem(NSMenuItem(title: "Quit FrogDrop", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
         NSMenu.popUpContextMenu(menu, with: event, for: self)
     }

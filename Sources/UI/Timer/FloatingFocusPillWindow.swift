@@ -1,6 +1,9 @@
 import SwiftUI
 import AppKit
 
+// MARK: - FocusIsland (`FloatingFocusPillManager` & `FloatingFocusPillPanel`)
+/// Compact, always-on-top Picture-in-Picture ambient focus HUD.
+/// Stays glanceable over full-screen apps and development tools.
 @MainActor
 final class FloatingFocusPillManager: ObservableObject {
     static let shared = FloatingFocusPillManager()

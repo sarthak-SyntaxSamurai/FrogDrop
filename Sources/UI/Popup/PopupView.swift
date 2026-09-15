@@ -152,7 +152,7 @@ struct PopupView: View {
                             MenuBarSettingsView()
                         }
                         
-                        Text("FrogDrop • Premium 3-in-1")
+                        Text("FrogHub • Native Suite")
                             .font(.system(.caption2, design: .rounded))
                             .foregroundColor(.secondary)
                     }
