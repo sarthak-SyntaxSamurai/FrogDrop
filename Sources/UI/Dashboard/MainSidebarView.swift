@@ -6,6 +6,7 @@ struct MainSidebarView: View {
         case timer = "Focus Timer"
         case clipboard = "Clipboard"
         case dropzone = "Dropzone"
+        case tasks = "Tasks"
         case settings = "Settings"
         
         var id: String { rawValue }
@@ -16,6 +17,7 @@ struct MainSidebarView: View {
             case .timer: return "timer"
             case .clipboard: return "paperclip"
             case .dropzone: return "square.and.arrow.down"
+            case .tasks: return "checklist"
             case .settings: return "gearshape.fill"
             }
         }
@@ -104,6 +106,17 @@ struct MainSidebarView: View {
                     case .dropzone:
                         DropzoneTabView()
                             .padding(16)
+                    case .tasks:
+                        TasksTabView(onStartFocus: { taskName, todoId in
+                            timerManager.setupSeconds = 25 * 60
+                            timerManager.setupTaskName = taskName
+                            timerManager.setupTodoId = todoId
+                            timerManager.isShowingSetup = true
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                activeTab = .timer
+                            }
+                        })
+                        .padding(16)
                     case .settings:
                         AppSettingsView()
                     }

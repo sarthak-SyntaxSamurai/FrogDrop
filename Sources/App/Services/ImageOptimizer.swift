@@ -62,25 +62,21 @@ class ImageOptimizer {
         var results: [URL] = []
         
         for url in urls {
-            guard let image = NSImage(contentsOf: url),
-                  let tiffData = image.tiffRepresentation,
-                  let bitmapRep = NSBitmapImageRep(data: tiffData) else {
+            guard let imageSource = CGImageSourceCreateWithURL(url as CFURL, nil),
+                  let cgImage = CGImageSourceCreateImageAtIndex(imageSource, 0, nil) else {
                 continue
             }
             
             let baseName = url.deletingPathExtension().lastPathComponent
             let destURL = downloadsDir.appendingPathComponent("\(baseName)_compressed.jpg")
             
-            let compressionProps: [NSBitmapImageRep.PropertyKey: Any] = [
-                .compressionFactor: quality
-            ]
-            
-            if let compressedData = bitmapRep.representation(using: .jpeg, properties: compressionProps) {
-                do {
-                    try compressedData.write(to: destURL)
+            if let destination = CGImageDestinationCreateWithURL(destURL as CFURL, "public.jpeg" as CFString, 1, nil) {
+                let options: [CFString: Any] = [
+                    kCGImageDestinationLossyCompressionQuality: quality
+                ]
+                CGImageDestinationAddImage(destination, cgImage, options as CFDictionary)
+                if CGImageDestinationFinalize(destination) {
                     results.append(destURL)
-                } catch {
-                    print("[ImageOptimizer] Failed to save compressed image: \(error)")
                 }
             }
         }

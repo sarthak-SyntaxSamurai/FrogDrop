@@ -45,10 +45,18 @@ class PopupPanelWindow: NSPanel {
         let width: CGFloat = 340
         let height: CGFloat = 460
         
-        // Position directly below status item button, centered horizontally, with a 4pt gap
+        var originX = buttonFrame.midX - (width / 2)
+        let originY = buttonFrame.minY - height - 4
+        
+        // Clamp to screen visible boundaries to prevent off-screen clipping on edge monitors
+        if let screen = NSScreen.screens.first(where: { $0.frame.contains(buttonFrame.origin) }) ?? NSScreen.main {
+            let visible = screen.visibleFrame
+            originX = max(visible.minX + 8, min(originX, visible.maxX - width - 8))
+        }
+        
         let rect = NSRect(
-            x: buttonFrame.midX - (width / 2),
-            y: buttonFrame.minY - height - 4,
+            x: originX,
+            y: originY,
             width: width,
             height: height
         )

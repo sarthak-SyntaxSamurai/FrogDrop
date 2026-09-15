@@ -1,10 +1,11 @@
 import SwiftUI
 
 struct PopupView: View {
-    enum Tab {
+    enum Tab: Int, CaseIterable {
         case timer
         case clipboard
         case dropzone
+        case tasks
     }
     
     @AppStorage("uiDimOpacity") private var uiDimOpacity: Double = 0.0
@@ -40,6 +41,8 @@ struct PopupView: View {
             case .clipboard:
                 activeTab = .dropzone
             case .dropzone:
+                activeTab = .tasks
+            case .tasks:
                 break
             }
         }
@@ -67,6 +70,8 @@ struct PopupView: View {
                 activeTab = .timer
             case .dropzone:
                 activeTab = .clipboard
+            case .tasks:
+                activeTab = .dropzone
             }
         }
         HapticManager.shared.tick()
@@ -82,14 +87,19 @@ struct PopupView: View {
                             activeTab = .timer
                         }
                     }
-                    TabButton(title: "Clipboard", icon: "paperclip", isActive: activeTab == .clipboard, namespace: tabNamespace) {
+                    TabButton(title: "Clips", icon: "paperclip", isActive: activeTab == .clipboard, namespace: tabNamespace) {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
                             activeTab = .clipboard
                         }
                     }
-                    TabButton(title: "Dropzone", icon: "square.and.arrow.down", isActive: activeTab == .dropzone, namespace: tabNamespace) {
+                    TabButton(title: "Shelf", icon: "square.and.arrow.down", isActive: activeTab == .dropzone, namespace: tabNamespace) {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
                             activeTab = .dropzone
+                        }
+                    }
+                    TabButton(title: "Tasks", icon: "checklist", isActive: activeTab == .tasks, namespace: tabNamespace) {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                            activeTab = .tasks
                         }
                     }
                 }
@@ -116,6 +126,16 @@ struct PopupView: View {
                         ClipboardTabView(clipboardManager: clipboardManager, searchQuery: $clipboardSearchQuery)
                     case .dropzone:
                         DropzoneTabView()
+                    case .tasks:
+                        TasksTabView(onStartFocus: { taskName, todoId in
+                            timerManager.setupSeconds = 25 * 60
+                            timerManager.setupTaskName = taskName
+                            timerManager.setupTodoId = todoId
+                            timerManager.isShowingSetup = true
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                                activeTab = .timer
+                            }
+                        })
                     }
                 }
                 .frame(maxHeight: .infinity)
@@ -157,6 +177,26 @@ struct PopupView: View {
                             .foregroundColor(.secondary)
                     }
                     Spacer()
+                    
+                    // Quick Studio Desktop Launcher
+                    Button(action: {
+                        AppDelegate.shared?.openDashboard()
+                    }) {
+                        HStack(spacing: 3) {
+                            Image(systemName: "macwindow")
+                                .font(.system(size: 9))
+                            Text("Studio")
+                                .font(.system(size: 10, weight: .semibold, design: .rounded))
+                        }
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 3)
+                        .background(Color.white.opacity(0.04))
+                        .cornerRadius(4)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Open FrogStudio Desktop Dashboard (⌘D)")
+                    
                     QuitButton()
                 }
                 .padding(12)

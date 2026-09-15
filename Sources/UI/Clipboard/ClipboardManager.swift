@@ -68,6 +68,9 @@ class ClipboardManager: ObservableObject {
         timer?.invalidate()
     }
     
+    private static let amazonRegex = try? NSRegularExpression(pattern: "/(dp|gp/product)/([A-Za-z0-9]{10})", options: [])
+    private static let flipkartRegex = try? NSRegularExpression(pattern: "/p/([A-Za-z0-9]{10,20})", options: [])
+
     private let rulesKey = "frogdrop.clipboardRules"
     private let durationKey = "frogdrop.tempDuration"
     
@@ -144,6 +147,7 @@ class ClipboardManager: ObservableObject {
     }
     
     private func checkExpiration() {
+        guard items.contains(where: { $0.isTemporary }) else { return }
         let now = Date()
         let filtered = items.filter { item in
             if item.isTemporary, let expiry = item.expiresAt {
@@ -235,8 +239,7 @@ class ClipboardManager: ObservableObject {
         
         // 1. Amazon Rewriting
         if host.contains("amazon.") {
-            let pattern = "/(dp|gp/product)/([A-Za-z0-9]{10})"
-            if let regex = try? NSRegularExpression(pattern: pattern, options: []),
+            if let regex = Self.amazonRegex,
                let match = regex.firstMatch(in: trimmed, options: [], range: NSRange(trimmed.startIndex..., in: trimmed)) {
                 if let asinRange = Range(match.range(at: 2), in: trimmed) {
                     let asin = String(trimmed[asinRange])
@@ -247,8 +250,7 @@ class ClipboardManager: ObservableObject {
         
         // 2. Flipkart Rewriting
         if host.contains("flipkart.com") {
-            let pattern = "/p/([A-Za-z0-9]{10,20})"
-            if let regex = try? NSRegularExpression(pattern: pattern, options: []),
+            if let regex = Self.flipkartRegex,
                let match = regex.firstMatch(in: trimmed, options: [], range: NSRange(trimmed.startIndex..., in: trimmed)) {
                 if let idRange = Range(match.range(at: 1), in: trimmed) {
                     let productID = String(trimmed[idRange])
@@ -372,7 +374,7 @@ class ClipboardManager: ObservableObject {
     private func saveHistory() {
         do {
             let data = try JSONEncoder().encode(items)
-            try data.write(to: storageURL)
+            try data.write(to: storageURL, options: .atomic)
         } catch {
             print("Failed to save clipboard history: \(error)")
         }

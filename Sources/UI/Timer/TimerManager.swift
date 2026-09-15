@@ -112,6 +112,7 @@ class TimerManager: ObservableObject {
     }
     
     private func sessionCompleted(for timer: inout ActiveTimer, updatedTimers: inout [ActiveTimer]) {
+        TodoManager.shared.flushDurationBuffer()
         HapticManager.shared.success()
         NSSound(named: "Glass")?.play()
         
@@ -244,6 +245,7 @@ class TimerManager: ObservableObject {
     }
     
     func togglePause(timerId: UUID) {
+        TodoManager.shared.flushDurationBuffer()
         if let idx = activeTimers.firstIndex(where: { $0.id == timerId }) {
             if activeTimers[idx].state == .running {
                 activeTimers[idx].state = .paused
@@ -256,6 +258,7 @@ class TimerManager: ObservableObject {
     }
     
     func stopTimer(timerId: UUID) {
+        TodoManager.shared.flushDurationBuffer()
         if let idx = activeTimers.firstIndex(where: { $0.id == timerId }) {
             let timer = activeTimers[idx]
             if timer.isStopwatch && timer.secondsElapsed >= 5 {

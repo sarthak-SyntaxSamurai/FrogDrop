@@ -39,7 +39,11 @@ class TodoManager: ObservableObject {
         load()
     }
     
+    private var pendingDurationBuffer: [UUID: TimeInterval] = [:]
+    private var lastBufferFlushTime: Date = Date()
+    
     func add(title: String) {
+        flushDurationBuffer()
         let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
         let newItem = TodoItem(id: UUID(), title: trimmed, isCompleted: false)
@@ -48,6 +52,7 @@ class TodoManager: ObservableObject {
     }
     
     func toggle(id: UUID) {
+        flushDurationBuffer()
         if let index = items.firstIndex(where: { $0.id == id }) {
             items[index].isCompleted.toggle()
             HapticManager.shared.click()
@@ -55,14 +60,33 @@ class TodoManager: ObservableObject {
     }
     
     func delete(id: UUID) {
+        pendingDurationBuffer.removeValue(forKey: id)
         items.removeAll { $0.id == id }
         HapticManager.shared.click()
     }
     
     func addDuration(id: UUID, seconds: TimeInterval) {
-        if let index = items.firstIndex(where: { $0.id == id }) {
-            items[index].focusedDuration += seconds
-            save()
+        pendingDurationBuffer[id, default: 0] += seconds
+        
+        // Flush buffer every 15 seconds to avoid 1Hz UI re-rendering and disk thrashing
+        if Date().timeIntervalSince(lastBufferFlushTime) >= 15.0 {
+            flushDurationBuffer()
+        }
+    }
+    
+    func flushDurationBuffer() {
+        guard !pendingDurationBuffer.isEmpty else { return }
+        lastBufferFlushTime = Date()
+        var modified = false
+        for (id, duration) in pendingDurationBuffer {
+            if let index = items.firstIndex(where: { $0.id == id }) {
+                items[index].focusedDuration += duration
+                modified = true
+            }
+        }
+        pendingDurationBuffer.removeAll()
+        if modified {
+            // didSet on items already triggers save()
         }
     }
     

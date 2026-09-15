@@ -66,9 +66,12 @@ struct TimerTabView: View {
                         // 3. Ambient Focus Soundscapes
                         AmbientSoundControlCard(ambientSound: ambientSound)
                         
-                        // 4. Todo Task List
-                        TodoListView()
-                            .frame(maxHeight: 160)
+                        // 4. Active Focus Task Card
+                        if let currentTimer = timerManager.activeTimers.first, !currentTimer.name.isEmpty {
+                            ActiveFocusTaskBanner(taskName: currentTimer.name)
+                        } else if !timerManager.setupTaskName.isEmpty {
+                            ActiveFocusTaskBanner(taskName: timerManager.setupTaskName)
+                        }
                         
                         // 5. Session History
                         TimerHistoryListView()
@@ -81,6 +84,36 @@ struct TimerTabView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
+    }
+}
+
+struct ActiveFocusTaskBanner: View {
+    let taskName: String
+    
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "target")
+                .foregroundColor(Color.brandGreenEnd)
+                .font(.system(size: 11, weight: .bold))
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text("CURRENT FOCUS TASK")
+                    .font(.system(size: 8, weight: .bold, design: .rounded))
+                    .foregroundColor(.secondary)
+                Text(taskName)
+                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .foregroundColor(.primary)
+                    .lineLimit(1)
+            }
+            Spacer()
+        }
+        .padding(10)
+        .background(Color.white.opacity(0.04))
+        .cornerRadius(10)
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(Color.brandGreenEnd.opacity(0.2), lineWidth: 0.5)
+        )
     }
 }
 
