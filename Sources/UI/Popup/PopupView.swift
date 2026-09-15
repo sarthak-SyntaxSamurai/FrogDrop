@@ -79,171 +79,8 @@ struct PopupView: View {
     
     var body: some View {
         ZStack {
-            VStack(spacing: 0) {
-                // Header Tab Bar
-                HStack(spacing: 2) {
-                    TabButton(title: "Timer", icon: "timer", isActive: activeTab == .timer, namespace: tabNamespace) {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
-                            activeTab = .timer
-                        }
-                    }
-                    TabButton(title: "Clips", icon: "paperclip", isActive: activeTab == .clipboard, namespace: tabNamespace) {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
-                            activeTab = .clipboard
-                        }
-                    }
-                    TabButton(title: "Shelf", icon: "square.and.arrow.down", isActive: activeTab == .dropzone, namespace: tabNamespace) {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
-                            activeTab = .dropzone
-                        }
-                    }
-                    TabButton(title: "Tasks", icon: "checklist", isActive: activeTab == .tasks, namespace: tabNamespace) {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
-                            activeTab = .tasks
-                        }
-                    }
-                }
-                .padding(3)
-                .background(Color.white.opacity(0.03))
-                .cornerRadius(8)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.white.opacity(0.06), lineWidth: 0.5)
-                )
-                .padding(.top, 14)
-                .padding(.horizontal, 14)
-                
-                Divider()
-                    .background(Color.white.opacity(0.1))
-                    .padding(.vertical, 8)
-                
-                // Tab Contents
-                ZStack {
-                    switch activeTab {
-                    case .timer:
-                        TimerTabView(timerManager: timerManager)
-                    case .clipboard:
-                        ClipboardTabView(clipboardManager: clipboardManager, searchQuery: $clipboardSearchQuery)
-                    case .dropzone:
-                        DropzoneTabView()
-                    case .tasks:
-                        TasksTabView(onStartFocus: { taskName, todoId in
-                            timerManager.setupSeconds = 25 * 60
-                            timerManager.setupTaskName = taskName
-                            timerManager.setupTodoId = todoId
-                            timerManager.isShowingSetup = true
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
-                                activeTab = .timer
-                            }
-                        })
-                    }
-                }
-                .frame(maxHeight: .infinity)
-                .contentShape(Rectangle())
-                .gesture(
-                    DragGesture(minimumDistance: 15)
-                        .onEnded { gesture in
-                            let threshold: CGFloat = 40
-                            let xDist = abs(gesture.translation.width)
-                            let yDist = abs(gesture.translation.height)
-                            
-                            guard xDist > yDist * 1.5 else { return }
-                            
-                            if gesture.translation.width < -threshold {
-                                switchToNextTab()
-                            } else if gesture.translation.width > threshold {
-                                switchToPrevTab()
-                            }
-                        }
-                )
-                
-                // Footer Info
-                HStack {
-                    HStack(spacing: 6) {
-                        Button(action: {
-                            isShowingSettings = true
-                        }) {
-                            Image(systemName: "gearshape")
-                                .font(.system(size: 11))
-                                .foregroundColor(.secondary)
-                        }
-                        .buttonStyle(.plain)
-                        .popover(isPresented: $isShowingSettings, arrowEdge: .top) {
-                            MenuBarSettingsView()
-                        }
-                        
-                        Text("FrogHub • Native Suite")
-                            .font(.system(.caption2, design: .rounded))
-                            .foregroundColor(.secondary)
-                    }
-                    Spacer()
-                    
-                    // Quick Studio Desktop Launcher
-                    Button(action: {
-                        AppDelegate.shared?.openDashboard()
-                    }) {
-                        HStack(spacing: 3) {
-                            Image(systemName: "macwindow")
-                                .font(.system(size: 9))
-                            Text("Studio")
-                                .font(.system(size: 10, weight: .semibold, design: .rounded))
-                        }
-                        .foregroundColor(.secondary)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 3)
-                        .background(Color.white.opacity(0.04))
-                        .cornerRadius(4)
-                    }
-                    .buttonStyle(.plain)
-                    .help("Open FrogStudio Desktop Dashboard (⌘D)")
-                    
-                    QuitButton()
-                }
-                .padding(12)
-                .background(Color.clear)
-            }
-            .frame(width: 340, height: 460)
-            .background(Color.black.opacity(uiDimOpacity))
-            .overlay(
-                RoundedRectangle(cornerRadius: 18)
-                    .stroke(Color.white.opacity(0.1), lineWidth: 0.5)
-            )
-            
-            if dropzoneManager.isShowingCombinePopover {
-                Color.black.opacity(0.35)
-                    .edgesIgnoringSafeArea(.all)
-                    .transition(.opacity)
-                    .onTapGesture {
-                        withAnimation {
-                            dropzoneManager.isShowingCombinePopover = false
-                        }
-                    }
-                
-                CombinePopoverView(
-                    selectedIDs: $dropzoneManager.selectedGroupIDs,
-                    onCombine: {
-                        dropzoneManager.combineGroups(withIDs: dropzoneManager.selectedGroupIDs)
-                        withAnimation {
-                            dropzoneManager.isShowingCombinePopover = false
-                        }
-                    },
-                    onCancel: {
-                        withAnimation {
-                            dropzoneManager.isShowingCombinePopover = false
-                        }
-                    }
-                )
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.white.opacity(0.04))
-                        .shadow(color: .black.opacity(0.3), radius: 10, x: 0, y: 5)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
-                )
-                .transition(.scale.combined(with: .opacity))
-            }
+            popupContainer
+            combinePopoverOverlay
         }
         .coordinateSpace(name: "PopupWindowSpace")
         .onAppear {
@@ -261,6 +98,186 @@ struct PopupView: View {
             if let delegate = NSApp.delegate as? AppDelegate {
                 delegate.closeAllPanels()
             }
+        }
+    }
+    
+    private var popupContainer: some View {
+        VStack(spacing: 0) {
+            headerTabBar
+            
+            Divider()
+                .background(Color.white.opacity(0.1))
+                .padding(.vertical, 8)
+            
+            tabContent
+            
+            footerInfo
+        }
+        .frame(width: 340, height: 460)
+        .background(Color.black.opacity(uiDimOpacity))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18)
+                .stroke(Color.white.opacity(0.1), lineWidth: 0.5)
+        )
+    }
+    
+    private var headerTabBar: some View {
+        HStack(spacing: 2) {
+            TabButton(title: "Timer", icon: "timer", isActive: activeTab == .timer, namespace: tabNamespace) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                    activeTab = .timer
+                }
+            }
+            TabButton(title: "Clips", icon: "paperclip", isActive: activeTab == .clipboard, namespace: tabNamespace) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                    activeTab = .clipboard
+                }
+            }
+            TabButton(title: "Shelf", icon: "square.and.arrow.down", isActive: activeTab == .dropzone, namespace: tabNamespace) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                    activeTab = .dropzone
+                }
+            }
+            TabButton(title: "Tasks", icon: "checklist", isActive: activeTab == .tasks, namespace: tabNamespace) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                    activeTab = .tasks
+                }
+            }
+        }
+        .padding(3)
+        .background(Color.white.opacity(0.03))
+        .cornerRadius(8)
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color.white.opacity(0.06), lineWidth: 0.5)
+        )
+        .padding(.top, 14)
+        .padding(.horizontal, 14)
+    }
+    
+    private var tabContent: some View {
+        ZStack {
+            switch activeTab {
+            case .timer:
+                TimerTabView(timerManager: timerManager)
+            case .clipboard:
+                ClipboardTabView(clipboardManager: clipboardManager, searchQuery: $clipboardSearchQuery)
+            case .dropzone:
+                DropzoneTabView()
+            case .tasks:
+                TasksTabView(onStartFocus: { taskName, todoId in
+                    timerManager.setupSeconds = 25 * 60
+                    timerManager.setupTaskName = taskName
+                    timerManager.setupTodoId = todoId
+                    timerManager.isShowingSetup = true
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                        activeTab = .timer
+                    }
+                })
+            }
+        }
+        .frame(maxHeight: .infinity)
+        .contentShape(Rectangle())
+        .gesture(
+            DragGesture(minimumDistance: 15)
+                .onEnded { gesture in
+                    let threshold: CGFloat = 40
+                    let xDist = abs(gesture.translation.width)
+                    let yDist = abs(gesture.translation.height)
+                    
+                    guard xDist > yDist * 1.5 else { return }
+                    
+                    if gesture.translation.width < -threshold {
+                        switchToNextTab()
+                    } else if gesture.translation.width > threshold {
+                        switchToPrevTab()
+                    }
+                }
+        )
+    }
+    
+    private var footerInfo: some View {
+        HStack {
+            HStack(spacing: 6) {
+                Button(action: {
+                    isShowingSettings = true
+                }) {
+                    Image(systemName: "gearshape")
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary)
+                }
+                .buttonStyle(.plain)
+                .popover(isPresented: $isShowingSettings, arrowEdge: .top) {
+                    MenuBarSettingsView()
+                }
+                
+                Text("FrogHub • Native Suite")
+                    .font(.system(.caption2, design: .rounded))
+                    .foregroundColor(.secondary)
+            }
+            Spacer()
+            
+            // Quick Studio Desktop Launcher
+            Button(action: {
+                AppDelegate.shared?.openDashboard()
+            }) {
+                HStack(spacing: 3) {
+                    Image(systemName: "macwindow")
+                        .font(.system(size: 9))
+                    Text("Studio")
+                        .font(.system(size: 10, weight: .semibold, design: .rounded))
+                }
+                .foregroundColor(.secondary)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 3)
+                .background(Color.white.opacity(0.04))
+                .cornerRadius(4)
+            }
+            .buttonStyle(.plain)
+            .help("Open FrogStudio Desktop Dashboard (⌘D)")
+            
+            QuitButton()
+        }
+        .padding(12)
+        .background(Color.clear)
+    }
+    
+    @ViewBuilder
+    private var combinePopoverOverlay: some View {
+        if dropzoneManager.isShowingCombinePopover {
+            Color.black.opacity(0.35)
+                .edgesIgnoringSafeArea(.all)
+                .transition(.opacity)
+                .onTapGesture {
+                    withAnimation {
+                        dropzoneManager.isShowingCombinePopover = false
+                    }
+                }
+            
+            CombinePopoverView(
+                selectedIDs: $dropzoneManager.selectedGroupIDs,
+                onCombine: {
+                    dropzoneManager.combineGroups(withIDs: dropzoneManager.selectedGroupIDs)
+                    withAnimation {
+                        dropzoneManager.isShowingCombinePopover = false
+                    }
+                },
+                onCancel: {
+                    withAnimation {
+                        dropzoneManager.isShowingCombinePopover = false
+                    }
+                }
+            )
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.white.opacity(0.04))
+                    .shadow(color: .black.opacity(0.3), radius: 10, x: 0, y: 5)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
+            )
+            .transition(.scale.combined(with: .opacity))
         }
     }
 }
